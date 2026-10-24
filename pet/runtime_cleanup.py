@@ -25,7 +25,7 @@ DEFAULT_STALE_AGE_SECONDS = 24 * 60 * 60
 # 归属标记：冻结进程启动时写进自己的 onefile 运行目录。值用**产品级** id
 # （不含变体后缀），因为 webm/gif/chat 变体共用同一套临时目录命名空间。
 OWNER_MARKER_NAME = ".dsh-pet-runtime-owner"
-PRODUCT_OWNER_ID = "dsh-pet-standalone"
+PRODUCT_OWNER_ID = "dsh-pet-chubby_blue_whale"
 _MARKER_READ_LIMIT = 4096
 
 

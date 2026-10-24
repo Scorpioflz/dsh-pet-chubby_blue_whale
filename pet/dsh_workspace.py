@@ -16,11 +16,11 @@ def _workspace_file() -> Path:
     """工作区配置文件路径（数据目录下）。"""
     if os.name == 'nt':
         base = os.environ.get('APPDATA', os.path.expanduser('~'))
-        return Path(base) / 'dsh-pet-standalone' / 'dsh_workspace.json'
+        return Path(base) / 'dsh-pet-chubby_blue_whale' / 'dsh_workspace.json'
     elif sys.platform == 'darwin':
-        return Path.home() / 'Library' / 'Application Support' / 'dsh-pet-standalone' / 'dsh_workspace.json'
+        return Path.home() / 'Library' / 'Application Support' / 'dsh-pet-chubby_blue_whale' / 'dsh_workspace.json'
     else:
-        return Path.home() / '.config' / 'dsh-pet-standalone' / 'dsh_workspace.json'
+        return Path.home() / '.config' / 'dsh-pet-chubby_blue_whale' / 'dsh_workspace.json'
 
 
 def get_workspace_title() -> str:

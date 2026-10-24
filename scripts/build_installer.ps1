@@ -35,7 +35,7 @@ if (Test-Path $frameseqDir -PathType Container) {
 # --- Step 2: PyInstaller onedir build ---
 Write-Host "`n[2/5] PyInstaller onedir (webm-chat)" -ForegroundColor Yellow
 $env:PATH = "$PWD\.venv\Scripts;$env:PATH"
-powershell -ExecutionPolicy Bypass -File scripts\build_onedir.ps1 -Variant webm-chat
+powershell -ExecutionPolicy Bypass -File scripts\build_onedir.ps1 -Variant webm-chat -SkipZip
 if ($LASTEXITCODE -ne 0) { Write-Error "PyInstaller build failed"; exit 1 }
 
 # --- Step 3: Verify + Rename ---
@@ -65,12 +65,6 @@ if (-not (Test-Path $ISCC)) {
 & $ISCC "packaging\dsh-pet-chubby_blue_whale.iss"
 if ($LASTEXITCODE -ne 0) { Write-Error "ISCC failed"; exit 1 }
 
-# --- Step 5: Cleanup portable zip ---
-$portableZip = "dist-onedir\dsh-pet-standalone-webm-chat-portable.zip"
-if (Test-Path $portableZip) {
-    Remove-Item $portableZip -Force
-    Write-Host "`n[5/5] Removed portable zip (installer only)" -ForegroundColor Green
-}
 
 # --- Done ---
 $installer = "dist-onedir\dsh-pet-chubby_blue_whale-setup.exe"

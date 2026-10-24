@@ -542,21 +542,8 @@ def _default_base():
 
 
 def _app_dir_name() -> str:
-    """打包变体的独立数据目录名；源码运行时回退到共享目录。
-
-    构建脚本（scripts/build_onedir.ps1）会在打包前生成
-    packaging/build_variant.py（VARIANT = "webm-chat" 等），
-    使 Chat / 无 Chat 等变体各自使用独立的配置目录、会话与自启项。
-    """
-    try:
-        from build_variant import VARIANT  # 仅打包产物中存在
-
-        name = str(VARIANT).strip()
-        if name:
-            return f"dsh-pet-standalone-{name}"
-    except Exception:
-        pass
-    return "dsh-pet-standalone"
+    """数据目录名（自用版：无变体概念，统一目录名）。"""
+    return "dsh-pet-chubby_blue_whale"
 
 
 APP_DIR_NAME = _app_dir_name()

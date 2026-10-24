@@ -111,9 +111,9 @@ powershell -ExecutionPolicy Bypass -File scripts\build_portable.ps1
 
 | 系统 | 数据目录 |
 |---|---|
-| Windows | `%APPDATA%/dsh-pet-standalone-<变体>/` |
-| macOS | `~/Library/Application Support/dsh-pet-standalone-<变体>/` |
-| Linux | `~/.config/dsh-pet-standalone-<变体>/` |
+| Windows | `%APPDATA%/dsh-pet-chubby_blue_whale/` |
+| macOS | `~/Library/Application Support/dsh-pet-chubby_blue_whale/` |
+| Linux | `~/.config/dsh-pet-chubby_blue_whale/` |
 
 目录中主要包含：
 

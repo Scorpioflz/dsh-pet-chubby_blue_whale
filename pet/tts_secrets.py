@@ -6,7 +6,7 @@
 打开（历史事故：设置页在打包版整体打不开）。这里只做「取/存一个字符串」，
 不依赖 pet.chat、不依赖 Qt，模块顶层不 import keyring（惰性导入，省启动成本）。
 
-服务名与 chat 的 SecretStore 保持一致（``dsh-pet-standalone``），因此凭据统一
+服务名与 chat 的 SecretStore 保持一致（``dsh-pet-chubby_blue_whale``），因此凭据统一
 落在同一个「Windows 凭据管理器 → 通用凭据」条目下，用户不会看到两处。
 
 keyring 不可用（未随包 / 系统拒绝写入）时退化为**写它的那个进程**的内存：重启即丢，
@@ -19,7 +19,7 @@ keyring 不可用（未随包 / 系统拒绝写入）时退化为**写它的那�
 
 from __future__ import annotations
 
-SERVICE_NAME = "dsh-pet-standalone"
+SERVICE_NAME = "dsh-pet-chubby_blue_whale"
 #: 小米 MiMo TTS 的 API Key 引用名（与 chat provider 的 provider/<id> 同构）
 MIMO_API_KEY_REF = "tts/mimo"
 
