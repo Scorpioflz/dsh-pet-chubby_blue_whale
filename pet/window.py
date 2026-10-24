@@ -3501,12 +3501,13 @@ class PetWindow(QWidget, WindowFeatureGateMixin):
         if getattr(provider, 'provider_id', '') == 'dsh-webapi':
             from . import vision as vision_mod
             from . import dsh_api
+            from . import dsh_workspace
             try:
                 shot = vision_mod.capture_screen_bytes()
                 app_info = vision_mod.foreground_app_info()
                 user_text = f"[看看屏幕] 前台窗口：{app_info}" if app_info else "[看看屏幕]"
                 client = dsh_api.DshApiClient(base_url=provider.base_url, api_key=provider.api_key)
-                ws_id = client.ensure_workspace(dsh_api.default_workspace_path(), "pet")
+                ws_id = client.ensure_workspace(dsh_api.default_workspace_path(), dsh_workspace.get_workspace_title())
                 sessions = client.list_sessions(workspace_id=ws_id)
                 if sessions:
                     session_id = sessions[-1].get("id") or sessions[-1].get("sessionId")

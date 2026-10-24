@@ -65,6 +65,8 @@ class ChatService(QObject):
         if provider is None:
             from .dsh_provider import ProviderRouter
             provider = ProviderRouter()
+        from ..dsh_workspace import ensure_workspace_title
+        ensure_workspace_title()
         self.provider=provider; self._request_id=None; self._cancel=None; self._worker=None; self._workers=set()
         self._detached=False
         # 档 B 记忆提炼（pet/chat/memory_extract）：前端在构造后挂 hook

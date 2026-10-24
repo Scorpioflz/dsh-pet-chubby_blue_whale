@@ -19,6 +19,7 @@ from typing import Any, Iterator
 
 from .providers import OpenAICompatibleProvider, ProviderError, StreamEvent
 from ..dsh_api import DshApiClient, default_workspace_path
+from ..dsh_workspace import get_workspace_title
 
 
 _DSH_PROVIDER_ID = "dsh-webapi"
@@ -65,7 +66,7 @@ class DshWebApiProvider:
         client = self._ensure_client(config)
         if self._workspace_id is None:
             ws_path = default_workspace_path()
-            ws_title = "pet"
+            ws_title = get_workspace_title()
             try:
                 self._workspace_id = client.ensure_workspace(ws_path, ws_title)
             except Exception:
