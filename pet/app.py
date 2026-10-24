@@ -2630,14 +2630,25 @@ class AppShell:
 
     # ------------------------------------------------------------ 启动
     def start(self) -> None:
-        # 自用版：启动时检查天气城市（IP 定位，仅天气功能激活时）
-        try:
-            from . import feature_activation
-            if feature_activation.is_active("weather"):
-                from .weather.ip_city import ensure_weather_city
-                ensure_weather_city()
-        except Exception:
-            pass
+        # 自用版：启动时延迟检查工作区 + 天气城市（等 feature activation freeze）
+        from PySide6.QtCore import QTimer
+        def _dsh_startup_checks():
+            try:
+                settings = self.config.chat_settings()
+                provider = settings.active_config
+                if getattr(provider, 'provider_id', '') == 'dsh-webapi':
+                    from .dsh_workspace import ensure_workspace_title
+                    ensure_workspace_title()
+            except Exception:
+                pass
+            try:
+                from . import feature_activation
+                if feature_activation.is_active("weather"):
+                    from .weather.ip_city import ensure_weather_city
+                    ensure_weather_city(config=self.config)
+            except Exception:
+                pass
+        QTimer.singleShot(1000, _dsh_startup_checks)
         # aboutToQuit 只在控制器层绑定一次：角色热切换会重建窗口，逐个
         # connect win.save_position 会在旧窗口延迟销毁后残留失效引用。
         # 统一走 _on_about_to_quit，在信号触发时读取当前有效窗口。

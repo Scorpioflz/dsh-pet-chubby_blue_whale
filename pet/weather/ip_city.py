@@ -46,12 +46,13 @@ def _find_config():
     return None
 
 
-def ensure_weather_city(parent=None) -> None:
+def ensure_weather_city(config=None, parent=None) -> None:
     """首次启动时如果城市列表为空，IP 定位 + 弹窗提醒设置默认城市。
 
-    在 GUI 线程调用（ChatService.__init__ 中）。
+    config 可直接传入（PetApp.start），或从 QApplication 顶层窗口查找。
     """
-    config = _find_config()
+    if config is None:
+        config = _find_config()
     if config is None:
         return
     try:
