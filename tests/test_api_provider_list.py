@@ -20,26 +20,26 @@ def test_chat_settings_provider_list_add_switch_delete(tmp_path):
     dlg = ChatSettingsDialog(cfg)
     try:
         assert dlg.provider_combo.count() == 1
-        assert dlg.settings.active_provider == "openai-main"
+        assert dlg.settings.active_provider == "dsh-webapi"
 
         dlg._add_provider()
         new_pid = dlg.settings.active_provider
         assert dlg.provider_combo.count() == 2
-        assert new_pid != "openai-main"
+        assert new_pid != "dsh-webapi"
         assert new_pid in dlg.settings.providers
 
         # 修改新 API 后切到默认项再切回，草稿应保留
         dlg.name.setText("Second API")
-        dlg.provider_combo.setCurrentIndex(dlg.provider_combo.findData("openai-main"))
-        assert dlg.settings.active_provider == "openai-main"
+        dlg.provider_combo.setCurrentIndex(dlg.provider_combo.findData("dsh-webapi"))
+        assert dlg.settings.active_provider == "dsh-webapi"
         dlg.provider_combo.setCurrentIndex(dlg.provider_combo.findData(new_pid))
         assert dlg.name.text() == "Second API"
 
         # 删除新 API 后回到唯一默认项
         dlg._delete_provider()
         assert dlg.provider_combo.count() == 1
-        assert dlg.settings.active_provider == "openai-main"
-        assert dlg.settings.providers.keys() == {"openai-main"}
+        assert dlg.settings.active_provider == "dsh-webapi"
+        assert dlg.settings.providers.keys() == {"openai-main", "dsh-webapi"}
     finally:
         dlg.close()
         _app().processEvents()
@@ -79,8 +79,8 @@ def test_chat_settings_provider_switch_keeps_key_draft(tmp_path):
         dlg.key.setText("sk-draft")
 
         # 切到默认项再切回：_load_provider_ui 会清空 Key 输入框
-        dlg.provider_combo.setCurrentIndex(dlg.provider_combo.findData("openai-main"))
-        assert dlg.settings.active_provider == "openai-main"
+        dlg.provider_combo.setCurrentIndex(dlg.provider_combo.findData("dsh-webapi"))
+        assert dlg.settings.active_provider == "dsh-webapi"
         dlg.provider_combo.setCurrentIndex(dlg.provider_combo.findData(new_pid))
         assert dlg.key.text() == ""
         assert dlg._provider_drafts[new_pid]["key"] == "sk-draft"
@@ -122,22 +122,22 @@ def test_modern_ai_page_provider_list_add_switch_delete(tmp_path, monkeypatch):
     try:
         page = dlg.ai_page
         assert page.provider_combo.count() == 1
-        assert page.settings.active_provider == "openai-main"
+        assert page.settings.active_provider == "dsh-webapi"
 
         page._add_provider()
         new_pid = page.settings.active_provider
         assert page.provider_combo.count() == 2
-        assert new_pid != "openai-main"
+        assert new_pid != "dsh-webapi"
 
         page.name.setText("Second API")
-        page.provider_combo.setCurrentData("openai-main")
-        assert page.settings.active_provider == "openai-main"
+        page.provider_combo.setCurrentData("dsh-webapi")
+        assert page.settings.active_provider == "dsh-webapi"
         page.provider_combo.setCurrentData(new_pid)
         assert page.name.text() == "Second API"
 
         page._delete_provider()
         assert page.provider_combo.count() == 1
-        assert page.settings.providers.keys() == {"openai-main"}
+        assert page.settings.providers.keys() == {"openai-main", "dsh-webapi"}
     finally:
         dlg.close()
         _app().processEvents()

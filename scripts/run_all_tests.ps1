@@ -16,7 +16,7 @@ foreach ($f in $testFiles) {
     Write-Host -NoNewline "$name ... "
     $output = uv run python -m pytest $f.FullName --tb=no -q --timeout=10 2>&1
     if ($LASTEXITCODE -eq 0) {
-        $line = ($output | Select-String "passed").ToString()
+
         Write-Host "PASS" -ForegroundColor Green
         $passed++
     } else {
