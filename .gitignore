@@ -89,6 +89,7 @@ dist-android/
 dist-packs/
 # CodeArts 配置与缓存
 .codearts/
+.codeartsdoer/
 
 # uv 锁文件与虚拟环境
 .venv/

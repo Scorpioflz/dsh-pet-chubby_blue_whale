@@ -26,6 +26,7 @@
 
 - [从源码运行](#从源码运行)
 - [打包](#打包)
+- [素材包说明](#素材包说明)
 - [数据目录](#数据目录)
 - [项目来源与素材声明](#项目来源与素材声明)
 - [许可证与致谢](#许可证与致谢)
@@ -69,6 +70,38 @@ powershell -ExecutionPolicy Bypass -File scripts\build_chubby_blue_whale.ps1
 **前提**：
 - [uv](https://docs.astral.sh/uv/) 已安装
 - Inno Setup 7（ISCC 路径在脚本中配置，默认 `D:\Tool\Inno Setup 7\ISCC.exe`）
+
+## 素材包说明
+
+### 仓库素材 vs 素材包
+
+仓库中自带 **106 个 WebM 动画**（`assets/characters/shenshen/videos/`），分布在 click/drag/events/idle/move/random/turn 目录。打包时通过 `convert_frameseq_progress.py` 从 WebM 生成帧序列（WebP），无需额外下载。
+
+`packs-index.json` 中的素材包（core + extra1-6，共 ~1.45GB）是**打包好的帧序列**（WebP 逐帧），与仓库中 106 个 WebM 一一对应，不多不少。素材包是给**安装包用户**用的（没有仓库、不想自己转换的用户）。
+
+### anim/ vs frameseq/ 目录
+
+| 目录 | 来源 | 格式 | 使用场景 |
+|---|---|---|---|
+| `videos/` | 仓库自带 | WebM 视频 | 源素材（开发调试、GIF 变体） |
+| `anim/` | 素材包安装 | WebP 帧序列 | 安装包用户（无源视频，帧序列随包下发） |
+| `frameseq/` | `convert_frameseq.py` 生成 | WebP 帧序列 | 有仓库的用户（从 WebM 转换） |
+
+运行时 `library.py` 根据是否有素材包索引决定用哪套：
+- **有素材包**（`anim/` 存在）→ 直接用 `anim/` 中的帧序列，不需要 `frameseq/`
+- **无素材包** → 从 `videos/` 中的 WebM 自动生成 `frameseq/`（运行时首跑自动供给）
+
+两者**可以共存**，不互相替换。优先用素材包（如果有）。
+
+### 手动导入素材包
+
+设置 → **角色与素材** → 点击 **"从本地文件安装…"** → 选择下载的 zip 文件。
+
+文件名需与发布页一致（如 `shenshen-2.0.0-base-640x360.core.zip`）。安装走与应用内下载完全相同的闸：解压 → 逐帧校验 → 合并索引。
+
+### 帧序列转换
+
+打包时 `build_chubby_blue_whale.ps1` 自动执行 `convert_frameseq_progress.py` 生成帧序列（带进度和 ETA），已有则跳过。被 Ctrl+C 打断后下次运行会跳过已完成的 clip，幂等安全。
 
 ## 数据目录
 
