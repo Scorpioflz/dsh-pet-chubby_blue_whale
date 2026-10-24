@@ -61,7 +61,11 @@ class ChatService(QObject):
             cls._global_finished_listeners.remove(callback)
 
     def __init__(self,provider=None,parent=None):
-        super().__init__(parent); self.provider=provider or OpenAICompatibleProvider(); self._request_id=None; self._cancel=None; self._worker=None; self._workers=set()
+        super().__init__(parent)
+        if provider is None:
+            from .dsh_provider import ProviderRouter
+            provider = ProviderRouter()
+        self.provider=provider; self._request_id=None; self._cancel=None; self._worker=None; self._workers=set()
         self._detached=False
         # 档 B 记忆提炼（pet/chat/memory_extract）：前端在构造后挂 hook
         # （(user_text, reply_text, provider, provider_config) -> None），

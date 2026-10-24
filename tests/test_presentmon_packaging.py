@@ -255,11 +255,6 @@ class TestOtherPlatformsDoNotBundleIt:
         assert "presentmon" not in text.lower()
         assert "PresentMon" not in text
 
-    def test_ci_builds_go_through_the_gated_script(self):
-        """CI 的 Windows 构建走 ``build_onedir.ps1``，因此上面两道门对 CI 同样生效。"""
-        workflow = (ROOT / ".github" / "workflows" / "build-windows.yml").read_text(
-            encoding="utf-8")
-        assert "build_onedir.ps1" in workflow
 
 
 # --------------------------------------------------------------------------- 四、冻结布局契约

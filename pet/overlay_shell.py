@@ -3441,6 +3441,33 @@ class OverlayShell(QObject):
         ).start()
 
     def _look_worker(self, provider, system_prompt, pet_name: str = "") -> None:
+        # 自用版：DSH Web API 模式下通过 DSH 会话处理截图
+        if getattr(provider, 'provider_id', '') == 'dsh-webapi':
+            from . import vision as vision_mod
+            from . import dsh_api
+            try:
+                shot = vision_mod.capture_screen_bytes()
+                app_info = vision_mod.foreground_app_info()
+                user_text = f"[看看屏幕] 前台窗口：{app_info}" if app_info else "[看看屏幕]"
+                client = dsh_api.DshApiClient(base_url=provider.base_url, api_key=provider.api_key)
+                ws_id = client.ensure_workspace(dsh_api.default_workspace_path(), "pet")
+                sessions = client.list_sessions(workspace_id=ws_id)
+                if sessions:
+                    session_id = sessions[-1].get("id") or sessions[-1].get("sessionId")
+                else:
+                    session_id = client.create_session(workspace_id=ws_id, title="看看屏幕")
+                file_path = client.upload_file(session_id, shot, "screenshot.jpg")
+                prompt = f"{user_text}\n[请查看附件: {file_path}]" if file_path else user_text
+                reply = client.prompt_sync(session_id, prompt)
+                if shiboken6.isValid(self) is False:
+                    return
+                self.look_done.emit(reply, user_text, False)
+            except Exception as exc:
+                logging.exception("看看屏幕失败（DSH 模式）")
+                if shiboken6.isValid(self) is False:
+                    return
+                self.look_done.emit(str(exc), "", True)
+            return
         from . import vision as vision_mod
 
         try:

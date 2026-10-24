@@ -420,7 +420,7 @@ def _merge_file_interpret_data(raw: Any) -> dict:
 def _default_chat_data():
     return {
         "enabled": True,
-        "active_provider": "openai-main",
+        "active_provider": "dsh-webapi",
         "default_system_prompt": "\u4f60\u662f\u4e00\u53ea\u53ef\u7231\u7684\u684c\u9762\u5ba0\u7269\uff0c\u8bf7\u7528\u81ea\u7136\u3001\u53cb\u5584\u7684\u4e2d\u6587\u548c\u7528\u6237\u4ea4\u6d41\u3002",
         "history_message_limit": 40,
         "history_char_limit": 24000,
@@ -431,6 +431,17 @@ def _default_chat_data():
                 "chat_path": "/v1/chat/completions",
                 "model": "deepseek-v4-flash",
                 "api_key_ref": "provider/openai-main",
+                "api_key": "",
+                "timeout": 60.0,
+                "temperature": 0.7,
+                "max_tokens": 2048,
+            },
+            "dsh-webapi": {
+                "name": "DSH Web API",
+                "base_url": "http://127.0.0.1:3080/api/v1",
+                "chat_path": "/chat/completions",
+                "model": "",
+                "api_key_ref": "provider/dsh-webapi",
                 "api_key": "",
                 "timeout": 60.0,
                 "temperature": 0.7,
