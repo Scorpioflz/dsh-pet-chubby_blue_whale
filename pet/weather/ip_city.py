@@ -2,6 +2,7 @@
 """IP 定位城市：启动时根据 IP 地址检测城市，提醒设置默认城市。
 
 首次启动且城市列表为空时，通过 IP 定位获取城市名，弹窗提醒用户设置。
+多 API 容错：ip-api.com → ipinfo.io → ip.cip.cc（国内可访问）。
 """
 
 from __future__ import annotations
@@ -11,22 +12,27 @@ import logging
 import urllib.request
 
 
-_IP_API_URL = "http://ip-api.com/json/?lang=zh"
 _TIMEOUT = 5
+
+_IP_APIS = [
+    ("http://ip-api.com/json/?lang=zh", lambda d: d.get("city", "") if d.get("status") == "success" else ""),
+    ("https://ipinfo.io/json", lambda d: d.get("city", "")),
+    ("http://ip.cip.cc", lambda d: d.get("city", "")),
+]
 
 
 def detect_city_by_ip() -> str | None:
-    """通过 IP 定位获取9定位获取城市名。失败返回 None。"""
-    try:
-        req = urllib.request.Request(_IP_API_URL)
-        with urllib.request.urlopen(req, timeout=_TIMEOUT) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        if data.get("status") == "success":
-            city = str(data.get("city", "")).strip()
+    """通过 IP 定位获取城市名（多 API 容错）。失败返回 None。"""
+    for url, extractor in _IP_APIS:
+        try:
+            req = urllib.request.Request(url)
+            with urllib.request.urlopen(req, timeout=_TIMEOUT) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            city = str(extractor(data)).strip()
             if city:
                 return city
-    except Exception:
-        logging.exception("IP 定位失败")
+        except Exception:
+            continue
     return None
 
 
