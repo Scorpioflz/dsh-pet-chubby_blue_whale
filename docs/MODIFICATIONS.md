@@ -163,6 +163,12 @@ if "weather" in enabled:
 
 **修改内容**：删除 `ANDROID_EXPORT`/`ANDROID_GRADLE`/`ANDROID_NOTICE` 常量和 `_load_android_exporter`/`test_android_*` 函数
 
+### 13. `pet/pack_download.py` — 素材包下载 URL 顺序反转
+
+**修改位置**：`_download_locked()` 方法（约行 232）
+
+**修改内容**：`for url in part.urls` 改为 `for url in reversed(part.urls)`，代理地址（列表末尾）优先尝试，GitHub 官方最后。
+
 ## 三、删除文件（自用-删除）
 
 | 文件/目录 | 原因 |
