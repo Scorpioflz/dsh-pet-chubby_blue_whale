@@ -32,6 +32,14 @@ if (-not (Test-Path "$onedir\dsh-pet-standalone-webm-chat.exe")) {
 }
 Write-Host "`n[3/4] onedir OK: $onedir" -ForegroundColor Green
 
+# --- Step 3.5: Rename exe to product name ---
+$oldExe = "$onedir\dsh-pet-standalone-webm-chat.exe"
+$newExe = "$onedir\dsh-pet-chubby_blue_whale.exe"
+if (Test-Path $oldExe) {
+    Rename-Item $oldExe $newExe
+    Write-Host "  Renamed exe -> dsh-pet-chubby_blue_whale.exe" -ForegroundColor Green
+}
+
 # --- Step 4: Inno Setup compiler ---
 Write-Host "`n[4/4] Inno Setup ISCC" -ForegroundColor Yellow
 if (-not (Test-Path $ISCC)) {
