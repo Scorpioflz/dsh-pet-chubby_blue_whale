@@ -65,7 +65,7 @@ class DshWebApiProvider:
         client = self._ensure_client(config)
         if self._workspace_id is None:
             ws_path = default_workspace_path()
-            ws_title = getattr(config, "chat_path", "") or "pet"
+            ws_title = "pet"
             try:
                 self._workspace_id = client.ensure_workspace(ws_path, ws_title)
             except Exception:
