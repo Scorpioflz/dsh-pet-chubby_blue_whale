@@ -9,7 +9,7 @@
 
 #define MyAppShortName "dsh-pet-chubby_blue_whale"
 #define MyAppExeName "dsh-pet-chubby_blue_whale.exe"
-#define MyAppDir "..\dist-onedir\dsh-pet-standalone-webm-chat"
+#define MyAppDir "..\dist-onedir\dsh-pet-chubby_blue_whale"
 #define MyAppId "{{a1b2c3d4-e5f6-7890-abcd-ef1234567890}"
 #define MyAppDisplay "dsh-pet-chubby_blue_whale"
 #define MyAppVersion "4.4.0"

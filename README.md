@@ -25,6 +25,7 @@
 ## 目录
 
 - [从源码运行](#从源码运行)
+- [打包](#打包)
 - [数据目录](#数据目录)
 - [项目来源与素材声明](#项目来源与素材声明)
 - [许可证与致谢](#许可证与致谢)
@@ -41,6 +42,33 @@ uv run python -m pet       # 启动桌宠
 ```
 
 也可用传统 pip 方式：`python -m pip install -r requirements.txt && python -m pet`。
+
+## 打包
+
+一键打包（PyInstaller onedir + Inno Setup 安装包）：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\build_chubby_blue_whale.ps1
+```
+
+脚本自动完成 4 步：
+
+1. `uv sync` + 安装 PyInstaller
+2. PyInstaller onedir 打包（webm-chat 变体）
+3. 重命名 exe 为 `dsh-pet-chubby_blue_whale.exe`
+4. ISCC 编译安装包（需 Inno Setup 7 在 `D:\Tool\Inno Setup 7`）
+
+产物在 `dist-onedir\` 下：
+
+| 文件 | 说明 |
+|---|---|
+| `dsh-pet-chubby_blue_whale-setup.exe` | 安装包（双击安装，免管理员权限） |
+| `dsh-pet-standalone-webm-chat-portable.zip` | 便携绿色版（解压即用） |
+| `dsh-pet-standalone-webm-chat\` | onedir 目录（绿色版 = 整个文件夹） |
+
+**前提**：
+- [uv](https://docs.astral.sh/uv/) 已安装
+- Inno Setup 7（ISCC 路径在脚本中配置，默认 `D:\Tool\Inno Setup 7\ISCC.exe`）
 
 ## 数据目录
 

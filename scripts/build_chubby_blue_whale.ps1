@@ -32,12 +32,17 @@ if (-not (Test-Path "$onedir\dsh-pet-standalone-webm-chat.exe")) {
 }
 Write-Host "`n[3/4] onedir OK: $onedir" -ForegroundColor Green
 
-# --- Step 3.5: Rename exe to product name ---
+# --- Step 3.5: Rename exe + dir to product name ---
 $oldExe = "$onedir\dsh-pet-standalone-webm-chat.exe"
 $newExe = "$onedir\dsh-pet-chubby_blue_whale.exe"
 if (Test-Path $oldExe) {
     Rename-Item $oldExe $newExe
     Write-Host "  Renamed exe -> dsh-pet-chubby_blue_whale.exe" -ForegroundColor Green
+}
+$newDir = "dist-onedir\dsh-pet-chubby_blue_whale"
+if (Test-Path $onedir) {
+    Rename-Item $onedir $newDir
+    Write-Host "  Renamed dir -> dsh-pet-chubby_blue_whale" -ForegroundColor Green
 }
 
 # --- Step 4: Inno Setup compiler ---
