@@ -19,6 +19,11 @@ if ($LASTEXITCODE -ne 0) { Write-Error "uv sync failed"; exit 1 }
 uv pip install pyinstaller packaging
 if ($LASTEXITCODE -ne 0) { Write-Error "pyinstaller install failed"; exit 1 }
 
+# --- Step 1.5: Generate frame-sequence material ---
+Write-Host "`n[1.5/4] Generate frameseq (shenshen)" -ForegroundColor Yellow
+uv run python tools/convert_frameseq.py --character shenshen --include random,events
+if ($LASTEXITCODE -ne 0) { Write-Error "frameseq generation failed"; exit 1 }
+
 # --- Step 2: PyInstaller onedir build ---
 Write-Host "`n[2/4] PyInstaller onedir (webm-chat)" -ForegroundColor Yellow
 # Put uv venv Python first so build_onedir.ps1 uses it (not system Python)
