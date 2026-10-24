@@ -21,6 +21,8 @@ if ($LASTEXITCODE -ne 0) { Write-Error "pyinstaller install failed"; exit 1 }
 
 # --- Step 2: PyInstaller onedir build ---
 Write-Host "`n[2/4] PyInstaller onedir (webm-chat)" -ForegroundColor Yellow
+# Put uv venv Python first so build_onedir.ps1 uses it (not system Python)
+$env:PATH = "$PWD\.venv\Scripts;$env:PATH"
 powershell -ExecutionPolicy Bypass -File scripts\build_onedir.ps1 -Variant webm-chat
 if ($LASTEXITCODE -ne 0) { Write-Error "PyInstaller build failed"; exit 1 }
 
