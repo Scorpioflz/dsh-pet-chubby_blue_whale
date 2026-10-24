@@ -97,17 +97,13 @@ def __init__(self,provider=None,parent=None):
 
 **修改内容**：与 `window.py` 相同的 DSH 分支，适配 overlay 拓扑。
 
-### 6. `pet/app.py` — 余额查询 DSH 分支 + 城市检测
+### 6. `pet/app.py` — 余额查询 DSH 分支 + 启动检查（工作区 + 城市）
 
 **修改位置 1**：`PetApp.start()` 开头（约行 2632）
 
-**修改内容**：启动时检查天气城市（IP 定位），仅天气功能激活时触发：
-```python
-from . import feature_activation
-if feature_activation.is_active("weather"):
-    from .weather.ip_city import ensure_weather_city
-    ensure_weather_city()
-```
+**修改内容**：启动时用 `QTimer.singleShot(1000ms)` 延迟执行两个检查：
+1. **工作区询问**：active provider 是 DSH 时弹窗询问工作区名称
+2. **城市检测**：直接检查 `config.get("feature_activation").get("enabled")` 是否包含 `"weather"`（不依赖 freeze 状态），是则 IP 定位弹窗
 
 **修改位置 2**：`show_balance()`（约行 4107）
 
@@ -121,7 +117,21 @@ if feature_activation.is_active("weather"):
 
 **修改内容**：通过 dsh-balance-panel 插件查询余额，解析 JSON 提取余额信息。支持 `quiet` 参数（灵动岛静默刷新不冒泡）。
 
-###C 7. `pyproject.toml` — Python 3.14 + uv 依赖管理
+### 7. `pet/settings_features.py` — 天气功能激活时触发城市检测
+
+**修改位置**：`_save()` 方法（约行 247）
+
+**修改内容**：保存功能激活状态后，如果 `"weather"` 在 enabled 列表中且城市列表为空，立即触发 IP 定位弹窗：
+```python
+config.set("feature_activation", {"version": CURRENT_VERSION, "enabled": enabled})
+if "weather" in enabled:
+    cities = config.get("weather_city_list", [])
+    if not cities:
+        from .weather.ip_city import ensure_weather_city
+        ensure_weather_city(config=config)
+```
+
+### 8. `pyproject.toml` — Python 3.14 + uv 依赖管理
 
 **修改内容**：
 - 新增 `[project]` 部分（name、version、requires-python=">=3.14"、dependencies）
