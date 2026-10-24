@@ -695,9 +695,9 @@ def test_worker_command_uses_the_module_in_source_mode(monkeypatch):
 def test_worker_command_uses_the_internal_flag_when_frozen(monkeypatch):
     """冻结包里没有可用的 python：exe 自己就是解释器，走 --ocr-worker 子命令。"""
     monkeypatch.setattr(sys, "frozen", True, raising=False)
-    monkeypatch.setattr(sys, "executable", "C:/fake/dsh-pet-standalone.exe")
+    monkeypatch.setattr(sys, "executable", "C:/fake/dsh-pet-chubby_blue_whale.exe")
 
-    assert ocr.worker_command() == ["C:/fake/dsh-pet-standalone.exe", ocr.OCR_WORKER_FLAG]
+    assert ocr.worker_command() == ["C:/fake/dsh-pet-chubby_blue_whale.exe", ocr.OCR_WORKER_FLAG]
 
 
 def test_the_package_entry_serves_the_worker_flag():

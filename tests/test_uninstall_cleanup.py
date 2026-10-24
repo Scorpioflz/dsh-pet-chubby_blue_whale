@@ -158,7 +158,7 @@ def test_other_instances_use_agent_detects_peers(tmp_path):
 def test_other_instances_use_agent_cross_variant(tmp_path):
     this_cfg = _config(tmp_path)
     # 另一个变体目录（如 webm）开启了 dsh——桥接插件是跨变体共享的，必须识别
-    variant_dir = tmp_path / "dsh-pet-standalone-webm"
+    variant_dir = tmp_path / "dsh-pet-chubby_blue_whale-webm"
     variant_dir.mkdir()
     (variant_dir / "config.json").write_text(
         json.dumps({"agent_link": {"dsh": True}}), encoding="utf-8"
@@ -236,7 +236,7 @@ def test_empty_or_broken_config_dir_never_raises(tmp_path):
     assert uninstall_cleanup.other_instances_use_agent(config, "dsh") is False
 
     # 正对照：目录坏了也不会把别的安装点看漏
-    _write_json(tmp_path / "dsh-pet-standalone-webm" / "config.json", {"agent_link": {"dsh": True}})
+    _write_json(tmp_path / "dsh-pet-chubby_blue_whale-webm" / "config.json", {"agent_link": {"dsh": True}})
     assert uninstall_cleanup.other_instances_use_agent(config, "dsh") is True
 
 
@@ -272,13 +272,13 @@ def test_uninstall_cleanup_removes_hooks_despite_own_slot_residue(tmp_path, monk
 
 def test_peer_variant_and_legacy_shared_dir_keep_protecting(tmp_path):
     """peer 变体与旧共享目录（历史安装）的配置照旧保护：跨变体共享的全局状态不许误删。"""
-    config = _variant_config(tmp_path, "dsh-pet-standalone-webm-chat")
+    config = _variant_config(tmp_path, "dsh-pet-chubby_blue_whale-webm-chat")
     _write_json(config.path, {"agent_link": {"dsh": False, "claude": False}})
     # 本变体自己的 slot 档案同时存在：不许影响 peer 判定
     _write_json(config.dir / "config-slot-2.json", {"agent_link": {"dsh": True, "claude": True}})
 
-    peer = tmp_path / "dsh-pet-standalone-webm"
-    legacy_shared = tmp_path / "dsh-pet-standalone"
+    peer = tmp_path / "dsh-pet-chubby_blue_whale-webm"
+    legacy_shared = tmp_path / "dsh-pet-chubby_blue_whale"
     _write_json(peer / "config.json", {"agent_link": {"dsh": True, "claude": False}})
     _write_json(legacy_shared / "config-lan.json", {"agent_link": {"dsh": False, "claude": True}})
 
@@ -298,9 +298,9 @@ def test_peer_variant_slot_profiles_stay_conservative(tmp_path):
     本次只收“本变体自己的档案”这一类误保护；别人的目录不动，方向偏保守——
     最多多保护一次，不会误删别的变体还在用的全局 hooks / 桥接。
     """
-    config = _variant_config(tmp_path, "dsh-pet-standalone-webm-chat")
+    config = _variant_config(tmp_path, "dsh-pet-chubby_blue_whale-webm-chat")
     _write_json(config.path, {"agent_link": {"dsh": False}})
-    peer = tmp_path / "dsh-pet-standalone-webm"
+    peer = tmp_path / "dsh-pet-chubby_blue_whale-webm"
     _write_json(peer / "config-slot-2.json", {"agent_link": {"dsh": True}})
 
     assert uninstall_cleanup.other_instances_use_agent(config, "dsh") is True
@@ -347,7 +347,7 @@ pet.app = app
 sys.modules["pet.uninstall_cleanup"] = uninstall
 sys.modules["pet.app"] = app
 
-sys.argv = ["dsh-pet-standalone", "--uninstall-cleanup"]
+sys.argv = ["dsh-pet-chubby_blue_whale", "--uninstall-cleanup"]
 exit_code = 0
 try:
     runpy.run_module("pet.__main__", run_name="__main__")

@@ -142,8 +142,8 @@ def test_structured_manifest_keeps_mirrors_and_integrity_fields(monkeypatch):
         body = json.dumps({
             "version": "4.3.0",
             "assets": {
-                "dsh-pet-standalone-webm-chat-setup.exe": {
-                    "fileName": "dsh-pet-standalone-webm-chat-setup.exe",
+                "dsh-pet-chubby_blue_whale-webm-chat-setup.exe": {
+                    "fileName": "dsh-pet-chubby_blue_whale-webm-chat-setup.exe",
                     "urls": [
                         "https://github.com/MerZlin/dsh-pet-indesktop/releases/download/v4.3.0/a.exe",
                         "https://cdn.jsdelivr.net/gh/MerZlin/dsh-pet-indesktop@v4.3.0/a.exe",
@@ -159,7 +159,7 @@ def test_structured_manifest_keeps_mirrors_and_integrity_fields(monkeypatch):
 
     monkeypatch.setattr(updater, "trusted_urlopen", fake_ok)
     release = updater.latest_release()
-    detail = release["asset_details"]["dsh-pet-standalone-webm-chat-setup.exe"]
+    detail = release["asset_details"]["dsh-pet-chubby_blue_whale-webm-chat-setup.exe"]
     assert detail["urls"][1].startswith("https://cdn.jsdelivr.net")
     assert detail["size"] == 123
     assert detail["sha256"] == "a" * 64
@@ -192,7 +192,7 @@ def test_download_asset_verifies_size_and_sha256(tmp_path, monkeypatch):
     )
     path = updater.download_asset(
         {
-            "name": "dsh-pet-standalone-webm-chat-setup.exe",
+            "name": "dsh-pet-chubby_blue_whale-webm-chat-setup.exe",
             "urls": ["https://github.com/MerZlin/dsh-pet-indesktop/releases/download/v4.3.0/a.exe"],
             "size": len(b"installer-payload"),
             "sha256": digest,
@@ -215,9 +215,9 @@ def test_download_asset_rejects_untrusted_origin(tmp_path):
 def test_select_windows_installer_supports_legacy_and_structured_assets(monkeypatch):
     monkeypatch.setattr(updater, "os", _ns_shim(os, name="nt"))
     release = {
-        "assets": {"dsh-pet-standalone-webm-setup.exe": "https://github.com/MerZlin/dsh-pet-indesktop/releases/download/v4.3.0/a.exe"},
+        "assets": {"dsh-pet-chubby_blue_whale-webm-setup.exe": "https://github.com/MerZlin/dsh-pet-indesktop/releases/download/v4.3.0/a.exe"},
         "asset_details": {},
     }
     asset = updater.select_windows_installer(release, include_chat=False)
-    assert asset["name"] == "dsh-pet-standalone-webm-setup.exe"
+    assert asset["name"] == "dsh-pet-chubby_blue_whale-webm-setup.exe"
     assert asset["urls"]

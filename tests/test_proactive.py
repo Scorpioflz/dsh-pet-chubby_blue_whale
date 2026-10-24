@@ -723,11 +723,11 @@ class TestVisionAndWatcherPhase2:
         watcher._on_frame_ready(fake_img, "code.exe | test", 12345, 0x12345678)
 
         # 真实状态文件应当不存在
-        real_state_file = tmp_path / "dsh-pet-standalone" / "proactive_screen_state.json"
+        real_state_file = tmp_path / "dsh-pet-chubby_blue_whale" / "proactive_screen_state.json"
         assert not real_state_file.exists()
 
         # dry_run 状态文件已创建
-        dry_state_file = tmp_path / "dsh-pet-standalone" / "proactive_screen_dryrun_state.json"
+        dry_state_file = tmp_path / "dsh-pet-chubby_blue_whale" / "proactive_screen_dryrun_state.json"
         assert dry_state_file.exists()
 
         # 检查 dry_run limiter 状态，count 保持为 0（dry_run 下只记 attempt，不记真实 success）
@@ -851,6 +851,8 @@ class TestPhase3VisionLinkAndDryRun:
 
         # 1. 默认情况：vision_same_as_chat=True -> 使用聊天 provider
         eff = effective_proactive_config({"prefer_free_provider": True})
+        # 自用版默认 provider 是 dsh-webapi（model 为空），测试切到 openai-main
+        cfg.data["chat"]["active_provider"] = "openai-main"
         p, _ = watcher._resolve_vision_provider(eff)
         assert p.model == "deepseek-v4-flash"
 

@@ -188,7 +188,7 @@ def test_topology_config_input_is_isolated_to_tmp(tmp_path, monkeypatch):
 
     拓扑自 T4 起还读主配置 ``stream_capture_mode``。若测试进程真去读，上面那条
     「清 env ⇒ 默认 overlay」在**开发机勾过捕获模式**时会假红（判定读到真实
-    ``<APPDATA>/dsh-pet-standalone/config.json``），CI 上却永远绿——断言失去意义。
+    ``<APPDATA>/dsh-pet-chubby_blue_whale/config.json``），CI 上却永远绿——断言失去意义。
     conftest 的 ``_isolate_topology_config`` 夹具把目录解析钉到 ``tmp_path``；
     本用例锁死这件事（并在同一份路径上写 true 证明读的确实是它）。
     """

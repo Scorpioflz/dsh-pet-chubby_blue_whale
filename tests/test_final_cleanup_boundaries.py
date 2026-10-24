@@ -309,7 +309,7 @@ sys.modules["pet.runtime_cleanup"] = runtime_cleanup
 sys.modules["pet.uninstall_cleanup"] = uninstall
 sys.modules["pet.app"] = app
 
-sys.argv = ["dsh-pet-standalone", "--uninstall-cleanup"]
+sys.argv = ["dsh-pet-chubby_blue_whale", "--uninstall-cleanup"]
 exit_code = 0
 try:
     runpy.run_path(entry_path, run_name="__main__")
@@ -462,14 +462,14 @@ def _code_without_comments(text: str) -> str:
 
 def test_shared_bridge_protected_when_another_variant_uses_agent(tmp_path) -> None:
     """跨变体保护在 slot 档案结构下依然成立：别的变体在用就不许删共享桥接/hooks。"""
-    ours = tmp_path / "dsh-pet-standalone-webm-chat"
+    ours = tmp_path / "dsh-pet-chubby_blue_whale-webm-chat"
     ours.mkdir()
     (ours / "config.json").write_text(
         json.dumps({"agent_link": {"dsh": False, "claude": False}}), encoding="utf-8"
     )
     (ours / "config-slot-0.json").write_text(json.dumps({"character": "shenshen"}), encoding="utf-8")
     (ours / "config-slot-2.json").write_text(json.dumps({"scale": 0.8}), encoding="utf-8")
-    peer = tmp_path / "dsh-pet-standalone-webm"
+    peer = tmp_path / "dsh-pet-chubby_blue_whale-webm"
     peer.mkdir()
     (peer / "config.json").write_text(
         json.dumps({"agent_link": {"dsh": True, "claude": False}}), encoding="utf-8"

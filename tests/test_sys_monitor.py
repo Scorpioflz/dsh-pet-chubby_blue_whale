@@ -221,7 +221,7 @@ def test_readers_propagate_psutil_call_failures(monkeypatch):
 
 
 def test_real_readers_are_psutil_backed_or_honestly_unavailable():
-    """本机真实集成（不联网）：psutil 在 requirements.txt 里，装了就给 0~100 的读数，
+    """本机真实集成（不联网）：psutil 在 pyproject.toml 里，装了就给 0~100 的读数，
     没装就抛 PsutilUnavailable——绝不返回一个假的 0。"""
     try:
         cpu_reader = sm.read_cpu_percent

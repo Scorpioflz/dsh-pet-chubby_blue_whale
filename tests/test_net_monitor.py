@@ -295,7 +295,7 @@ def test_format_network_slot_is_fixed_width():
 def test_real_counter_reader_is_psutil_backed_or_honestly_none():
     """真实计数器读取：psutil 可用时给 (收, 发) 两个浮点，不可用给 None（不抛）。
 
-    本机安装路径的真实集成（不联网）：psutil 已在 requirements.txt 里声明，
+    本机安装路径的真实集成（不联网）：psutil 已在 pyproject.toml 里声明，
     读的是网卡累计字节，不产生任何流量。
     """
     sample = nm.read_counters()

@@ -51,7 +51,7 @@ def _declared_requirement_names() -> set[str]:
     names = set()
     for raw in data.get("project", {}).get("dependencies", []):
         # 依赖格式如 "PySide6>=6.8" 或 "pywin32-ctypes>=0.2.0; platform_system == 'Windows'"，
-        # 取版本约束/环境标记之前的部分作为包名（与原 requirements.txt 解析同口径）。
+        # 取版本约束/环境标记之前的部分作为包名（与原 pyproject.toml 解析同口径）。
         name = re.split(r"[<>=!;\[\s]", raw, maxsplit=1)[0]
         if name:
             names.add(_canonical(name))

@@ -134,7 +134,7 @@ def test_config_v4_migrates_legacy_chat_fields(tmp_path: Path, monkeypatch):
     monkeypatch.setattr("pet.chat.models.SecretStore", _FakeStore)
 
     root = tmp_path / "appdata"
-    cfg_dir = root / "dsh-pet-standalone"
+    cfg_dir = root / "dsh-pet-chubby_blue_whale"
     cfg_dir.mkdir(parents=True)
     (cfg_dir / "config.json").write_text(json.dumps({
         "version": 2,
@@ -540,10 +540,10 @@ def test_no_chat_packaging_uses_isolated_entrypoint():
     # spec 是构建产物（*.spec 已 gitignore）；干净检出时不存在则跳过，
     # 存在时（本机构建过）校验无 Chat 变体必须排除 pet.chat。
     for spec_name in (
-        "dsh-pet-standalone.spec",
-        "dsh-pet-standalone-hd.spec",
-        "dsh-pet-standalone-gif.spec",
-        "dsh-pet-standalone-webm.spec",
+        "dsh-pet-chubby_blue_whale.spec",
+        "dsh-pet-chubby_blue_whale-hd.spec",
+        "dsh-pet-chubby_blue_whale-gif.spec",
+        "dsh-pet-chubby_blue_whale-webm.spec",
     ):
         spec_path = Path(spec_name)
         if not spec_path.is_file():
@@ -551,7 +551,7 @@ def test_no_chat_packaging_uses_isolated_entrypoint():
         spec = spec_path.read_text(encoding="utf-8")
         assert "pet_entry_no_chat.py" in spec
         assert "'pet.chat'" in spec
-    for spec_name in ("dsh-pet-standalone-gif-chat.spec", "dsh-pet-standalone-webm-chat.spec"):
+    for spec_name in ("dsh-pet-chubby_blue_whale-gif-chat.spec", "dsh-pet-chubby_blue_whale-webm-chat.spec"):
         spec_path = Path(spec_name)
         if not spec_path.is_file():
             continue
@@ -2241,7 +2241,7 @@ def test_webm_and_gif_animation_sets_are_in_sync():
 
 
 def test_config_variant_dir_and_legacy_migration(tmp_path, monkeypatch):
-    """变体使用独立配置目录，并从旧共享目录一次性迁移配置与会话。"""
+    """从上游旧目录 dsh-pet-standalone 一次性迁移配置与会话到自用版目录。"""
     from pet import config as config_mod
 
     legacy = tmp_path / "dsh-pet-standalone"
@@ -2249,9 +2249,8 @@ def test_config_variant_dir_and_legacy_migration(tmp_path, monkeypatch):
     (legacy / "config.json").write_text('{"version": 3, "scale": 0.85}', encoding="utf-8")
     (legacy / "sessions").mkdir()
 
-    monkeypatch.setattr(config_mod, "APP_DIR_NAME", "dsh-pet-standalone-webm-chat")
     cfg = config_mod.Config(tmp_path)
-    assert cfg.dir == tmp_path / "dsh-pet-standalone-webm-chat"
+    assert cfg.dir == tmp_path / "dsh-pet-chubby_blue_whale"
     assert cfg.path.is_file()
     assert cfg.get("scale") == 0.85
     assert (cfg.dir / "sessions").is_dir()
@@ -2266,7 +2265,7 @@ def test_config_shared_dir_when_no_variant_marker(tmp_path):
     from pet import config as config_mod
 
     cfg = config_mod.Config(tmp_path)
-    assert cfg.dir == tmp_path / "dsh-pet-standalone"
+    assert cfg.dir == tmp_path / "dsh-pet-chubby_blue_whale"
 
 
 def test_provider_config_verify_ssl_roundtrip():

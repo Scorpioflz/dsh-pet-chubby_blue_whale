@@ -145,7 +145,7 @@ def test_missing_speak_key_normalizes_to_off(tmp_path):
     from pet.config import Config
 
     root = tmp_path / "appdata"
-    cfg_dir = root / "dsh-pet-standalone"
+    cfg_dir = root / "dsh-pet-chubby_blue_whale"
     cfg_dir.mkdir(parents=True)
     (cfg_dir / "config.json").write_text(json.dumps({"version": 4}), encoding="utf-8")
 
@@ -160,7 +160,7 @@ def test_stored_speak_choice_survives_default_flip(tmp_path):
 
     for stored in (True, False):
         root = tmp_path / f"appdata-{stored}"
-        cfg_dir = root / "dsh-pet-standalone"
+        cfg_dir = root / "dsh-pet-chubby_blue_whale"
         cfg_dir.mkdir(parents=True)
         (cfg_dir / "config.json").write_text(
             json.dumps({"version": 4, "self_talk_speak_enabled": stored}),

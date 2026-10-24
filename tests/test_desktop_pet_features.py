@@ -2994,13 +2994,13 @@ def test_dsh_converged_state_wiring_drives_thinking(tmp_path, monkeypatch):
 
 
 def test_external_character_dirs_uses_variant_then_legacy_fallback(tmp_path, monkeypatch):
-    """外部角色目录应优先变体目录，并保留旧 dsh-pet-standalone 目录兜底。"""
+    """外部角色目录应优先变体目录，并保留旧 dsh-pet-chubby_blue_whale 目录兜底。"""
     import sys
 
     import pet.catalog as catalog_mod
     from pet import config as config_mod
 
-    monkeypatch.setattr(config_mod, "APP_DIR_NAME", "dsh-pet-standalone-webm-chat")
+    monkeypatch.setattr(config_mod, "APP_DIR_NAME", "dsh-pet-chubby_blue_whale-webm-chat")
     # 数据目录按平台走 APPDATA / Library/Application Support / XDG_CONFIG_HOME
     if sys.platform == "win32":
         root = tmp_path
@@ -3012,8 +3012,8 @@ def test_external_character_dirs_uses_variant_then_legacy_fallback(tmp_path, mon
         root = tmp_path
         monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
     dirs = catalog_mod.external_character_dirs()
-    variant = root / "dsh-pet-standalone-webm-chat" / "characters"
-    legacy = root / "dsh-pet-standalone" / "characters"
+    variant = root / "dsh-pet-chubby_blue_whale-webm-chat" / "characters"
+    legacy = root / "dsh-pet-chubby_blue_whale" / "characters"
     assert variant in dirs
     assert legacy in dirs
     assert dirs.index(variant) < dirs.index(legacy)  # 新目录优先
@@ -3026,7 +3026,7 @@ def test_external_character_dirs_dedupes_base_dir(tmp_path, monkeypatch):
     import pet.catalog as catalog_mod
     from pet import config as config_mod
 
-    monkeypatch.setattr(config_mod, "APP_DIR_NAME", "dsh-pet-standalone")
+    monkeypatch.setattr(config_mod, "APP_DIR_NAME", "dsh-pet-chubby_blue_whale")
     if sys.platform == "win32":
         root = tmp_path
         monkeypatch.setenv("APPDATA", str(tmp_path))
@@ -3037,7 +3037,7 @@ def test_external_character_dirs_dedupes_base_dir(tmp_path, monkeypatch):
         root = tmp_path
         monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
     dirs = catalog_mod.external_character_dirs()
-    base = root / "dsh-pet-standalone" / "characters"
+    base = root / "dsh-pet-chubby_blue_whale" / "characters"
     assert dirs.count(base) == 1
 def test_self_talk_deleted_external_dir_falls_back_to_text_not_bundled(tmp_path):
     """回归：用户显式配置的外部图片目录被删后，不再回退内置彩蛋池

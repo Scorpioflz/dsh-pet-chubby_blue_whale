@@ -252,7 +252,7 @@ def test_session_less_resolved_with_two_candidates_closes_nothing(tmp_path, capl
         mon._poll()
         assert _sessions_of(mgr) == ["A", "B"]
 
-        with caplog.at_level(logging.WARNING, logger="dsh-pet-standalone"):
+        with caplog.at_level(logging.WARNING, logger="dsh-pet-chubby_blue_whale"):
             _write(mon.events_dir, "dsh-1001.jsonl",
                    {"event": "approval/resolved", "rpcId": "shared"})
             mon._poll()
