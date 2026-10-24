@@ -4039,6 +4039,21 @@ class AppShell:
         import hashlib
         settings = self.config.chat_settings()
         provider = settings.active_config
+        # 自用版：DSH Web API 模式下通过 dsh-balance-panel 插件查询余额
+        if getattr(provider, 'provider_id', '') == 'dsh-webapi':
+            base_url = str(provider.base_url or 'http://127.0.0.1:3080')
+            panel_url = base_url.rstrip('/').replace('/api/v1', '') + '/dsh-balance-panel'
+            self._quiet_balance_busy = True
+            self._quiet_balance_last = now
+            bridge = _BalanceBridge(None, owner=self)
+            self._quiet_balance_bridge = bridge
+            threading.Thread(
+                target=self._balance_worker_dsh,
+                args=(bridge, panel_url, provider.api_key),
+                kwargs={'quiet': True},
+                daemon=True, name='pet-balance-dsh-quiet',
+            ).start()
+            return
         provider.api_key = self.config.resolve_api_key(provider)
         if not provider.api_key:
             island.set_balance_info(
@@ -4171,7 +4186,7 @@ class AppShell:
             self._weather_service = WeatherService(self)
         self._weather_service.show_weather(parent)
 
-    def _balance_worker_dsh(self, bridge, panel_url: str, api_key: str) -> None:
+    def _balance_worker_dsh(self, bridge, panel_url: str, api_key: str, *, quiet: bool = False) -> None:
         """自用版：通过 dsh-balance-panel 插件查询余额（DSH 模式专用）。"""
         import json as json_mod
         import urllib.request
@@ -4205,7 +4220,10 @@ class AppShell:
         except Exception as exc:
             bridge.done.emit(False, f'余额查询失败：{exc}')
         finally:
-            self._balance_busy = False
+            if quiet:
+                self._quiet_balance_busy = False
+            else:
+                self._balance_busy = False
 
     def _balance_worker(self, bridge, base_url: str, api_key: str, verify_ssl: bool, provider_key: str = '', *, quiet: bool = False) -> None:
         from .island import balance as balance_mod  # 按需导入（见 _show_balance_payload）
