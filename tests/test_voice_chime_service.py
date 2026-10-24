@@ -759,7 +759,7 @@ def test_window_callbacks_for_voice_chime_are_wired(tmp_path):
 
 
 def test_build_scripts_and_requirements_declare_edge_tts():
-    """三端打包脚本必须收集 edge_tts，requirements.txt 必须声明它。
+    """三端打包脚本必须收集 edge_tts，pyproject.toml 必须声明它。
 
     语音报时缺 edge-tts 时只降级气泡（不崩溃），但**打包版用户无法自行 pip
     安装**——漏收就是「功能在安装包里永久不发声」。三脚本的 --collect-all
@@ -771,9 +771,11 @@ def test_build_scripts_and_requirements_declare_edge_tts():
                  "scripts/build_onedir.ps1"):
         text = (repo / name).read_text(encoding="utf-8")
         assert "--collect-all edge_tts" in text, f"{name} 必须收集 edge_tts"
-    requirements = (repo / "requirements.txt").read_text(encoding="utf-8")
-    assert re.search(r"^edge-tts>=", requirements, re.M), \
-        "requirements.txt 必须声明 edge-tts（CI 与打包都按它装依赖）"
+    import tomllib
+    with (repo / "pyproject.toml").open("rb") as f:
+        deps = tomllib.load(f).get("project", {}).get("dependencies", [])
+    assert any(d.strip().startswith("edge-tts>=") for d in deps), \
+        "pyproject.toml 必须声明 edge-tts（CI 与打包都按它装依赖）"
 
 
 def test_about_to_quit_stops_voice_chime_service(tmp_path, monkeypatch):
@@ -1213,7 +1215,7 @@ def test_aux_precache_completion_never_claims_the_chime_path(tmp_path, monkeypat
 def _write_cache_for(service, text: str) -> Path:
     """用产品自己的路径算法把一段文本标成"已有缓存"（不手拼 key：命中要看真实文件名）。"""
     attempts = service._usable_attempts()
-    assert attempts, "前提：本环境至少有一个可用后端（CI 装 requirements.txt 后成立）"
+    assert attempts, "前提：本环境至少有一个可用后端（CI 装 pyproject.toml 依赖后成立）"
     service._cache_dir.mkdir(parents=True, exist_ok=True)
     cached = service._cache_path(text, attempts[0])
     cached.write_bytes(b"\x00" * 32)

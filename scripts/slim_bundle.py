@@ -67,7 +67,7 @@ REMOVAL_GLOBS = (
 #
 # **numpy 已于 2026-10-13 移出本清单**：快速识屏的本地 OCR 直接 import numpy
 # （``pet/screen_capture/ocr.py`` 的 QImage → BGR 数组），它不再是"打包机污染"
-# 而是**随包必带的运行时依赖**（requirements.txt 里也已声明）。留在清单里的后果
+# 而是**随包必带的运行时依赖**（pyproject.toml 里也已声明）。留在清单里的后果
 # 不是"更干净"而是硬闸误杀：每次构建都会红在一个完全正常的产物上。
 # 移除它时同时删掉了 ``build_onedir.ps1`` 里的 ``--exclude-module numpy``——
 # 两处一致，正是那条注释原本要求的"换机/新装库后复查"。

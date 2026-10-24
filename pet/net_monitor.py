@@ -4,7 +4,7 @@
 槽内容 = 上下行网速 + 延迟。两条数据源各自的取舍：
 
 - **网速（零流量成本）**：读网卡累计字节计数器算 ``Δ字节/Δt``。用
-  ``requirements.txt`` 里已有的 psutil（``net_io_counters``）。本机实测单次调用
+  ``pyproject.toml`` 里已有的 psutil（``net_io_counters``）。本机实测单次调用
   **23ms**（63 张网卡的表遍历 + 具名元组构造），所以采样固定在后台线程
   （:class:`NetMonitor`），GUI 线程只读一次快照（:meth:`NetMonitor.snapshot`）——
   不把 23ms 的 syscall 塞进 16ms 的动画帧预算里。

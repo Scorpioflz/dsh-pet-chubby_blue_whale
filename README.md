@@ -7,7 +7,10 @@
 本项目是 **DSH (DeepSeek Harness) 的桌宠前端**，通过 dsh-web-service 插件的会话 API 接入 DSH：
 
 - **对话**：通过 DSH Web Service 会话 API（`/sessions/:id/prompt-stream`）实现连续对话，DSH 侧显示为同一会话
+- **角色对应会话**：每个桌宠角色对应独立 DSH 会话（按 system prompt 指纹映射）
 - **看看屏幕/截图提问**：截图上传到 DSH 会话（`POST /sessions/:id/files`）→ 提问 → 气泡显示回复
+- **余额查询**：通过 dsh-balance-panel 插件查询 DeepSeek 余额
+- **IP 定位城市**：首次启动检测城市，提醒设置默认天气城市
 - **工作区**：所有对话放在指定 DSH 工作区（默认 "pet"），便于整理与权限管理
 - **不发布、无 CI/CD、无 Release**，仅供自行封装使用
 - 依赖管理用 uv + `pyproject.toml`（Python 3.14+）
@@ -42,34 +45,33 @@ uv sync                    # 按 pyproject.toml 安装依赖到 .venv
 uv run python -m pet       # 启动桌宠
 ```
 
-也可用传统 pip 方式：`python -m pip install -r requirements.txt && python -m pet`。
+依赖管理通过 `pyproject.toml`（uv 方式），无需手动 pip install。
 
 ## 打包
 
-一键打包（PyInstaller onedir + Inno Setup 安装包）：
+### 安装包（exe）
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\build_chubby_blue_whale.ps1
+powershell -ExecutionPolicy Bypass -File scripts\build_installer.ps1
 ```
 
-脚本自动完成 4 步：
+产物：`dist-onedir\dsh-pet-chubby_blue_whale-setup.exe`（双击安装，免管理员权限）
 
-1. `uv sync` + 安装 PyInstaller
-2. PyInstaller onedir 打包（webm-chat 变体）
-3. 重命名 exe 为 `dsh-pet-chubby_blue_whale.exe`
-4. ISCC 编译安装包（需 Inno Setup 7 在 `D:\Tool\Inno Setup 7`）
+### 便携版（zip）
 
-产物在 `dist-onedir\` 下：
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\build_portable.ps1
+```
 
-| 文件 | 说明 |
-|---|---|
-| `dsh-pet-chubby_blue_whale-setup.exe` | 安装包（双击安装，免管理员权限） |
-| `dsh-pet-standalone-webm-chat-portable.zip` | 便携绿色版（解压即用） |
-| `dsh-pet-standalone-webm-chat\` | onedir 目录（绿色版 = 整个文件夹） |
+产物：`dist-onedir\dsh-pet-chubby_blue_whale-portable.zip`（解压即用）
+
+两个脚本共享前置步骤（uv sync → 帧序列生成 → PyInstaller → 重命名），区别仅在最后：
+- **安装包**：ISCC 编译 → 删除 portable.zip
+- **便携版**：重命名 portable.zip（不跑 ISCC）
 
 **前提**：
 - [uv](https://docs.astral.sh/uv/) 已安装
-- Inno Setup 7（ISCC 路径在脚本中配置，默认 `D:\Tool\Inno Setup 7\ISCC.exe`）
+- 安装包需 Inno Setup 7（ISCC 路径在脚本中配置，默认 `D:\Tool\Inno Setup 7\ISCC.exe`）
 
 ## 素材包说明
 

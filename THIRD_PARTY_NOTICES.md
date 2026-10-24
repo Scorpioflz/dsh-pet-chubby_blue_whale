@@ -2,8 +2,6 @@
 
 This project includes third-party software and assets subject to their respective licenses.
 
-The Android client carries the character attribution below and Android-specific
-notices in `android/NOTICE.txt`; its build includes these notices in the APK.
 
 ---
 
@@ -14,9 +12,9 @@ notices in `android/NOTICE.txt`; its build includes these notices in the APK.
   - `assets/sounds/duck/Ya2.mp3`
 - **Origin / Source Repository**: [MeteorNOX/DeepSeek-Balance-Whale-Widget](https://github.com/MeteorNOX/DeepSeek-Balance-Whale-Widget)
 - **License**: MIT License（正文见本节末尾）
-- **分发方式**（2026-10-17 起）：这两个文件随桌面三端产物与 APK 一起分发，**本节
+- **分发方式**（2026-10-17 起）：这两个文件随桌面产物一起分发，**本节
   连同下面的 MIT 正文也随之分发**——桌面 onedir 包落 `_internal/THIRD_PARTY_NOTICES.md`
-  （同目录还有项目自身的 `LICENSE`），APK 落资产根。把 mp3 打进包、把声明留在源码
+  （同目录还有项目自身的 `LICENSE`）。把 mp3 打进包、把声明留在源码
   仓库，不构成「许可正文随复制件分发」。
 
 ### MIT License Text
@@ -288,7 +286,7 @@ OR OTHER DEALINGS IN THE SOFTWARE.
   打包阶段拦住。运行期不做摘要校验（每次启动多读 31 MB 只为一件事 CI 该做的事）。
 - **测试数据**：`rapidocr/models/` 之外的一切（推理引擎、字符表、配置）不进本仓库。
 
-### 新增运行时依赖（`requirements.txt`）
+### 新增运行时依赖（`pyproject.toml`）
 
 | 发行包 | 版本约束 | License | 用途 |
 | --- | --- | --- | --- |
@@ -322,17 +320,34 @@ headless，本机两个发行名同版本并存、都提供 `cv2` 顶层模块�
   名称与鲸鱼标识的商标权归深度求索（DeepSeek）所有**——本项目是其桌面宠物衍生
   作品，按品牌本意作指示性使用（不代表官方出品/背书）。
 
-## 9. Android 客户端与构建工具
+## 9. 自用版新增第三方组件
 
-- Kotlin 及 kotlinx.coroutines：JetBrains 与贡献者，Apache-2.0。
-  https://github.com/JetBrains/kotlin ，https://github.com/Kotlin/kotlinx.coroutines 。
-- AndroidX / Jetpack Compose / Material Components：Android Open Source Project
-  与贡献者，Apache-2.0，https://android.googlesource.com/platform/frameworks/support/ 。
-- Gradle Wrapper：Gradle Inc. 与贡献者，Apache-2.0，仅作为构建工具。
-  https://github.com/gradle/gradle 。Wrapper JAR 与分发 ZIP 按官方摘要校验。
-- Apache-2.0 全文：`android/LICENSE-APACHE-2.0.txt`，随 APK 分发。
-- APK 资产里同时分发本文件（`THIRD_PARTY_NOTICES.md`）与 `android/NOTICE.txt`：
-  第 1 节的点击音 MIT 正文因此随 APK 一起走（见
-  `scripts/export_android_assets.py::copy_notices`，2026-10-17 起）。
-- 手机使用的 WebP 动画与图标由第 2 节角色素材派生，继续保留其署名和
-  个人非商业使用限制。工具与验收说明见 [Android 文档](docs/ANDROID.md)。
+以下为自用版（dsh-pet-chubby_blue_whale）新增的第三方组件，原项目不含。
+
+### 9.1 DSH Web Service 插件（REST API 服务）
+
+- **来源**：[toddpan/dsh-webapi](https://github.com/toddpan/dsh-webapi)
+- **用途**：提供会话/工作区/文件上传/SSE 流式对话 REST API，桌宠通过此 API 接入 DSH
+- **安装**：DSH Web 自带
+- **许可**：按上游仓库声明
+
+### 9.2 dsh-balance-panel 插件（余额查询）
+
+- **来源**：[wycto/dsh-balance-panel](https://github.com/wycto/dsh-balance-panel)
+- **用途**：提供 `GET /dsh-balance-panel` REST 端点，桌宠通过此端点查询 DeepSeek 余额
+- **安装**：`dsh plugin --profile web add @wycto/dsh-balance-panel`
+- **许可**：MIT License
+
+### 9.3 IP 定位 API（天气城市检测）
+
+- **高德 IP 定位**：[高德开放平台](https://lbs.amap.com/)，需用户自行申请 API Key，按高德服务条款使用
+- **免费回退 API**：
+  - [ip-api.com](http://ip-api.com/)（免费，精度到省级出口）
+  - [ipinfo.io](https://ipinfo.io/)（免费，精度到省级出口）
+- **用途**：首次启动时检测用户城市，提醒设置默认天气城市
+- **许可**：按各 API 服务条款
+
+### 9.4 打包工具
+
+- **PyInstaller**：[pyinstaller.org](https://pyinstaller.org/)，GPL（作为工具使用，不随产物分发）
+- **Inno Setup**：[jrsoftware.org/isdl](https://jrsoftware.org/isdl.php)，免费使用（作为工具使用，不随产物分发）

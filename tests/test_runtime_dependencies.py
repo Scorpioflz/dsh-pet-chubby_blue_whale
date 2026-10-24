@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-"""运行时依赖必须显式声明在 requirements.txt 里。
+"""运行时依赖必须显式声明在 pyproject.toml 的 [project] dependencies 里。
 
 背景（PR #134 的教训）：`pet/now_playing.py` 新引入 `import psutil` 做「播放器进程在不在」
-判断，用来**绕开 SMTC 的永久阻塞**，但 psutil 没写进 requirements.txt。缺失时那段判断
+判断，用来**绕开 SMTC 的永久阻塞**，但 psutil 没写进 pyproject.toml。缺失时那段判断
 按设计放行（宁可多试一次也不误伤），于是 SMTC 挂住的老路照旧会走——修复在打包版里
 等于没生效，而 CI 里"碰巧装了 psutil"（PyInstaller/环境带进来的传递依赖），所以整套
 测试全绿、谁也看不出问题。
 
 这道守卫把「运行时 import 了却没人声明」变成红灯：扫 `pet/` 下所有第三方顶层 import，
-逐个解析它属于哪个发行包，再核对 requirements.txt。
+逐个解析它属于哪个发行包，再核对 pyproject.toml。
 
 判定规则：
 * 标准库、本仓库内的包（pet / packaging / integrations）跳过；
@@ -22,13 +22,14 @@ import ast
 import importlib.metadata as md
 import re
 import sys
+import tomllib
 from pathlib import Path
 
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PET_DIR = REPO_ROOT / "pet"
-REQUIREMENTS = REPO_ROOT / "requirements.txt"
+PYPROJECT = REPO_ROOT / "pyproject.toml"
 
 # 本仓库内的顶层包名（不参与依赖核对）。
 INTERNAL_MODULES = {"pet", "packaging", "integrations"}
@@ -44,13 +45,14 @@ TRANSITIVE_ALLOWED = {
 
 
 def _declared_requirement_names() -> set[str]:
-    """requirements.txt 里的发行包名（规范化：小写、「_/.」统一成「-」）。"""
+    """pyproject.toml [project] dependencies 里的发行包名（规范化：小写、「_/.」统一成「-」）。"""
+    with PYPROJECT.open("rb") as f:
+        data = tomllib.load(f)
     names = set()
-    for raw in REQUIREMENTS.read_text(encoding="utf-8").splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#") or line.startswith("-"):
-            continue
-        name = re.split(r"[<>=!;\[\s]", line, maxsplit=1)[0]
+    for raw in data.get("project", {}).get("dependencies", []):
+        # 依赖格式如 "PySide6>=6.8" 或 "pywin32-ctypes>=0.2.0; platform_system == 'Windows'"，
+        # 取版本约束/环境标记之前的部分作为包名（与原 requirements.txt 解析同口径）。
+        name = re.split(r"[<>=!;\[\s]", raw, maxsplit=1)[0]
         if name:
             names.add(_canonical(name))
     return names
@@ -101,7 +103,7 @@ def _distributions_for(module: str) -> list[str]:
 
 
 def test_pet_third_party_imports_are_declared():
-    """pet/ 里 import 的第三方包，必须能在 requirements.txt 里找到（或列入白名单）。"""
+    """pet/ 里 import 的第三方包，必须能在 pyproject.toml 里找到（或列入白名单）。"""
     declared = _declared_requirement_names()
     undeclared: list[str] = []
     for module, users in sorted(_pet_third_party_imports().items()):
@@ -119,9 +121,9 @@ def test_pet_third_party_imports_are_declared():
                 f"{module} (发行包: {', '.join(sorted(dists))}) <- {', '.join(sorted(users))}"
             )
     assert not undeclared, (
-        "以下第三方模块被 pet/ import，但没有声明在 requirements.txt 里。\n"
+        "以下第三方模块被 pet/ import，但没有声明在 pyproject.toml 里。\n"
         "打包版不会带上它们（用户也无法自行 pip 安装），而 CI 环境里往往碰巧存在，\n"
-        "所以这种缺失在测试里看不出来。请加进 requirements.txt，"
+        "所以这种缺失在测试里看不出来。请加进 pyproject.toml 的 [project] dependencies，"
         "并在需要时给构建脚本加 --collect-all：\n  " + "\n  ".join(undeclared)
     )
 
@@ -129,7 +131,7 @@ def test_pet_third_party_imports_are_declared():
 def test_psutil_is_declared_for_player_probe():
     """psutil 专项保险：歌词显示靠它绕开 SMTC 的永久阻塞，缺了就白修（见模块 docstring）。"""
     assert "psutil" in _declared_requirement_names(), (
-        "psutil 必须留在 requirements.txt：pet/now_playing.py 用它判断播放器进程在不在，"
+        "psutil 必须留在 pyproject.toml 的 [project] dependencies：pet/now_playing.py 用它判断播放器进程在不在，"
         "进程不在时直接启动播放器而**不碰 WinRT**；缺失时该判断放行，"
         "SMTC 卡住的老路会照旧走。"
     )

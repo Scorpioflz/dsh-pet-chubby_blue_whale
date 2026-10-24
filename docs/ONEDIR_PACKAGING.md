@@ -44,9 +44,9 @@ dist-onedir\dsh-pet-standalone-webm-chat-portable.zip
 
 4.3.1 的语音依赖门禁在三端构建中均强制执行：构建前运行
 `python scripts/verify_bundle_tts.py --environment`，要求已安装的 edge-tts 满足
-`requirements.txt` 的 `>=7.3.1,<8`；冻结后运行同脚本的 `--app-dir` 检查，
+`pyproject.toml` 的 `>=7.3.1,<8`；冻结后运行同脚本的 `--app-dir` 检查，
 同时核对模块闭包、包内发行元数据和构建环境版本。旧版本、缺元数据或版本不一致
-均中止打包。环境依赖可用 `python -m pip install -r requirements.txt` 更新。
+均中止打包。环境依赖可用 `python -m uv sync` 更新。
 不能只在系统 Python 升级：必须用实际运行 PyInstaller 的解释器安装和检查。
 协议变更的旧版 403 对照及真实试听证据见
 [4.3.1 交付报告](PR-REPORT-DESKTOP-431-2026-10-16.md)。
@@ -208,7 +208,7 @@ macOS 的正式构建在最终签名前写入 `LSUIElement=true`：独立设置�
   见 `.scratch/screen-capture/build_ocr_hidden.out`）；Linux/macOS 那一行是按同一份
   实现接的线，**从未在本机构建或运行过**（本机是 Windows），别把它当作已验证。
 - **`numpy` / `cv2` 不再是「构建机环境污染」**：本地 OCR 直接 import numpy、rapidocr
-  直接 import cv2，两者都是随包依赖（`requirements.txt` 已声明）。构建脚本的
+  直接 import cv2，两者都是随包依赖（`pyproject.toml` 已声明）。构建脚本的
   `--exclude-module` 与 `slim_bundle.py` 的 `FORBIDDEN_GLOBS` 里的 numpy 条目都已删除
   ——留着会让**每一次**构建红在一个完全正常的产物上；而排除它们曾让冻结包的 OCR
   全线不可用（2026-10-13 实测，v3 变体）。

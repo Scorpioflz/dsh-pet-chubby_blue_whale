@@ -236,5 +236,8 @@ def test_build_scripts_collect_keyring_windows_backend_dependency():
     assert "WINDOWS_ONLY_MODULES" in verifier and "win32ctypes.pywin32.win32cred" in verifier, (
         "构建期兜底清单要钉住它（按目标平台生效）：Windows 包缺了就以退出码 4 中止")
 
-    requires = (repo / "requirements.txt").read_text(encoding="utf-8")
-    assert "pywin32-ctypes" in requires, "运行时依赖要显式声明（不靠 keyring 带）"
+    import tomllib
+    with (repo / "pyproject.toml").open("rb") as f:
+        deps = tomllib.load(f).get("project", {}).get("dependencies", [])
+    assert any(d.strip().startswith("pywin32-ctypes") for d in deps), \
+        "运行时依赖要显式声明（不靠 keyring 带）"

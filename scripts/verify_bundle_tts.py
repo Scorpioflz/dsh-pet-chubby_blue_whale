@@ -90,12 +90,15 @@ def platform_modules(platform: str | None = None) -> tuple[str, ...]:
 
 
 def required_version() -> str:
-    """Read the same constraint pip uses; there is no second minimum to drift."""
-    requirements = Path(__file__).resolve().parents[1] / "requirements.txt"
-    for line in requirements.read_text(encoding="utf-8").splitlines():
-        if line.strip().startswith("edge-tts"):
-            return str(Requirement(line.strip()).specifier)
-    raise ValueError("requirements.txt does not declare edge-tts")
+    """Read the same constraint pyproject.toml uses; there is no second minimum to drift."""
+    import tomllib
+    pyproject = Path(__file__).resolve().parents[1] / "pyproject.toml"
+    with pyproject.open("rb") as f:
+        deps = tomllib.load(f).get("project", {}).get("dependencies", [])
+    for dep in deps:
+        if dep.strip().startswith("edge-tts"):
+            return str(Requirement(dep.strip()).specifier)
+    raise ValueError("pyproject.toml does not declare edge-tts")
 
 
 def verify_environment() -> tuple[int, dict]:
@@ -287,7 +290,7 @@ def verify(app_dir: Path | None, exe: Path | None) -> tuple[int, dict]:
     if closure is None:
         return 5, {
             "error": "edge-tts-not-installed-in-build-env",
-            "hint": "pip install -r requirements.txt（缺依赖时 --collect-all edge_tts "
+            "hint": "uv sync（缺依赖时 --collect-all edge_tts "
                     "只警告不报错，产物会静默缺 TTS）",
             "exe": str(exe),
         }

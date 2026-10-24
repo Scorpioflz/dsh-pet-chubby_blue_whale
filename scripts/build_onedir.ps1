@@ -86,7 +86,7 @@ $env:PYTHONUTF8 = '1'
 $env:PYTHONIOENCODING = 'utf-8'
 
 python scripts\verify_bundle_tts.py --environment
-if ($LASTEXITCODE -ne 0) { throw '[tts] upgrade build dependencies with pip install -r requirements.txt' }
+if ($LASTEXITCODE -ne 0) { throw '[tts] upgrade build dependencies with uv sync' }
 
 $variants = @{
     'webm-chat' = @{ Name = 'dsh-pet-standalone-webm-chat'; Entry = 'packaging\pet_entry.py' }

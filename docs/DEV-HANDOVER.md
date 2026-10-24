@@ -29,7 +29,7 @@ AIGC:
 
 ### 1.2 运行环境与依赖
 
-`requirements.txt`（运行时 + 开发依赖）：
+`pyproject.toml`（运行时 + 开发依赖）：
 
 ```
 PySide6>=6.5
@@ -62,7 +62,7 @@ D:\dsh-pet\
 ├── AGENTS.md                     # 工程纪律（必读：变更纪律、CI 成本纪律、context pointers）
 ├── CONTEXT.md                    # 领域术语表（Shared UX Contract / Settings System / Menu Action Model）
 ├── README.md                     # 用户向说明（下载/安装/使用/隐私/限制）＋开发者入口；工程细节见本文与 docs/
-├── requirements.txt / pyproject.toml / pytest.ini
+├── pyproject.toml / pyproject.toml / pytest.ini
 ├── run.bat                       # 本地源码启动脚本
 ├── dsh-pet-standalone-webm-chat.spec   # PyInstaller 规格（onedir）
 ├── pet\                          # 应用源码（112 个 .py，含子包）
@@ -399,7 +399,7 @@ _on_tick(now)
 
 ```powershell
 cd D:\dsh-pet
-pip install -r requirements.txt
+uv sync
 $env:QT_QPA_PLATFORM = "offscreen"     # 无头环境必须
 python -m pytest -q                     # 全量
 python -m pytest tests\test_voice_chime.py -q            # 语音报时族
@@ -729,7 +729,7 @@ tests/                        # 单元测试、Qt offscreen 测试和构建相�
 ```powershell
 # 源码运行
 cd D:\dsh-pet
-pip install -r requirements.txt
+uv sync
 pip install edge-tts                # 需要语音合成时
 python -m pet                        # 或 run.bat
 
