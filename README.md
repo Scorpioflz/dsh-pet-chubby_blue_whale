@@ -13,6 +13,15 @@
 - 依赖管理用 uv + `pyproject.toml`（Python 3.14+）
 - 上游同步：`git remote add upstream https://github.com/MerZlin/dsh-pet-indesktop.git && git fetch upstream`
 
+## DSH 插件依赖
+
+本桌宠依赖以下 DSH 插件：
+
+| 插件 | 用途 | 地址 | 安装 |
+|---|---|---|---|
+| `dsh-web-service` | REST API 服务（会话/工作区/文件上传/SSE 流式对话） | [toddpan/dsh-webapi](https://github.com/toddpan/dsh-webapi) | DSH Web 自带 |
+| `@wycto/dsh-balance-panel` | 余额查询 REST 端点 `GET /dsh-balance-panel` | [wycto/dsh-balance-panel](https://github.com/wycto/dsh-balance-panel) | `dsh plugin --profile web add @wycto/dsh-balance-panel` |
+
 ## 目录
 
 - [从源码运行](#从源码运行)
