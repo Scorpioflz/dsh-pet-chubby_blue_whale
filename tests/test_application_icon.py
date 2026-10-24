@@ -249,7 +249,7 @@ def test_shell_build_scripts_stay_syntactically_valid(name):
     if bash is None:
         pytest.skip("这台机器没有 bash（脚本语法门在 Linux/macOS 上生效）")
 
-    completed = subprocess.run([bash, "-n", str(SHELLS[name])], capture_output=True, text=True,
+    completed = subprocess.run([bash, "-n", str(SHELLS[name]).replace('\\', '/')], capture_output=True, text=True,
                                timeout=120)
 
     assert completed.returncode == 0, completed.stderr
