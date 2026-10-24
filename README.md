@@ -410,60 +410,9 @@ DeepSeek 余额显示（气泡/小部件思路）参考了 [MeteorNOX/DeepSeek-B
 
 本项目采用 **MIT License**（见仓库根目录 `LICENSE`），第三方素材与组件授权声明见 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)。
 
-**特别感谢：**
+**原作者：**
 
-- [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet)：参考实现与动画素材基础。
+- [MerZlin/dsh-pet-indesktop](https://github.com/MerZlin/dsh-pet-indesktop)（MIT License, Copyright (c) 2026 Merzlin）：本项目基于此开源项目个人自用再开发。
+- [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet)：原作者参考的动画素材基础。
 - [MeteorNOX/DeepSeek-Balance-Whale-Widget](https://github.com/MeteorNOX/DeepSeek-Balance-Whale-Widget)：DeepSeek 余额气泡思路参考。
-- **贡献者 [ushio2026-alt](https://github.com/ushio2026-alt)**：贡献了 v4.0.0 的现代桌面体验重构（PR #11：新版右键菜单、新版设置、现代双栏 AI 对话窗口、彩蛋入口、多开孵化）、CI 测试时序稳定（PR #12）与彩蛋弹窗时序/图片回退加固（PR #13）。
-- **贡献者 [klxxya](https://github.com/klxxya)**：贡献了拖拽物理、全屏自动隐藏、看看屏幕、聊天窗主题背景、裁切取景、文字动画免镜像、置顶看门狗等增强功能（PR #5），v4.0.0 的性能与主动陪伴体系（PR #7：隐藏零功耗、启动懒加载、主动识屏陪伴、Agent 联动、多实例避让）与合并后的加固修复（PR #16），v4.2.1 之后的大批主线工作（灵动岛段化、单进程多宠架构、歌词采样提速等，逐项见 [`docs/RELEASE-v4.3.0.md`](docs/RELEASE-v4.3.0.md) 的致谢）。
-- **贡献者 [lscatfish123-cell](https://github.com/lscatfish123-cell)**：贡献了 Windows「自动隐藏任务栏」下桌宠误隐藏的修复（PR #18：全屏判定增加标题栏检查）。
-- **v4.3.1 修复批**：贡献者 [klxxya](https://github.com/klxxya)（#271 主宠设置保存、穿透卡死 #277）、[李玉清](https://github.com/lyq1101871677-dev)（#272 macOS 失活时桌宠保持可见）；拖拽弹簧手感批、Markdown 渲染覆盖，以及设置页打磨、截图问答品牌图标、歌词多歌手取词（这几批的提交署名同为 `syf`，与 GitHub 账号的对应关系未经核实，故不并入任何个人条目，记为**本地修复批/贡献记录**）。#271 由 **Xaisx-sys** 报告（含精确代码定位与主/子宠对照实验，直接锁定根因），#272 同族记录见 issue #262（另一处 legacy 鼠标缺陷另立 #275）。逐项见 [`docs/RELEASE-v4.3.1.md`](docs/RELEASE-v4.3.1.md)。
-- **Issue 反馈者**：[Viteyun](https://github.com/Viteyun)（图标过小反馈）、[Lorin1470](https://github.com/Lorin1470)（macOS 使用反馈与建议）、[YukidokeAzarea](https://github.com/YukidokeAzarea)（AI 对话报错反馈）、[zangxx66](https://github.com/zangxx66)（macOS 右键菜单反馈）——感谢你们帮助发现并定位问题。
-- **所有在 Bilibili 上为本项目提供反馈和建议的观众**：你们的评论、建议与使用反馈是项目持续改进的重要动力。v4.0.0 中的设置自动保存、深色模式适配、会话滚动、看看屏幕同步、气泡层级、托盘同步、锁定/不透明度等多项修复与功能均来自用户实测反馈。
-
-## 开发者与贡献
-
-改代码前先读工程纪律与文档索引，不要只照本页行事：
-
-- [`AGENTS.md`](AGENTS.md)：**工程纪律的权威出处**——项目结构、变更纪律、CI 成本纪律、架构红线、"Context pointers"（改哪块必须先读哪份文档）。
-- [`docs/INDEX.md`](docs/INDEX.md)：**全文档入口索引**，每份文档一句话 + 何时必读；找文档先查它，新文档必须在此登记并互链。
-- [`docs/DEV-HANDOVER.md`](docs/DEV-HANDOVER.md)：本地运行、改配置、加功能、跑测试、重新打包的流程，外加 §10 的 `pet/` 模块一览、Harness 启动器机制、性能与内存治理口径、坑位清单（自带基线日期，其中的行数/用例数按当时实测算，改动后以实际为准）。
-- [`CONTEXT.md`](CONTEXT.md)：领域术语表（Shared UX Contract / Settings System / Menu Action Model 等）。
-
-改对应代码前的必读文档（完整触发表见 `AGENTS.md` 的 "Context pointers"）：
-
-- [`docs/WINDOW_PY_SPLIT_GUIDE.md`](docs/WINDOW_PY_SPLIT_GUIDE.md)：改 `pet/window.py` 前必读（只许瘦不许胖）。
-- [`docs/SETTINGS-CHANGE-GATES.md`](docs/SETTINGS-CHANGE-GATES.md)：新增/改动任何设置项前必读。
-- [`docs/ASSET-PIPELINE.md`](docs/ASSET-PIPELINE.md)：做/换动画素材（绿幕源视频 → 透明 WebM）与新增角色前必读。
-- [`docs/ONEDIR_PACKAGING.md`](docs/ONEDIR_PACKAGING.md)：打包流水线、随包资产与构建门。
-- [`docs/PR-REPORT-TEMPLATE.md`](docs/PR-REPORT-TEMPLATE.md) / [`docs/ACCEPTANCE_TESTS.md`](docs/ACCEPTANCE_TESTS.md) / [`docs/BUILD-CI-FAILURE-NOTES-2026-08.md`](docs/BUILD-CI-FAILURE-NOTES-2026-08.md)：PR 报告模板 / 三条验收路径该跑哪些测试 / 三平台打包 CI 的坑与解法汇总（CI 红了先去这里找同类记录）。
-- [`docs/PR-MERGE-LESSONS-2026-09-12.md`](docs/PR-MERGE-LESSONS-2026-09-12.md)：合并 PR 前必读（叠放 PR 冲突、两个 PR 合并后才越线的预算/红线、时序测试 flake 纪律）。
-
-### 提交前必过的门（硬要求）
-
-硬要求本身不在本页重复，两处权威出处：[`AGENTS.md`](AGENTS.md)（变更纪律 / CI 成本纪律 / 架构红线 / "Context pointers"）与 [`docs/DEV-HANDOVER.md`](docs/DEV-HANDOVER.md) §8（PR 流程、三份交付证据的判定标准、变更门禁清单）。
-
-一句话版：**推送前过本地三道门**（`ruff` → 全量 `pytest` → 受影响时序测试族高负载复跑 3 遍）；**每个 PR 交三份证据**（修改文件说明 + 实测性能分析 + 实机运行记录，报告写入 `docs/PR-REPORT-<主题>-<YYYY-MM-DD>.md` 并在 [`docs/INDEX.md`](docs/INDEX.md) 登记；纯文档/文案改动可只保留第 1 条，但要在 PR 描述里写明豁免理由）；**架构红线与行数预算**由 `tests/test_architecture.py` 机器守卫（常量值与每次校准的日期、理由都在该文件里，**改前读它，不要照抄别处的旧数字**）；**新增配置键三处登记**（默认值 dict + `reload()` 白名单 + `tests/test_config_schema.py` 快照）。
-
-### 开发结构
-
-`pet/` 模块一览（含各模块职责）、Harness 启动器机制、性能与内存治理口径，统一收在 [`docs/DEV-HANDOVER.md`](docs/DEV-HANDOVER.md) §10 与本页 [性能与内存治理](#性能与内存治理) 一节。
-
-拆代码前先读：[`docs/WINDOW_PY_SPLIT_GUIDE.md`](docs/WINDOW_PY_SPLIT_GUIDE.md)（`window.py` 处于「只许瘦不许胖」的增量拆分公约下）、[`docs/SETTINGS-CHANGE-GATES.md`](docs/SETTINGS-CHANGE-GATES.md)（设置项准入/准出）。
-
-### 测试与验证
-
-在项目根目录执行：
-
-```powershell
-pip install -r requirements.txt   # 运行时 + 开发依赖（含 pytest/ruff）
-$env:QT_QPA_PLATFORM = "offscreen"
-python -m pytest -q
-python -m ruff check pet/ tests/
-python -m compileall pet packaging scripts
-```
-
-- 该跑哪几个文件（设置窗口 / DSH Bridge / Qt 生命周期三条验收路径的精确命令）见 [`docs/ACCEPTANCE_TESTS.md`](docs/ACCEPTANCE_TESTS.md)；全量套件的规模与三端 CI 状态以实际运行为准，不要照抄历史数字。
-- 时序测试的写法纪律（事件同步 + 宽预算，禁止固定 sleep、赌目录枚举顺序、用 monotonic 绝对值做回拨算术）见 `AGENTS.md` 与 [`docs/PR-MERGE-LESSONS-2026-09-12.md`](docs/PR-MERGE-LESSONS-2026-09-12.md)。
-- 人工验证真实窗口（不设 `offscreen` 直接跑 `python -m pet`）时的自查清单见 [`docs/DEV-HANDOVER.md`](docs/DEV-HANDOVER.md) §10.4。
 
