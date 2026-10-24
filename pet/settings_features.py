@@ -245,6 +245,15 @@ class FeaturesPage(QWidget):
                 unknown = []
         enabled = list(dict.fromkeys([*self._pending, *unknown]))
         config.set("feature_activation", {"version": CURRENT_VERSION, "enabled": enabled})
+        # 自用版：天气功能激活时检查城市
+        if "weather" in enabled:
+            try:
+                cities = config.get("weather_city_list", [])
+                if not cities:
+                    from .weather.ip_city import ensure_weather_city
+                    ensure_weather_city(config=config)
+            except Exception:
+                pass
 
 
 def build_content(dialog) -> QWidget:

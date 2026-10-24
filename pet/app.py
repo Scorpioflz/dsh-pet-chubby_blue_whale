@@ -2642,8 +2642,9 @@ class AppShell:
             except Exception:
                 pass
             try:
-                from . import feature_activation
-                if feature_activation.is_active("weather"):
+                fa = self.config.get("feature_activation", {})
+                enabled = fa.get("enabled", []) if isinstance(fa, dict) else []
+                if "weather" in enabled:
                     from .weather.ip_city import ensure_weather_city
                     ensure_weather_city(config=self.config)
             except Exception:
