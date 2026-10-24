@@ -229,7 +229,8 @@ def _download_locked(part: Part, final: Path, partial: Path, *,
     只有 sha256 不符（内容不可信）才删半成品并直接换下一个地址。
     """
     errors: list[str] = []
-    for url in part.urls:
+    # 自用版：反转 URL 顺序，代理（列表末尾）优先尝试，GitHub 官方最后
+    for url in reversed(part.urls):
         last_error = ""
         for attempt in range(1, _TRANSIENT_RETRIES + 1):
             try:
