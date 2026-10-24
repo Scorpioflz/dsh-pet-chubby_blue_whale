@@ -20,9 +20,21 @@ uv pip install pyinstaller packaging
 if ($LASTEXITCODE -ne 0) { Write-Error "pyinstaller install failed"; exit 1 }
 
 # --- Step 1.5: Generate frame-sequence material ---
-Write-Host "`n[1.5/4] Generate frameseq (shenshen)" -ForegroundColor Yellow
-uv run python tools/convert_frameseq.py --character shenshen --include random,events
-if ($LASTEXITCODE -ne 0) { Write-Error "frameseq generation failed"; exit 1 }
+$frameseqDir = "assets\characters\shenshen\frameseq"
+if (Test-Path $frameseqDir -PathType Container) {
+    $clipCount = (Get-ChildItem $frameseqDir -Recurse -Directory -Filter "g*" | Measure-Object).Count
+    if ($clipCount -gt 0) {
+        Write-Host "`n[1.5/4] Frameseq already exists ($clipCount clips), skip" -ForegroundColor Green
+    } else {
+        Write-Host "`n[1.5/4] Generate frameseq (shenshen)" -ForegroundColor Yellow
+        uv run python tools/convert_frameseq_progress.py --character shenshen --include random,events
+        if ($LASTEXITCODE -ne 0) { Write-Error "frameseq generation failed"; exit 1 }
+    }
+} else {
+    Write-Host "`n[1.5/4] Generate frameseq (shenshen)" -ForegroundColor Yellow
+    uv run python tools/convert_frameseq.py --character shenshen --include random,events
+    if ($LASTEXITCODE -ne 0) { Write-Error "frameseq generation failed"; exit 1 }
+}
 
 # --- Step 2: PyInstaller onedir build ---
 Write-Host "`n[2/4] PyInstaller onedir (webm-chat)" -ForegroundColor Yellow
