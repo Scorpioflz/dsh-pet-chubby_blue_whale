@@ -51,7 +51,7 @@ class DshApiClient:
 
     def _request(self, method: str, path: str, body: Any = None, timeout: int = _TIMEOUT) -> Any:
         url = f"{self.base_url}{path}"
-        data = json.dumps(body).encode("utf-8") if body is not None else None
+        data = json.dumps(body, ensure_ascii=False).encode("utf-8") if body is not None else None
         req = urllib.request.Request(url, data=data, method=method, headers=self._headers())
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
@@ -147,7 +147,7 @@ class DshApiClient:
         kind: 'delta'（正文增量）、'reasoning'（思考增量）、'error'。
         """
         url = f"{self.base_url}/sessions/{session_id}/prompt-stream"
-        data = json.dumps({"prompt": prompt}).encode("utf-8")
+        data = json.dumps({"prompt": prompt}, ensure_ascii=False).encode("utf-8")
         headers = self._headers()
         headers["Accept"] = "text/event-stream"
         req = urllib.request.Request(url, data=data, method="POST", headers=headers)

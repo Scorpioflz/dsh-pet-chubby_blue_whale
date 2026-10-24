@@ -439,7 +439,7 @@ def _default_chat_data():
             "dsh-webapi": {
                 "name": "DSH Web API",
                 "base_url": "http://127.0.0.1:3080/api/v1",
-                "chat_path": "/chat/completions",
+                "chat_path": "pet",
                 "model": "",
                 "api_key_ref": "provider/dsh-webapi",
                 "api_key": "",

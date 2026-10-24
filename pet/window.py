@@ -3506,7 +3506,7 @@ class PetWindow(QWidget, WindowFeatureGateMixin):
                 app_info = vision_mod.foreground_app_info()
                 user_text = f"[看看屏幕] 前台窗口：{app_info}" if app_info else "[看看屏幕]"
                 client = dsh_api.DshApiClient(base_url=provider.base_url, api_key=provider.api_key)
-                ws_id = client.ensure_workspace(dsh_api.default_workspace_path(), "pet")
+                ws_id = client.ensure_workspace(dsh_api.default_workspace_path(), getattr(provider, 'chat_path', '') or "pet")
                 sessions = client.list_sessions(workspace_id=ws_id)
                 if sessions:
                     session_id = sessions[-1].get("id") or sessions[-1].get("sessionId")

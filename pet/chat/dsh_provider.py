@@ -48,8 +48,9 @@ class DshWebApiProvider:
         client = self._ensure_client(config)
         if self._workspace_id is None:
             ws_path = default_workspace_path()
+            ws_title = getattr(config, "chat_path", "") or "pet"
             try:
-                self._workspace_id = client.ensure_workspace(ws_path, "pet")
+                self._workspace_id = client.ensure_workspace(ws_path, ws_title)
             except Exception:
                 logging.exception("DSH 工作区创建失败，继续无工作区")
         try:
