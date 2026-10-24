@@ -245,6 +245,8 @@ def test_the_cache_does_not_outlive_its_application(monkeypatch):
 
 @pytest.mark.parametrize("name", sorted(SHELLS))
 def test_shell_build_scripts_stay_syntactically_valid(name):
+    if sys.platform == 'win32':
+        pytest.skip("Windows 上 WSL bash 无法访问 Windows 路径（脚本语法门在 Linux/macOS 上生效）")
     bash = shutil.which("bash")
     if bash is None:
         pytest.skip("这台机器没有 bash（脚本语法门在 Linux/macOS 上生效）")
