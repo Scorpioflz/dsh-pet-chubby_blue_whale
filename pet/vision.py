@@ -328,6 +328,46 @@ def _post_vision_request(
     已耗尽，函数直接抛出 VisionError 停止后续重试。
     pet_name: 可选，桌宠角色显示名；用于在 user 文本里追加自我识别提示，
     让模型认出截图角落里的桌宠就是自己，而不是陌生程序。"""
+    # 自用版：DSH Web API 模式下通过 DSH 会话处理截图提问
+    if getattr(p, 'provider_id', '') == 'dsh-webapi':
+        from . import dsh_api
+        from .dsh_workspace import get_workspace_title
+        client = dsh_api.DshApiClient(base_url=p.base_url, api_key=p.api_key)
+        ws_id = client.ensure_workspace(dsh_api.default_workspace_path(), get_workspace_title())
+        sessions = client.list_sessions(workspace_id=ws_id)
+        if sessions:
+            session_id = sessions[-1].get("id") or sessions[-1].get("sessionId")
+        else:
+            session_id = client.create_session(workspace_id=ws_id, title="截图提问")
+        file_path = None
+        if jpeg_bytes:
+            file_path = client.upload_file(session_id, jpeg_bytes, "screenshot.jpg")
+        if messages_override is not None:
+            last = messages_override[-1] if messages_override else {}
+            content = last.get("content", "")
+            if isinstance(content, str):
+                prompt = content
+            elif isinstance(content, list):
+                prompt = ""
+                for part in content:
+                    if not isinstance(part, dict):
+                        continue
+                    if part.get("type") == "text":
+                        prompt += part.get("text", "")
+                    elif part.get("type") == "image_url" and file_path is None:
+                        url = part.get("image_url", {}).get("url", "")
+                        if url.startswith("data:") and "," in url:
+                            _, b64data = url.split(",", 1)
+                            try:
+                                img_bytes = base64.b64decode(b64data)
+                                file_path = client.upload_file(session_id, img_bytes, "screenshot.jpg")
+                            except Exception:
+                                pass
+        else:
+            prompt = user_text or f"[看看屏幕] 前台窗口：{app_info or '（无信息）'}"
+        if file_path:
+            prompt += f"\n[请查看附件: {file_path}]"
+        return client.prompt_sync(session_id, prompt)
     # 延迟导入：无 Chat 变体（pet.chat 被排除）下本函数不会被调用
     from .chat.providers import _make_ssl_context, normalize_chat_endpoint, build_browser_headers
     # 视觉独立端点仅在「不同聊天模型」时生效；同聊天模型时强制跟随聊天配置，

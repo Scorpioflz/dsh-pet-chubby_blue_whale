@@ -2630,6 +2630,14 @@ class AppShell:
 
     # ------------------------------------------------------------ 启动
     def start(self) -> None:
+        # 自用版：启动时检查天气城市（IP 定位，仅天气功能激活时）
+        try:
+            from . import feature_activation
+            if feature_activation.is_active("weather"):
+                from .weather.ip_city import ensure_weather_city
+                ensure_weather_city()
+        except Exception:
+            pass
         # aboutToQuit 只在控制器层绑定一次：角色热切换会重建窗口，逐个
         # connect win.save_position 会在旧窗口延迟销毁后残留失效引用。
         # 统一走 _on_about_to_quit，在信号触发时读取当前有效窗口。
