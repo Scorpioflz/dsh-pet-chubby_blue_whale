@@ -4103,6 +4103,21 @@ class AppShell:
         import hashlib
         settings = self.config.chat_settings()
         provider = settings.active_config
+        # 自用版：DSH Web API 模式下通过 dsh-balance-panel 插件查询余额
+        if getattr(provider, 'provider_id', '') == 'dsh-webapi':
+            self._balance_busy = True
+            QTimer.singleShot(0, lambda: win.show_bubble('让我看看余额…', duration_ms=6000))
+            bridge = _BalanceBridge(win, owner=self)
+            self._balance_bridge = bridge
+            base_url = str(provider.base_url or 'http://127.0.0.1:3080')
+            panel_url = base_url.rstrip('/').replace('/api/v1', '') + '/dsh-balance-panel'
+            threading.Thread(
+                target=self._balance_worker_dsh,
+                args=(bridge, panel_url, provider.api_key),
+                daemon=True, name='pet-balance-dsh',
+            ).start()
+            return
+
         provider.api_key = self.config.resolve_api_key(provider)
         key_digest = hashlib.sha256(str(provider.api_key or '').encode()).hexdigest()[:12]
         provider_key = '|'.join([
@@ -4155,6 +4170,42 @@ class AppShell:
         if self._weather_service is None:
             self._weather_service = WeatherService(self)
         self._weather_service.show_weather(parent)
+
+    def _balance_worker_dsh(self, bridge, panel_url: str, api_key: str) -> None:
+        """自用版：通过 dsh-balance-panel 插件查询余额（DSH 模式专用）。"""
+        import json as json_mod
+        import urllib.request
+        try:
+            headers = {}
+            if api_key:
+                headers['Authorization'] = f'Bearer {api_key}'
+            req = urllib.request.Request(panel_url, headers=headers)
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                data = json_mod.loads(resp.read().decode('utf-8'))
+            text_parts = []
+            for p in data.get('providers', []):
+                balance = p.get('balance', {})
+                if balance.get('status') != 'ok':
+                    continue
+                for info in balance.get('infos', []):
+                    currency = info.get('currency', '')
+                    total = info.get('totalBalance', '')
+                    granted = info.get('grantedBalance', '')
+                    topped = info.get('toppedUpBalance', '')
+                    name = p.get('displayName', p.get('id', ''))
+                    symbol = '¥' if currency == 'CNY' else '$' if currency == 'USD' else ''
+                    text_parts.append(f'{name} 余额：{symbol}{total}（充值 {symbol}{topped} + 赠送 {symbol}{granted}）')
+            if text_parts:
+                text = '\n'.join(text_parts)
+                payload = {"text": text, "info": data}
+                self._balance_cache = (time.monotonic(), payload, 'dsh-balance-panel')
+                bridge.done.emit(True, payload)
+            else:
+                bridge.done.emit(False, '未找到可用余额信息')
+        except Exception as exc:
+            bridge.done.emit(False, f'余额查询失败：{exc}')
+        finally:
+            self._balance_busy = False
 
     def _balance_worker(self, bridge, base_url: str, api_key: str, verify_ssl: bool, provider_key: str = '', *, quiet: bool = False) -> None:
         from .island import balance as balance_mod  # 按需导入（见 _show_balance_payload）
