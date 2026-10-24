@@ -32,7 +32,7 @@ _UPDATE_JSON_URLS = (
     f'https://fastly.jsdelivr.net/gh/{REPO}@main/update.json',
     f'https://gcore.jsdelivr.net/gh/{REPO}@main/update.json',
 )
-_USER_AGENT = 'dsh-pet-standalone-updater'
+_USER_AGENT = 'dsh-pet-chubby_blue_whale-updater'
 _TRUSTED_ASSET_HOSTS = {
     'github.com',
     'objects.githubusercontent.com',
@@ -209,7 +209,7 @@ def select_windows_installer(release: dict, *, include_chat: bool = True) -> dic
     """按当前 Windows 构建变体选择 Inno Setup 安装包。"""
     if os.name != 'nt' or not isinstance(release, dict):
         return None
-    wanted = 'dsh-pet-standalone-webm-chat-setup.exe' if include_chat else 'dsh-pet-standalone-webm-setup.exe'
+    wanted = 'dsh-pet-chubby_blue_whale-webm-chat-setup.exe' if include_chat else 'dsh-pet-chubby_blue_whale-webm-setup.exe'
     details = (release.get('asset_details') or {}).get(wanted)
     if details is not None:
         return details

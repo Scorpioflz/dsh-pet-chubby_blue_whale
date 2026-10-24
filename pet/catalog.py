@@ -194,7 +194,7 @@ def user_characters_dir() -> Path:
     cwd 随启动方式漂移（装上但换个启动方式就找不到——终审点名）。
     """
     from . import config as _config  # 延迟导入防环：config 顶层 import catalog
-    app_dir_name = getattr(_config, 'APP_DIR_NAME', 'dsh-pet-standalone')
+    app_dir_name = getattr(_config, 'APP_DIR_NAME', 'dsh-pet-chubby_blue_whale')
     return _data_character_dirs(app_dir_name)[0]
 
 
@@ -203,8 +203,8 @@ def external_character_dirs() -> list[Path]:
 
     顺序：
     1. exe 同目录 / 当前工作目录下的 characters/
-    2. 打包变体数据目录下的 characters/（变体感知，如 dsh-pet-standalone-webm-chat）
-    3. 旧目录 dsh-pet-standalone/characters/（兼容老用户已在旧目录放置的角色）
+    2. 打包变体数据目录下的 characters/（变体感知，如 dsh-pet-chubby_blue_whale-webm-chat）
+    3. 旧目录 dsh-pet-chubby_blue_whale/characters/（兼容老用户已在旧目录放置的角色）
 
     数据目录名复用 config.APP_DIR_NAME（延迟导入，避免与 config 顶层
     ``from . import catalog`` 构成循环依赖）。
@@ -217,11 +217,11 @@ def external_character_dirs() -> list[Path]:
     dirs.append(base / 'characters')
 
     from . import config as _config  # 延迟导入防环：config 顶层 import catalog
-    app_dir_name = getattr(_config, 'APP_DIR_NAME', 'dsh-pet-standalone')
+    app_dir_name = getattr(_config, 'APP_DIR_NAME', 'dsh-pet-chubby_blue_whale')
     dirs.extend(_data_character_dirs(app_dir_name))
     # 非变体旧目录兜底：老用户已放入的角色不能因为变体拆分而丢
-    if app_dir_name != 'dsh-pet-standalone':
-        dirs.extend(_data_character_dirs('dsh-pet-standalone'))
+    if app_dir_name != 'dsh-pet-chubby_blue_whale':
+        dirs.extend(_data_character_dirs('dsh-pet-chubby_blue_whale'))
     return dirs
 
 

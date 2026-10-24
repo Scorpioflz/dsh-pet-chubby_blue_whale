@@ -1396,12 +1396,11 @@ class Config:
         }
 
     def _migrate_legacy_config(self, base) -> None:
-        """旧版各变体共用 %APPDATA%/dsh-pet-standalone；升级后首次运行时
-        把该目录的 config.json 与 sessions/ 一次性复制到变体独立目录，
-        避免用户设置与聊天会话“消失”。仅在新目录尚不存在时执行。"""
+        """旧版数据目录迁移：从上游 dsh-pet-standalone 迁移到自用版目录。
+        仅在新目录尚不存在且旧目录有 config.json 时执行。"""
         if self.instance_id:
-            return  # 多开实例不参与旧版迁移，避免把单开配置复制给每个实例
-        if APP_DIR_NAME == "dsh-pet-standalone" or self.path.exists():
+            return
+        if self.path.exists():
             return
         legacy = base / "dsh-pet-standalone"
         if not (legacy / "config.json").is_file():

@@ -47,7 +47,7 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QPushButton, QWidget
 from .reasons import ASK_UNAVAILABLE_REASON, TRANSLATION_UNAVAILABLE_REASON
 from .session import SelectionRect, normalize_drag
 
-log = logging.getLogger("dsh-pet-standalone")
+log = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 __all__ = ["ACTION_ASK", "ACTION_COPY", "ACTION_OCR", "ACTION_TRANSLATE",
            "DIM_ALPHA", "MIN_SELECTION_SIDE", "SelectionMemory", "SelectionOverlay",

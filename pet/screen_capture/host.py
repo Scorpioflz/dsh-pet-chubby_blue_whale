@@ -26,7 +26,7 @@ import logging
 
 import shiboken6
 
-log = logging.getLogger("dsh-pet-standalone")
+log = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 __all__ = ["WindowHider", "visible_top_level_windows"]
 

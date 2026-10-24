@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import logging
 
-log = logging.getLogger("dsh-pet-standalone")
+log = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 __all__ = ["DEFAULT_ALLOCATION_LIMIT_MB", "apply_image_allocation_limit"]
 

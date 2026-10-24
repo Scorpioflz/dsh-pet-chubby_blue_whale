@@ -42,7 +42,7 @@ from .brand_icons import load_ds_whale
 from .result_panel import _STYLES, resolve_style
 from .vision_bridge import VisionConversation
 
-log = logging.getLogger("dsh-pet-standalone")
+log = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 __all__ = ["ScreenAskDialog"]
 

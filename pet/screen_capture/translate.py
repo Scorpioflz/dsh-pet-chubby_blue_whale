@@ -18,7 +18,7 @@ import time
 import urllib.error
 import urllib.request
 
-log = logging.getLogger("dsh-pet-standalone")
+log = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 __all__ = ["TranslateError", "translate_text"]
 

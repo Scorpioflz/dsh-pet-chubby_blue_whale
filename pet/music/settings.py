@@ -48,7 +48,7 @@ from PySide6.QtWidgets import QMessageBox, QPushButton
 from . import players as music_players
 from ..settings_widgets import ResourcePathPicker, SettingRow
 
-log = logging.getLogger("dsh-pet-standalone")
+log = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 #: 设置页展示的播放器（次序 = 行序）。**取注册表，不另抄键表**：``music_players``
 #: 是"有哪些播放器"的唯一真源（右键菜单与 config 的路径清洗都从这里取键）。此前这里

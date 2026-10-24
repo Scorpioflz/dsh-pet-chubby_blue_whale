@@ -80,7 +80,7 @@ from dataclasses import dataclass
 import numpy as np
 from PySide6.QtGui import QColorSpace, QImage
 
-log = logging.getLogger("dsh-pet-standalone")
+log = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 __all__ = ["DISABLE_ENV", "fp16_scrgb_to_srgb8", "grab_hdr_sdr", "hdr_capture_disabled",
            "hdr_state", "release_cached_sessions"]

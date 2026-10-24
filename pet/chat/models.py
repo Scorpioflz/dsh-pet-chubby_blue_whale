@@ -160,7 +160,7 @@ def _is_placeholder_backend(backend) -> bool:
 
 
 class SecretStore:
-    def __init__(self,service_name='dsh-pet-standalone'):
+    def __init__(self,service_name='dsh-pet-chubby_blue_whale'):
         self.service_name=service_name
         try: import keyring
         except Exception: keyring=None
@@ -190,7 +190,7 @@ class SecretStore:
         if self._usable is None:
             self._usable = self._backend_usable()
             if not self._usable:
-                logging.getLogger("dsh-pet-standalone").warning(
+                logging.getLogger("dsh-pet-chubby_blue_whale").warning(
                     "凭据存储不可用（系统钥匙串没有可用后端）：API Key 只能留在内存里，"
                     "重启后需要重新填写。打包版可能是 keyring 的 Windows 后端依赖"
                     "（pywin32-ctypes / win32ctypes）没随包进来，也可能只是这台机器的"
@@ -201,7 +201,7 @@ class SecretStore:
         if not self.available or not ref: return ''
         try: return str(self._keyring.get_password(self.service_name,ref) or '')
         except Exception as exc:
-            logging.getLogger("dsh-pet-standalone").warning(
+            logging.getLogger("dsh-pet-chubby_blue_whale").warning(
                 "读取凭据失败（%s）：%s", ref, type(exc).__name__)
             return ''
 
@@ -210,6 +210,6 @@ class SecretStore:
         try: self._keyring.set_password(self.service_name,ref,value); return True
         except Exception as exc:
             # 失败不能静默：界面会显示"已保存"，用户下次启动就发现 Key 没了
-            logging.getLogger("dsh-pet-standalone").warning(
+            logging.getLogger("dsh-pet-chubby_blue_whale").warning(
                 "保存凭据失败（%s）：%s", ref, type(exc).__name__)
             return False

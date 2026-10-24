@@ -69,7 +69,7 @@ from .ocr_worker import (
     STDERR_PREFIX,
 )
 
-log = logging.getLogger("dsh-pet-standalone")
+log = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 __all__ = [
     "BUNDLE_MODULES",

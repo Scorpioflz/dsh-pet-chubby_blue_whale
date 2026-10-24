@@ -36,7 +36,7 @@ from .config import (
     normalize_quiet_minutes,
 )
 
-log = logging.getLogger("dsh-pet-standalone")
+log = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 #: 汇报气泡里摘录单条提醒文案时的截断长度（过长会撑爆气泡）。
 QUIET_TEXT_LIMIT = 60

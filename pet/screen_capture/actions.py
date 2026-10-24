@@ -64,7 +64,7 @@ from .result_panel import SHORT_RESULT_LIMIT, ScreenResult, ScreenResultPanel
 # ``controller ↔ actions`` 引用环把 Qt 销毁推到解释器退出期）。同包内复用一份，
 # 不再抄第二遍。
 
-log = logging.getLogger("dsh-pet-standalone")
+log = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 __all__ = [
     "ACTION_ASK",

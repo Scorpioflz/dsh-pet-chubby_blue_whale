@@ -26,7 +26,7 @@ from PySide6.QtGui import QColorSpace, QImage, QPixmap
 from .hdr_capture import grab_hdr_sdr, hdr_capture_disabled, hdr_state
 from .session import SelectionRect
 
-log = logging.getLogger("dsh-pet-standalone")
+log = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 __all__ = ["SRGB8_FORMAT", "SRGB_COLOR_SPACE", "crop_selection", "grab_screen_image", "to_srgb8"]
 

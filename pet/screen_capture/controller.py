@@ -45,7 +45,7 @@ from .overlay import ACTION_ASK, ACTION_COPY, ACTION_OCR, ACTION_TRANSLATE, Sele
 from .pixels import crop_selection, grab_screen_image, to_srgb8
 from .session import CapturePhase, CaptureSession, SelectionRect
 
-log = logging.getLogger("dsh-pet-standalone")
+log = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 __all__ = ["ScreenCaptureController", "settle_before_grab"]
 

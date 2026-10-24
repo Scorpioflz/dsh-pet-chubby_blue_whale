@@ -44,7 +44,7 @@ REACHABILITY_TARGETS = (
 #: 每个源最多读多少字节（正常响应几百字节；限长防"对方换成大文件"）。
 MAX_BODY_BYTES = 64 * 1024
 DEFAULT_TIMEOUT_SECONDS = 5.0
-_USER_AGENT = "dsh-pet-standalone-network-info"
+_USER_AGENT = "dsh-pet-chubby_blue_whale-network-info"
 
 #: 中国大陆省级行政区（用于"源只给了省/市、没给国家码"时的属地判定）。
 CN_MAINLAND_REGIONS = frozenset({

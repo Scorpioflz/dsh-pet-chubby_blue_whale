@@ -30,7 +30,7 @@ from pathlib import Path
 
 from .models import ChatSession, utc_now
 
-log = logging.getLogger("dsh-pet-standalone")
+log = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 
 class _AsyncWriter:

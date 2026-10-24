@@ -62,7 +62,7 @@ from ..persona_phrases import PhrasePicker
 from ..persona_template import CONDITIONAL_PARAMETERS, LEGACY_HIDDEN_PARAMETERS
 from ..speech_bubble_text import truncate_bubble_text
 
-log = logging.getLogger("dsh-pet-standalone")
+log = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 _LIVE_AGENT_LINK_MANAGERS: weakref.WeakSet = weakref.WeakSet()
 _LIVE_AGENT_MONITORS: weakref.WeakSet = weakref.WeakSet()
@@ -2207,7 +2207,7 @@ class DshMonitor(BaseAgentMonitor):
 
     def __init__(self, agent_key: str, config_dir: Path, parent=None) -> None:
         super().__init__(agent_key, config_dir, parent)
-        # 桥目录与变体无关：config_dir = <base>/dsh-pet-standalone[-variant] → parent = <base>
+        # 桥目录与变体无关：config_dir = <base>/dsh-pet-chubby_blue_whale[-variant] → parent = <base>
         # 不变量：插件写 <base>/dsh-pet-bridge/（win32 即 %APPDATA%），
         # 若未来数据目录支持自定义根，两侧必须同步改（当前 Config 结构保证 parent==base）。
         self.events_dir = self.config_dir.parent / "dsh-pet-bridge"
@@ -3153,7 +3153,7 @@ def other_instances_use_agent(config, agent_key: str) -> bool:
     try:
         candidates.append(config_dir / "config.json")
         candidates.extend(config_dir.glob("config-*.json"))
-        candidates.extend(config_dir.parent.glob("dsh-pet-standalone*/config*.json"))
+        candidates.extend(config_dir.parent.glob("dsh-pet-chubby_blue_whale*/config*.json"))
     except OSError:
         pass
     # 档案名判据的单一来源在 pet_profiles；这里延迟导入——本函数只在卸载清理 /

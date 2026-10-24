@@ -27,7 +27,7 @@ from . import window_placement
 # 音频峰值瞬时跌到阈值下，太小会导致唱歌状态反复退出。
 MUSIC_SING_GRACE_SECONDS = 6.0
 
-_log = logging.getLogger("dsh-pet-standalone")
+_log = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 #: 待处理提醒条数上限（另有 1 条 current 展示位）。**有界是硬要求**：审批/提问这类
 #: 关键项同样在此限内——本地提示队列不是远程许可，丢弃只影响本地呈现（见
@@ -374,7 +374,7 @@ def redirect_hidden_bubble(host, text: str, *, subtitle: str = "",
     try:
         return bool(redirect(str(text), subtitle=str(subtitle or ""), duration_ms=int(duration_ms)))
     except Exception:
-        logging.getLogger("dsh-pet-standalone").exception("隐藏期气泡改道到灵动岛失败")
+        logging.getLogger("dsh-pet-chubby_blue_whale").exception("隐藏期气泡改道到灵动岛失败")
         return False
 
 
@@ -422,7 +422,7 @@ def show_alert(host, text: str, *, subtitle: str = "", duration_ms: int = 0,
         for key in ("sessionId", "riskScore", "riskReasons", "targetCount", "targets"):
             if key in metadata:
                 item[key] = metadata[key]
-    logging.getLogger("dsh-pet-standalone").info(
+    logging.getLogger("dsh-pet-chubby_blue_whale").info(
         "alert enqueue alertType=%s priority=%s alertId=%s preemptedAlertId=%s",
         item["alertType"], item["priority"], item["id"], item["preemptedAlertId"],
     )
@@ -453,7 +453,7 @@ def show_alert(host, text: str, *, subtitle: str = "", duration_ms: int = 0,
         host._sticky_bubble_active = False
         _dismiss_bubble(alert_bubble(host))
         item["preemptedAlertId"] = old.get("id", "")
-        logging.getLogger("dsh-pet-standalone").info(
+        logging.getLogger("dsh-pet-chubby_blue_whale").info(
             "alert preempted alertType=%s priority=%s alertId=%s by=%s",
             old.get("alertType", ""), old.get("priority", 3), old.get("id", ""), item.get("id", ""),
         )
@@ -762,7 +762,7 @@ def speak_click_self_talk(host, text: str) -> None:
     try:
         speaker(stripped)
     except Exception:
-        logging.getLogger("dsh-pet-standalone").exception("点击自言自语语音播报失败")
+        logging.getLogger("dsh-pet-chubby_blue_whale").exception("点击自言自语语音播报失败")
 
 
 def show_click_self_talk(host, click_name: str) -> bool:

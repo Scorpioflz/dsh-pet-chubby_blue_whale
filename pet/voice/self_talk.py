@@ -59,7 +59,7 @@ import urllib.request
 import uuid
 from pathlib import Path
 
-logger = logging.getLogger("dsh-pet-standalone")
+logger = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 CACHE_DIR_NAME = "self_talk_voice"
 #: 临时文件前缀：以 ``.`` 开头，不进 ``<md5>.*`` 的查找模式（见 ``cached_audio``）。

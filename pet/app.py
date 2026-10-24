@@ -1939,7 +1939,7 @@ class AppShell:
                 if channel.play_file(str(cached), log_tag="点击自言自语"):
                     # 落一条日志：本地播报与"偷偷回落到在线合成"必须能分辨，
                     # 否则文件名对不上时只会表现为"声音怎么变了"却查不出原因。
-                    logging.getLogger("dsh-pet-standalone").info(
+                    logging.getLogger("dsh-pet-chubby_blue_whale").info(
                         "点击自言自语：播放预缓存台词 %s（本地，不走网络）", cached.name)
                     return True
             except Exception:
@@ -1983,7 +1983,7 @@ class AppShell:
             logging.exception("启动台词语音预缓存失败（不影响点击朗读）")
             return False
         if started:
-            logging.getLogger("dsh-pet-standalone").info(
+            logging.getLogger("dsh-pet-chubby_blue_whale").info(
                 "已开始后台预缓存台词语音%s", f"（{reason}）" if reason else "")
         return started
 
@@ -5372,7 +5372,7 @@ def main(argv: list[str] | None = None, enable_chat: bool = True) -> int:
         # 一次性迁移判定并冻结本次运行快照；功能页写盘只影响下次启动。
         feature_activation_mod.decide_and_freeze(config)
 
-        logging.info("dsh-pet-standalone 启动 (slot: %s, instance: %s)", slot_id, instance_id)
+        logging.info("dsh-pet-chubby_blue_whale 启动 (slot: %s, instance: %s)", slot_id, instance_id)
         _cleanup_stale_runtime_dirs()
         stale_removed = autostart_mod.cleanup_stale_entries()
         if stale_removed:
@@ -5384,7 +5384,7 @@ def main(argv: list[str] | None = None, enable_chat: bool = True) -> int:
             controller.start()
         except Exception as exc:
             logging.exception("启动失败")
-            _show_startup_error("dsh-pet-standalone", str(exc))
+            _show_startup_error("dsh-pet-chubby_blue_whale", str(exc))
             return 1
 
         logging.info("进入事件循环")

@@ -26,24 +26,24 @@ from pathlib import Path
 from .config import APP_DIR_NAME
 
 # macOS LaunchAgent 按变体隔离（plist 文件名/Label），避免多版本互覆盖
-_APP_BASE_ID = "com.merzlin.dsh-pet-standalone"
+_APP_BASE_ID = "com.merzlin.dsh-pet-chubby_blue_whale"
 PLIST_LABEL = (
     _APP_BASE_ID
-    if APP_DIR_NAME == "dsh-pet-standalone"
+    if APP_DIR_NAME == "dsh-pet-chubby_blue_whale"
     else f"{_APP_BASE_ID}.{APP_DIR_NAME}"
 )
-# Windows 自启注册表值名按变体隔离（如 dsh-pet-standalone-webm-chat）。
+# Windows 自启注册表值名按变体隔离（如 dsh-pet-chubby_blue_whale-webm-chat）。
 # 每个变体只管理自己的值，避免“关无 Chat 版把 Chat 版也关了”。
 VALUE_NAME = APP_DIR_NAME
 RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
 # 历史/各变体可能写入过的值名；仅用于启动时清理“指向已不存在路径”的失效项，
 # 不影响其他仍有效的变体自启。
 KNOWN_VALUE_NAMES = (
-    "dsh-pet-standalone",
-    "dsh-pet-standalone-webm",
-    "dsh-pet-standalone-webm-chat",
-    "dsh-pet-standalone-gif",
-    "dsh-pet-standalone-gif-chat",
+    "dsh-pet-chubby_blue_whale",
+    "dsh-pet-chubby_blue_whale-webm",
+    "dsh-pet-chubby_blue_whale-webm-chat",
+    "dsh-pet-chubby_blue_whale-gif",
+    "dsh-pet-chubby_blue_whale-gif-chat",
 )
 
 _IS_WIN = sys.platform == "win32"

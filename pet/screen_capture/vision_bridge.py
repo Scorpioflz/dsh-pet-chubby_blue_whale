@@ -20,7 +20,7 @@ from typing import Any
 from PySide6.QtCore import QBuffer, QIODevice, Qt
 from PySide6.QtGui import QImage
 
-log = logging.getLogger("dsh-pet-standalone")
+log = logging.getLogger("dsh-pet-chubby_blue_whale")
 
 __all__ = ["SELECTION_PROMPT", "ChatVisionChannel", "VisionConversation",
            "image_to_jpeg_bytes", "resolve_chat_context"]

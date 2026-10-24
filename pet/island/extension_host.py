@@ -26,7 +26,7 @@
 
 - **用户根**：既有配置目录下的 ``island-extensions``（路径算法复用
   ``pet/config.py`` 的 ``APP_DIR_NAME`` / ``_default_base``，**不硬编码机器路径**）。
-  Windows 上即 ``%APPDATA%/dsh-pet-standalone/island-extensions``；
+  Windows 上即 ``%APPDATA%/dsh-pet-chubby_blue_whale/island-extensions``；
 - **项目根**：仓库（打包后是程序目录）下的 ``island-extensions``；
 - 环境变量 ``DSH_PET_ISLAND_EXTENSION_DIRS``（``os.pathsep`` 分隔）：**一旦设置就
   只扫它**（显式指定的可信目录，开发与测试用）。
