@@ -1,17 +1,17 @@
 ; -*- mode: ini -*-
-; dsh-pet-selfuse onedir installer (Inno Setup 7)
+; dsh-pet-chubby_blue_whale onedir installer (Inno Setup 7)
 ; 自用版安装包脚本，基于上游 packaging/dsh-pet.iss 修改
 ;
 ; Compile:
-;   "D:\Tool\Inno Setup 7\ISCC.exe" packaging\dsh-pet-selfuse.iss
+;   "D:\Tool\Inno Setup 7\ISCC.exe" packaging\dsh-pet-chubby_blue_whale.iss
 ;
-; Output: dist-onedir\dsh-pet-selfuse-setup.exe
+; Output: dist-onedir\dsh-pet-chubby_blue_whale-setup.exe
 
-#define MyAppShortName "dsh-pet-selfuse"
+#define MyAppShortName "dsh-pet-chubby_blue_whale"
 #define MyAppExeName "dsh-pet-standalone-webm-chat.exe"
 #define MyAppDir "..\dist-onedir\dsh-pet-standalone-webm-chat"
 #define MyAppId "{{a1b2c3d4-e5f6-7890-abcd-ef1234567890}"
-#define MyAppDisplay "dsh-pet-selfuse"
+#define MyAppDisplay "dsh-pet-chubby_blue_whale"
 #define MyAppVersion "4.4.0"
 
 [Setup]

@@ -149,7 +149,7 @@ if "weather" in enabled:
 ### 10. `README.md` — 继承声明 + 自用定位 + 精简
 
 **修改内容**：
-- 标题改为 `dsh-pet-selfuse`
+- 标题改为 `dsh-pet-chubby_blue_whale`
 - 新增继承声明和自用定位说明
 - 移除 badges、发布状态、下载/安装/升级、AI 对话教程、版本历史、打包发布、开发者与贡献等章节
 - 从源码运行改为 uv 方式

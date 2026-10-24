@@ -1,5 +1,5 @@
 [project]
-name = "dsh-pet-selfuse"
+name = "dsh-pet-chubby_blue_whale"
 version = "4.4.0"
 description = "DSH Web Service 桌宠前端（基于 MerZlin/dsh-pet-indesktop MIT 协议个人自用再开发）"
 requires-python = ">=3.14"

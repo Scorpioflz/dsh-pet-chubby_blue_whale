@@ -9,7 +9,7 @@ $ErrorActionPreference = "Stop"
 $ISCC = "D:\Tool\Inno Setup 7\ISCC.exe"
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  dsh-pet-selfuse build (v4.4.0)" -ForegroundColor Cyan
+Write-Host "  dsh-pet-chubby_blue_whale build (v4.4.0)" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 
 # --- Step 1: Install dependencies ---
@@ -39,11 +39,11 @@ if (-not (Test-Path $ISCC)) {
     Write-Host "Please install Inno Setup 7 or update `$ISCC path in this script." -ForegroundColor Red
     exit 1
 }
-& $ISCC "packaging\dsh-pet-selfuse.iss"
+& $ISCC "packaging\dsh-pet-chubby_blue_whale.iss"
 if ($LASTEXITCODE -ne 0) { Write-Error "ISCC failed"; exit 1 }
 
 # --- Done ---
-$installer = "dist-onedir\dsh-pet-selfuse-setup.exe"
+$installer = "dist-onedir\dsh-pet-chubby_blue_whale-setup.exe"
 Write-Host "`n========================================" -ForegroundColor Green
 Write-Host "  BUILD COMPLETE" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
