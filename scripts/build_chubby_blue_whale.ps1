@@ -16,7 +16,7 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "`n[1/4] uv sync + pyinstaller" -ForegroundColor Yellow
 uv sync
 if ($LASTEXITCODE -ne 0) { Write-Error "uv sync failed"; exit 1 }
-uv pip install pyinstaller
+uv pip install pyinstaller packaging
 if ($LASTEXITCODE -ne 0) { Write-Error "pyinstaller install failed"; exit 1 }
 
 # --- Step 2: PyInstaller onedir build ---
