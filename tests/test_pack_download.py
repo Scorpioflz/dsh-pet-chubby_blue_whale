@@ -167,7 +167,10 @@ def test_sha_mismatch_discards_partial(server, tmp_path):
     assert not (tmp_path / "core.zip").exists()
 
 
-def test_size_mismatch_rejected(server, tmp_path):
+def test_size_mismatch_rejected(server, tmp_path, monkeypatch):
+    # 字节数不符会按断流重试 _TRANSIENT_RETRIES 次（默认 10 次，含退避 sleep），
+    # 单测里缩短到 1 次避免退避累积超时。
+    monkeypatch.setattr(pd, "_TRANSIENT_RETRIES", 1)
     data = _Handler.payload
     bad = pd.Part(name="core.zip", urls=(server,), bytes=len(data) + 10, sha256=_sha(data))
     with pytest.raises(pd.DownloadError):
@@ -189,7 +192,10 @@ def test_existing_valid_file_short_circuits(server, tmp_path):
     assert got.read_bytes() == data
 
 
-def test_unreachable_host_raises_clear_error(tmp_path):
+def test_unreachable_host_raises_clear_error(tmp_path, monkeypatch):
+    # 连接被拒会按断流重试 _TRANSIENT_RETRIES 次（默认 10 次，含退避 sleep），
+    # 单测里缩短到 1 次避免退避累积超时。
+    monkeypatch.setattr(pd, "_TRANSIENT_RETRIES", 1)
     s = socket.socket()
     s.bind(("127.0.0.1", 0))
     port = s.getsockname()[1]

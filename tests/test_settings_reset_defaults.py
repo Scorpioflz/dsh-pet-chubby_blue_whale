@@ -208,7 +208,7 @@ def test_reset_rebuilds_credential_only_entry_for_custom_providers(tmp_path: Pat
     assert relay["model"] == "deepseek-v4-flash"
     assert relay["api_key_ref"] == "provider/relay", "凭据引用必须留下（钥匙串里的 key 靠它取回）"
     # 重置后活跃 provider 仍是默认那一个：被保留的凭据容器不会被自动选中。
-    assert reloaded.data["chat"]["active_provider"] == "openai-main"
+    assert reloaded.data["chat"]["active_provider"] == "dsh-webapi"
 
 
 def test_reset_does_not_touch_keyring_and_drops_non_credential_fields(tmp_path: Path, monkeypatch):
@@ -230,7 +230,7 @@ def test_reset_does_not_touch_keyring_and_drops_non_credential_fields(tmp_path: 
     providers = cfg.data["chat"]["providers"]
     assert providers["relay"]["api_key"] == "sk-relay"          # 只有凭据活着
     assert providers["relay"]["name"] == "中转"                  # 骨架名（便于认出是哪个服务商）
-    assert cfg.data["chat"]["active_provider"] == "openai-main"
+    assert cfg.data["chat"]["active_provider"] == "dsh-webapi"
     assert cfg.data["chat"]["default_system_prompt"] != "自定义提示词"
 
 

@@ -144,6 +144,8 @@ class TestMissingDependencySpecs:
         def boom(*args, **kwargs):
             raise PermissionError(13, "Permission denied")
 
+        # Python 3.14+ pathlib 重构后 is_dir() 不再走 Path.stat()，需分别打桩
+        monkeypatch.setattr(Path, "is_dir", boom)
         monkeypatch.setattr(Path, "stat", boom)
 
         assert agent_link._safe_is_dir(target) is False

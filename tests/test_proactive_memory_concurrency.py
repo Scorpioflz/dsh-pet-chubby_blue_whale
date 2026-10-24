@@ -798,6 +798,21 @@ def _deny_target_stat(target: Path, exc: OSError):
     return denied
 
 
+def _deny_target_is_file(target: Path, exc: OSError):
+    """只让**目标文件**的 is_file 失败，其余路径照常（monkeypatch 用）。
+
+    Python 3.14+ pathlib 重构后 ``is_file()`` 不再走 ``Path.stat()``，需单独打桩。
+    """
+    real_is_file = Path.is_file
+
+    def denied(self, *args, **kwargs):
+        if Path(self) == target:
+            raise exc
+        return real_is_file(self, *args, **kwargs)
+
+    return denied
+
+
 @pytest.mark.parametrize("kind,exc", _PROBE_ERRORS, ids=[k for k, _ in _PROBE_ERRORS])
 def test_probe_failure_is_read_failure_and_never_an_empty_memory(
         tmp_path, monkeypatch, caplog, kind, exc):
@@ -818,6 +833,7 @@ def test_probe_failure_is_read_failure_and_never_an_empty_memory(
     before = target.read_bytes()
 
     monkeypatch.setattr(Path, "stat", _deny_target_stat(target, exc))
+    monkeypatch.setattr(Path, "is_file", _deny_target_is_file(target, exc))
     mem = pm.ProactiveMemory(target)
 
     with caplog.at_level(logging.WARNING):
@@ -850,6 +866,7 @@ def test_clear_reports_failure_when_probe_fails(tmp_path, monkeypatch, caplog, k
     before = target.read_bytes()
 
     monkeypatch.setattr(Path, "stat", _deny_target_stat(target, exc))
+    monkeypatch.setattr(Path, "is_file", _deny_target_is_file(target, exc))
     mem = pm.ProactiveMemory(target)
 
     with caplog.at_level(logging.WARNING):

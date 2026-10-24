@@ -1467,6 +1467,7 @@ class TestAgentLinkBubbles:
         # 钥匙串边界：不让测试进程真去读 keyring（有 key 会起线程打真接口）。
         monkeypatch.setattr(Config, "resolve_api_key", lambda self, provider: "")
         mgr, win, bubbles, clock = self._make_mgr(tmp_path)
+        mgr.cfg.data["chat"]["active_provider"] = "openai-main"
         mgr.cfg.set("agent_cost_enabled", True)
 
         # 第一轮：正常完成，把基线/结算链路走完整
@@ -1509,6 +1510,7 @@ class TestAgentLinkBubbles:
         单人会话也会被误标「（含其他会话）」。"""
         monkeypatch.setattr(Config, "resolve_api_key", lambda self, provider: "")
         mgr, win, bubbles, clock = self._make_mgr(tmp_path)
+        mgr.cfg.data["chat"]["active_provider"] = "openai-main"
         mgr.cfg.set("agent_cost_enabled", True)
 
         # 第一轮干活 → idle（确认定时器挂着，但不手动 _fire_done——模拟 800ms
