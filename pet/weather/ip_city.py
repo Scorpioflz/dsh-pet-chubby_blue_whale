@@ -1,29 +1,45 @@
 # -*- coding: utf-8 -*-
 """IP 定位城市：启动时根据 IP 地址检测城市，提醒设置默认城市。
 
-首次启动且城市列表为空时，通过 IP 定位获取城市名，弹窗提醒用户设置。
-多 API 容错：ip-api.com → ipinfo.io → ip.cip.cc（国内可访问）。
+优先使用高德 IP 定位 API（精度更高，需 API Key），回退到免费 API（ip-api.com / ipinfo.io）。
+高德 API 文档：https://developer.amap.com/api/webservice/guide/api/ipconfig/
 """
 
 from __future__ import annotations
 
 import json
 import logging
+import urllib.parse
 import urllib.request
 
 
 _TIMEOUT = 5
 
-_IP_APIS = [
+_FREE_IP_APIS = [
     ("http://ip-api.com/json/?lang=zh", lambda d: d.get("city", "") if d.get("status") == "success" else ""),
     ("https://ipinfo.io/json", lambda d: d.get("city", "")),
-    ("http://ip.cip.cc", lambda d: d.get("city", "")),
 ]
 
 
+def detect_city_by_amap(api_key: str) -> str | None:
+    """通过高德 IP 定位 API 获取城市名。需高德 Web 服务 API Key。"""
+    try:
+        url = f"https://restapi.amap.com/v3/ip?key={urllib.parse.quote(api_key)}"
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req, timeout=_TIMEOUT) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        if data.get("status") == "1":
+            city = str(data.get("city", "")).strip()
+            if city:
+                return city
+    except Exception:
+        logging.exception("高德 IP 定位失败")
+    return None
+
+
 def detect_city_by_ip() -> str | None:
-    """通过 IP 定位获取城市名（多 API 容错）。失败返回 None。"""
-    for url, extractor in _IP_APIS:
+    """通过免费 IP 定位 API 获取城市名（多 API 容错）。失败返回 None。"""
+    for url, extractor in _FREE_IP_APIS:
         try:
             req = urllib.request.Request(url)
             with urllib.request.urlopen(req, timeout=_TIMEOUT) as resp:
@@ -55,7 +71,7 @@ def _find_config():
 def ensure_weather_city(config=None, parent=None) -> None:
     """首次启动时如果城市列表为空，IP 定位 + 弹窗提醒设置默认城市。
 
-    config 可直接传入（PetApp.start），或从 QApplication 顶层窗口查找。
+    优先使用高德 API（精度更高），无 Key 时弹窗询问是否申请，拒绝则回退免费 API。
     """
     if config is None:
         config = _find_config()
@@ -67,9 +83,46 @@ def ensure_weather_city(config=None, parent=None) -> None:
             return
     except Exception:
         return
-    city = detect_city_by_ip()
+
+    city = None
+
+    amap_key = ""
+    try:
+        amap_key = str(config.get("amap_api_key", "") or "")
+    except Exception:
+        pass
+
+    if amap_key:
+        city = detect_city_by_amap(amap_key)
+
+    if not city:
+        try:
+            from PySide6.QtWidgets import QMessageBox, QInputDialog
+            reply = QMessageBox.question(
+                parent,
+                "IP 定位服务",
+                "免费 IP 定位精度较低（仅到省级出口）。\n是否使用高德 IP 定位服务？（精度更高，需自行申请 API Key）\n\n申请地址：https://lbs.amap.com/dev/key/app",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if reply == QMessageBox.StandardButton.Yes:
+                key, ok = QInputDialog.getText(
+                    parent, "高德 API Key", "请输入高德 Web 服务 API Key："
+                )
+                if ok and key.strip():
+                    amap_key = key.strip()
+                    config.set("amap_api_key", amap_key)
+                    config.save()
+                    city = detect_city_by_amap(amap_key)
+        except Exception:
+            logging.exception("高德 API Key 弹窗失败")
+
+    if not city:
+        city = detect_city_by_ip()
+
     if not city:
         return
+
     try:
         from PySide6.QtWidgets import QMessageBox
         reply = QMessageBox.question(
