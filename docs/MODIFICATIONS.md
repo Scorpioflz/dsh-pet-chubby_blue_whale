@@ -22,7 +22,7 @@
 | `pet/dsh_api.py` | DSH Web Service REST API 客户端（工作区/会话/上传/SSE 流式） |
 | `pet/chat/dsh_provider.py` | `DshWebApiProvider`（会话 API 连续对话 + 附件上传 + 角色对应会话）+ `ProviderRouter`（按 provider_id 路由） |
 | `pet/dsh_workspace.py` | 工作区标题管理：首次启动弹窗询问，存储到 `%APPDATA%/dsh-pet-standalone/dsh_workspace.json` |
-| `pet/weather/ip_city.py` | IP 定位城市：首次启动通过 ip-api.com 检测城市，弹窗提醒设置默认城市 |
+| `pet/weather/ip_city.py` | IP 定位城市：优先高德 API（精度高，需 Key），回退免费 API（ip-api.com / ipinfo.io），首次启动弹窗提醒设置默认城市 |
 | `docs/MODIFICATIONS.md` | 本文档 |
 
 ## 二、修改文件（自用-修改）
