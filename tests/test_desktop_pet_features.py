@@ -3335,6 +3335,15 @@ def test_clear_proactive_memory_reports_failure_when_probe_fails(tmp_path, monke
 
     monkeypatch.setattr(Path, "stat", denied_probe)
 
+    # Python 3.14: Path.is_file() 可能直接调 os.stat 而非 Path.stat
+    import os as _os
+    real_os_stat = _os.stat
+    def denied_os_stat(path, *args, **kwargs):
+        if Path(path) in targets:
+            raise OSError(5, "Access is denied", None, 5)
+        return real_os_stat(path, *args, **kwargs)
+    monkeypatch.setattr(_os, "stat", denied_os_stat)
+
     shown: list[tuple[str, str, str]] = []
     monkeypatch.setattr(
         QMessageBox, "information",
