@@ -29,16 +29,16 @@ _DEFAULT_BASE = "http://127.0.0.1:3080/api/v1"
 class DshWebApiProvider:
     """通过 dsh-web-service 会话 API 实现的对话 Provider。
 
-    每个桌宠角色（按 system prompt 指纹区分）对应一个 DSH 会话，
-    切换角色时自动切换到对应会话，无需修改角色切换代码。
+    一个桌宠对应一个 DSH 会话（不按角色指纹区分），首次对话时创建，
+    后续所有对话复用同一会话，保证 DSH 侧上下文连续。
     支持图片附件：解析 messages 中的 image_url → 上传到 DSH 会话 → 提示中引用。
     """
 
     def __init__(self):
-        self._session_map: dict[str, str] = {}
+        self._session_id: str | None = None
         self._workspace_id: str | None = None
         self._client: DshApiClient | None = None
-        self._system_sent: set[str] = set()
+        self._system_sent: bool = False
 
     def _ensure_client(self, config) -> DshApiClient:
         if self._client is None:
@@ -46,23 +46,9 @@ class DshWebApiProvider:
             self._client = DshApiClient(base_url=base_url, api_key=config.api_key)
         return self._client
 
-    @staticmethod
-    def _character_key(messages: list[dict]) -> str:
-        """从 system prompt 提取角色标识（前 200 字符的 MD5 摘要）。
-
-        不同的角色有不同的 system prompt（人设），指纹自然不同；
-        人设部分通常在前 200 字符内，时间等动态内容在后面不影响指纹。
-        """
-        sys_msg = next((m for m in messages if m.get("role") == "system"), None)
-        if sys_msg:
-            text = sys_msg.get("content", "")
-            if isinstance(text, str) and text.strip():
-                return hashlib.md5(text[:200].encode("utf-8")).hexdigest()[:12]
-        return "default"
-
-    def _ensure_session(self, config, character_key: str) -> str:
-        if character_key in self._session_map:
-            return self._session_map[character_key]
+    def _ensure_session(self, config) -> str:
+        if self._session_id is not None:
+            return self._session_id
         client = self._ensure_client(config)
         if self._workspace_id is None:
             ws_path = default_workspace_path()
@@ -72,17 +58,16 @@ class DshWebApiProvider:
             except Exception:
                 logging.exception("DSH 工作区创建失败，继续无工作区")
         try:
-            session_id = client.create_session(
+            self._session_id = client.create_session(
                 workspace_id=self._workspace_id,
-                title=f"桌宠-{character_key[:8]}",
+                title="桌宠对话",
                 model=config.model or None,
             )
         except Exception as exc:
             raise ProviderError(f"DSH 会话创建失败: {exc}", 503) from exc
-        if not session_id:
+        if not self._session_id:
             raise ProviderError("DSH 会话创建返回空 ID", 503)
-        self._session_map[character_key] = session_id
-        return session_id
+        return self._session_id
 
     def _extract_user_message(self, messages: list[dict]) -> tuple[str, bytes | None]:
         """从 messages 最后一条 user 消息提取文本和图片。"""
@@ -122,14 +107,13 @@ class DshWebApiProvider:
         yield str 为正文增量，yield StreamEvent('reasoning', text) 为思考过程。
         """
         client = self._ensure_client(config)
-        char_key = self._character_key(messages)
-        session_id = self._ensure_session(config, char_key)
+        session_id = self._ensure_session(config)
 
         user_text, image_bytes = self._extract_user_message(messages)
         if not user_text and image_bytes is None:
             return
 
-        if char_key not in self._system_sent:
+        if not self._system_sent:
             sys_msg = next((m for m in messages if m.get("role") == "system"), None)
             if sys_msg:
                 sys_text = sys_msg.get("content", "")
@@ -138,7 +122,7 @@ class DshWebApiProvider:
                         client.prompt_sync(session_id, sys_text)
                     except Exception:
                         logging.exception("发送 system prompt 到 DSH 失败")
-            self._system_sent.add(char_key)
+            self._system_sent = True
 
         if image_bytes:
             try:
@@ -158,14 +142,10 @@ class DshWebApiProvider:
             elif kind == "error":
                 raise ProviderError(text, 503)
 
-    def reset_session(self, character_key: str | None = None) -> None:
-        """重置会话。指定 character_key 时只重置该角色，不指定时重置全部。"""
-        if character_key is not None:
-            self._session_map.pop(character_key, None)
-            self._system_sent.discard(character_key)
-        else:
-            self._session_map.clear()
-            self._system_sent.clear()
+    def reset_session(self) -> None:
+        """重置会话（下次 stream 创建新 DSH 会话）。"""
+        self._session_id = None
+        self._system_sent = False
 
 
 class ProviderRouter:
