@@ -685,9 +685,8 @@ try {
     Wait-SmokeWindow -Process $settingsProc -Label '--settings' `
         -EarlyExitHint 'arg routing broken' `
         -NoWindowHint 'no settings window appeared'
-    # 配置目录名随打包变体走（= $name，如 dsh-pet-standalone-webm-chat），
-    # 写死基础名会让 webm-chat 等变体误报"没拿到锁"（实机踩过）
-    $settingsLock = Join-Path (Join-Path $smokeBase $name) 'settings.lock'
+    # 自用版：APP_DIR_NAME 固定为 dsh-pet-chubby_blue_whale（无变体后缀）
+    $settingsLock = Join-Path (Join-Path $smokeBase "dsh-pet-chubby_blue_whale") 'settings.lock'
     if (-not (Test-Path $settingsLock)) {
         throw "[smoke] --settings did not acquire settings.lock"
     }
