@@ -100,7 +100,15 @@ def generate_self_talk(config: Any) -> bool:
         from .dsh_api import DshApiClient, default_workspace_path
         from .dsh_workspace import get_workspace_title
 
-        client = DshApiClient(base_url=provider.base_url, api_key=provider.api_key)
+        # 复用 provider 的 API Key（可能存在 keyring 中，需要 resolve）
+        api_key = provider.api_key
+        if not api_key:
+            try:
+                api_key = config.resolve_api_key(provider)
+            except Exception:
+                pass
+
+        client = DshApiClient(base_url=provider.base_url, api_key=api_key)
         if not client.is_available():
             logging.warning("DSH 不可用，跳过自言自语生成")
             return False
