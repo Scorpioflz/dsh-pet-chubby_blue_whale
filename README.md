@@ -59,7 +59,17 @@ uv run python -m pet       # 启动桌宠
 powershell -ExecutionPolicy Bypass -File scripts\build_installer.ps1
 ```
 
-产物：`dist-onedir\dsh-pet-chubby_blue_whale-setup.exe`（双击安装，免管理员权限）
+产物：`dist-onedir\dsh-pet-chubby_blue_whale-setup.exe`（双击安装，免管理员权限，含全部素材 ~500MB）
+
+### 增量更新（exe，不含素材）
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\build_update.ps1
+```
+
+产物：`dist-onedir\dsh-pet-chubby_blue_whale-update-setup.exe`（~100MB，不含动画素材，安装时不覆盖已有素材）
+
+适用于日常代码更新：打包时跳过素材（`-SkipAssets`），安装时只替换代码和依赖，保留已有的动画素材。首次安装需用完整安装包。
 
 ### 便携版（zip）
 
@@ -67,15 +77,19 @@ powershell -ExecutionPolicy Bypass -File scripts\build_installer.ps1
 powershell -ExecutionPolicy Bypass -File scripts\build_portable.ps1
 ```
 
-产物：`dist-onedir\dsh-pet-chubby_blue_whale-portable.zip`（解压即用）
+产物：`dist-onedir\dsh-pet-chubby_blue_whale-portable.zip`（解压即用，含全部素材）
 
-两个脚本共享前置步骤（uv sync → 帧序列生成 → PyInstaller），区别仅在最后：
-- **安装包**：ISCC 编译安装包（跳过 portable.zip 生成）
-- **便携版**：生成 portable.zip（不跑 ISCC）
+三个脚本共享前置步骤（uv sync → PyInstaller），区别：
+
+| 脚本 | 素材 | ISCC | portable.zip | 产物大小 |
+|---|---|---|---|---|
+| `build_installer.ps1` | ✅ 含 | ✅ | ❌ 跳过 | ~500MB |
+| `build_update.ps1` | ❌ 不含 | ✅ | ❌ 跳过 | ~100MB |
+| `build_portable.ps1` | ✅ 含 | ❌ | ✅ 生成 | ~500MB |
 
 **前提**：
 - [uv](https://docs.astral.sh/uv/) 已安装
-- 安装包需 Inno Setup 7（ISCC 路径在脚本中配置，默认 `D:\Tool\Inno Setup 7\ISCC.exe`）
+- 安装包/增量更新需 Inno Setup 7（ISCC 路径在脚本中配置，默认 `D:\Tool\Inno Setup 7\ISCC.exe`）
 
 ## 素材包说明
 
