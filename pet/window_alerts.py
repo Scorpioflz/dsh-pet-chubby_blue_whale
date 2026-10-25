@@ -708,14 +708,19 @@ def show_random_self_talk(host) -> bool:
     texts = list(host._self_talk_texts)
     try:
         import json as _json
-        texts_file = host.cfg.dir / "dsh_self_talk_texts.json"
-        if texts_file.is_file():
-            data = _json.loads(texts_file.read_text(encoding="utf-8"))
-            dsh_texts = data.get("texts", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
-            if dsh_texts:
-                texts.extend(dsh_texts)
-    except Exception:
-        pass
+        cfg = getattr(host, 'cfg', None)
+        if cfg is not None:
+            cfg_dir = getattr(cfg, 'dir', None)
+            if cfg_dir is not None:
+                texts_file = cfg_dir / "dsh_self_talk_texts.json"
+                if texts_file.is_file():
+                    data = _json.loads(texts_file.read_text(encoding="utf-8"))
+                    dsh_texts = data.get("texts", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
+                    if dsh_texts:
+                        texts.extend(dsh_texts)
+                        logging.info("自言自语合并 DSH 候选词: +%d 条 (总计 %d)", len(dsh_texts), len(texts))
+    except Exception as e:
+        logging.warning("读取 DSH 自言自语候选词失败: %s", e)
 
     picked = pick_self_talk_choice(
         texts, live_images, self_talk_image_chance(host)
