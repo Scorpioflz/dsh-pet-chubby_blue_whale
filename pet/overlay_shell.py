@@ -674,7 +674,8 @@ class _SpriteSelfTalkHost:
             if len(live) != len(self._self_talk_images):
                 self._self_talk_images = live
         picked = window_alerts.pick_self_talk_choice(
-            self._self_talk_texts, self._self_talk_images,
+            window_alerts.merge_dsh_texts(self._self_talk_texts, self._shell),
+            self._self_talk_images,
             window_alerts.self_talk_image_chance(self))
         if picked is None:
             return False
@@ -3066,7 +3067,8 @@ class OverlayShell(QObject):
                     for key in [k for k in cache if k not in live_keys]:
                         cache.pop(key, None)
         picked = window_alerts.pick_self_talk_choice(
-            self._self_talk_texts, self._self_talk_images,
+            window_alerts.merge_dsh_texts(self._self_talk_texts, self._shell),
+            self._self_talk_images,
             window_alerts.self_talk_image_chance(self))
         if picked is None:
             return False

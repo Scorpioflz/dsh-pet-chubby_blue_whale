@@ -621,6 +621,7 @@ def expression_style_text(host, text: str) -> str:
 
 def schedule_self_talk(host, *, after_display: bool = False) -> None:
     host._self_talk_timer.stop()
+    print(f"[DEBUG] schedule_self_talk: enabled={host._self_talk_enabled} texts={len(host._self_talk_texts)} images={len(host._self_talk_images)}")
     if not host._self_talk_enabled or not (
         host._self_talk_texts or host._self_talk_images
     ):
@@ -687,6 +688,26 @@ def pick_self_talk_choice(texts, images, image_chance):
     return ("text", random.choice(clean_texts))
 
 
+def merge_dsh_texts(base_texts: list, shell_or_host) -> list:
+    """合并 DSH 自动生成的候选词（从独立文件读取）。"""
+    texts = list(base_texts)
+    try:
+        import json as _json
+        cfg = getattr(shell_or_host, 'cfg', None) or getattr(shell_or_host, 'config', None) or getattr(shell_or_host, '_config', None)
+        if cfg is not None:
+            cfg_dir = getattr(cfg, 'dir', None)
+            if cfg_dir is not None:
+                texts_file = cfg_dir / "dsh_self_talk_texts.json"
+                if texts_file.is_file():
+                    data = _json.loads(texts_file.read_text(encoding="utf-8"))
+                    dsh_texts = data.get("texts", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
+                    if dsh_texts:
+                        texts.extend(dsh_texts)
+    except Exception:
+        pass
+    return texts
+
+
 def show_random_self_talk(host) -> bool:
     from .window import _set_speech_bubble_interactive
     if bubble_blocked(host):
@@ -704,23 +725,8 @@ def show_random_self_talk(host) -> bool:
     if len(live_images) != len(host._self_talk_images):
         host._self_talk_images = live_images
 
-    # 自用版：合并 DSH 自动生成的候选词（从独立文件读取，时效性内容每次替换）
-    texts = list(host._self_talk_texts)
-    try:
-        import json as _json
-        cfg = getattr(host, 'cfg', None)
-        if cfg is not None:
-            cfg_dir = getattr(cfg, 'dir', None)
-            if cfg_dir is not None:
-                texts_file = cfg_dir / "dsh_self_talk_texts.json"
-                if texts_file.is_file():
-                    data = _json.loads(texts_file.read_text(encoding="utf-8"))
-                    dsh_texts = data.get("texts", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
-                    if dsh_texts:
-                        texts.extend(dsh_texts)
-                        logging.info("自言自语合并 DSH 候选词: +%d 条 (总计 %d)", len(dsh_texts), len(texts))
-    except Exception as e:
-        logging.warning("读取 DSH 自言自语候选词失败: %s", e)
+    # 自用版：合并 DSH 自动生成的候选词
+    texts = merge_dsh_texts(host._self_talk_texts, host)
 
     picked = pick_self_talk_choice(
         texts, live_images, self_talk_image_chance(host)
