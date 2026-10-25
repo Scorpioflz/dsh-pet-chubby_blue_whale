@@ -94,25 +94,11 @@ def generate_self_talk(config: Any) -> bool:
         if not new_texts:
             return False
 
-        existing = list(config.get("self_talk_texts", []) or [])
-        seen = set(t.strip() for t in existing)
-        added = []
-        for t in new_texts:
-            if t not in seen:
-                added.append(t)
-                seen.add(t)
-
-        if not added:
-            return False
-
-        merged = added + existing
-        if len(merged) > _MAX_TEXTS:
-            merged = merged[:_MAX_TEXTS]
-
-        config.set("self_talk_texts", merged)
+        # DSH 生成的候选词存到单独列表（每次替换，不累计），用户手设的 self_talk_texts 不变
+        config.set("dsh_self_talk_texts", new_texts)
         config.set("dsh_self_talk_last_generated", time.time())
         config.save()
-        logging.info("DSH 自言自语生成成功: +%d 条 (总计 %d)", len(added), len(merged))
+        logging.info("DSH 自言自语生成成功: %d 条 (替换旧生成)", len(new_texts))
         return True
 
     except Exception:
