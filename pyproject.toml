@@ -32,6 +32,10 @@ dev = [
     "pytest>=8",
     "ruff>=0.5",
 ]
+build = [
+    "pyinstaller>=6.0",
+    "packaging>=24",
+]
 
 # dsh-pet 最小 ruff 基线（批 0a 建立，纯非行为变更）。
 # 目标：不改任何存量代码，仅靠配置让 `ruff check pet/ tests/` 全绿。

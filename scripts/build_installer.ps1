@@ -12,8 +12,8 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "`n[1/5] uv sync + pyinstaller" -ForegroundColor Yellow
 uv sync
 if ($LASTEXITCODE -ne 0) { Write-Error "uv sync failed"; exit 1 }
-uv pip install pyinstaller packaging
-if ($LASTEXITCODE -ne 0) { Write-Error "pyinstaller install failed"; exit 1 }
+uv sync --extra build
+if ($LASTEXITCODE -ne 0) { Write-Error "build deps install failed"; exit 1 }
 
 # --- Step 1.5: Generate frame-sequence material ---
 $frameseqDir = "assets\characters\shenshen\frameseq"
