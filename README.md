@@ -153,11 +153,12 @@ pet.log
 | `pet/dsh_api.py` | DSH Web Service REST API 客户端（工作区/会话/上传/SSE 流式） |
 | `pet/chat/dsh_provider.py` | `DshWebApiProvider`（会话 API 连续对话 + 附件上传 + 角色对应会话）+ `ProviderRouter`（按 provider_id 路由） |
 | `pet/dsh_workspace.py` | 工作区标题管理：首次启动弹窗询问，存储到数据目录 |
-| `pet/dsh_self_talk.py` | 每天通过 DSH API 以桌宠身份自动生成自言自语候选词（含热搜、新闻、吐槽） |
+| `pet/dsh_self_talk.py` | 每天通过 DSH API 以桌宠身份自动生成自言自语候选词（含热搜、新闻、吐槽），独立文件存储 |
 | `pet/weather/ip_city.py` | IP 定位城市：优先高德 API（精度高，需 Key），回退免费 API |
 | `tools/convert_frameseq_progress.py` | 帧序列转换器（带进度显示和 ETA） |
-| `scripts/build_installer.ps1` | 安装包打包脚本（PyInstaller + ISCC，跳过 portable.zip） |
-| `scripts/build_portable.ps1` | 便携版打包脚本（PyInstaller + zip，不跑 ISCC） |
+| `scripts/build_installer.ps1` | 完整安装包打包脚本（PyInstaller + ISCC，含素材） |
+| `scripts/build_update.ps1` | 增量更新打包脚本（PyInstaller + ISCC，不含素材，`-SkipAssets`） |
+| `scripts/build_portable.ps1` | 便携版打包脚本（PyInstaller + zip，含素材） |
 | `scripts/run_all_tests.ps1` | 逐个运行所有测试（带超时） |
 | `packaging/dsh-pet-chubby_blue_whale.iss` | Inno Setup 安装包脚本 |
 
@@ -166,16 +167,16 @@ pet.log
 | 文件 | 改动 |
 |---|---|
 | `pet/chat/service.py` | 注入 `ProviderRouter`（按 provider_id 路由到 DSH 或原 OpenAI） |
-| `pet/config.py` | 默认 provider 改为 `dsh-webapi`；`APP_DIR_NAME` 改为 `dsh-pet-chubby_blue_whale`（无变体后缀） |
+| `pet/config.py` | 默认 provider 改为 `dsh-webapi`；`APP_DIR_NAME` 改为 `dsh-pet-chubby_blue_whale`（无变体后缀）；`reload()` 键列表加 `dsh_self_talk_enabled` |
 | `pet/vision.py` | 截图提问 DSH 分支：上传截图到 DSH 会话 → 提问 → 返回回复 |
 | `pet/window.py` | 看看屏幕 DSH 分支：截图 → 上传到 DSH 会话 → 提问 → 气泡 |
-| `pet/overlay_shell.py` | 看看屏幕 DSH 分支（overlay 版） |
+| `pet/overlay_shell.py` | 看看屏幕 DSH 分支（overlay 版）；`PetSprite` + `ScreenHost` 的 `_show_random_self_talk` 合并 DSH 候选词 |
 | `pet/app.py` | 启动时检查工作区 + 天气城市 + 自言自语生成（`QTimer.singleShot`）；余额查询 DSH 分支（`show_balance` + `_quiet_balance_refresh` + `_balance_worker_dsh`） |
 | `pet/settings_features.py` | 天气功能激活时触发城市检测 |
-| `pet/window_alerts.py` | 自言自语合并 `self_talk_texts` + `dsh_self_talk_texts`（DSH 生成的时效性内容每次替换） |
+| `pet/window_alerts.py` | `merge_dsh_texts` 函数：从独立文件 `dsh_self_talk_texts.json` 读取 DSH 候选词并合并；`show_random_self_talk` 调用合并 |
 | `pet/pack_download.py` | 素材包下载 URL 顺序反转（代理优先，GitHub 官方最后） |
-| `scripts/build_onedir.ps1` | 去掉变体相关，统一为 `dsh-pet-chubby_blue_whale` |
-| `pyproject.toml` | Python 3.14 + uv 依赖管理（`[project]` dependencies） |
+| `scripts/build_onedir.ps1` | 去掉变体相关，统一为 `dsh-pet-chubby_blue_whale`；加 `-SkipAssets` 开关 |
+| `pyproject.toml` | Python 3.14 + uv 依赖管理（`[project]` dependencies + `[project.optional-dependencies]` build） |
 | `.gitignore` | CodeArts + uv 配置不追踪 |
 | `README.md` | 继承声明 + 自用定位 + 精简 |
 | `THIRD_PARTY_NOTICES.md` | 删除 Android 声明，新增自用版第三方组件 |
