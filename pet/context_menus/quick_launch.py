@@ -66,7 +66,7 @@ def fitted_application_icon(icon: QIcon, size: int, widget) -> QIcon:
 
 def launch_quick_app(item: dict) -> bool:
     if item.get("kind") == "default_browser":
-        return bool(QDesktopServices.openUrl(QUrl("https://www.google.com/")))
+        return bool(QDesktopServices.openUrl(QUrl("about:blank")))
     path = os.path.abspath(os.path.expanduser(str(item.get("path") or "")))
     if not path:
         return False
