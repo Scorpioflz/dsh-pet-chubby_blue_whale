@@ -1,21 +1,51 @@
 # -*- coding: utf-8 -*-
 """DSH 自动生成自言自语候选词。
 
-每天通过 DSH API 以桌宠身份生成自言自语候选词，追加到 self_talk_texts。
+每天通过 DSH API 以桌宠身份生成自言自语候选词。
 包含身份设定（System Prompt），内容自然生动，仿佛桌宠在播报消息、吐槽。
+候选词和时间戳存到独立文件 dsh_self_talk_texts.json，不写 config.json。
 """
 
 from __future__ import annotations
 
+import json as _json
 import logging
 import time
+from pathlib import Path
 from typing import Any
 
 
 _GENERATE_PROMPT = """请以桌宠的口吻生成 60 条自言自语，可以包含今日热搜、新闻感想、日常碎碎念、每日要闻等等，每条一句话。内容要自然、生动、有趣，仿佛真的是个桌宠在播报消息、吐槽。每条一行，不要编号，不要多余解释。"""
 
-_MAX_TEXTS = 200
 _INTERVAL_SECONDS = 86400  # 24 hours
+
+
+def _texts_file(config: Any) -> Path:
+    """独立文件路径：dsh_self_talk_texts.json（存候选词 + 时间戳）。"""
+    return config.dir / "dsh_self_talk_texts.json"
+
+
+def _load_texts_data(config: Any) -> dict:
+    """读取独立文件，返回 {"texts": [...], "last_generated": float}。"""
+    f = _texts_file(config)
+    if not f.is_file():
+        return {"texts": [], "last_generated": 0.0}
+    try:
+        data = _json.loads(f.read_text(encoding="utf-8"))
+        if isinstance(data, list):
+            return {"texts": data, "last_generated": 0.0}
+        return data
+    except Exception:
+        return {"texts": [], "last_generated": 0.0}
+
+
+def _save_texts_data(config: Any, texts: list[str], ts: float) -> None:
+    """写入独立文件。"""
+    f = _texts_file(config)
+    f.write_text(
+        _json.dumps({"texts": texts, "last_generated": ts}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
 
 
 def _build_prompt(system_prompt: str) -> str:
@@ -34,23 +64,21 @@ def _parse_lines(reply: str) -> list[str]:
         text = raw.strip()
         if not text:
             continue
-        # 去掉常见编号前缀（1. / 1、 / (1) / 1）等）
         for prefix_len in range(1, 5):
             if len(text) > prefix_len + 1 and text[:prefix_len].isdigit():
                 sep = text[prefix_len]
                 if sep in '.、）)．:：':
                     text = text[prefix_len + 1:].strip()
                     break
-        # 去掉引号包裹
         if len(text) >= 2 and text[0] in '"「『（(' and text[-1] in '"」』）)':
             text = text[1:-1].strip()
-        if text and len(text) <= 200:  # 单条不超过 200 字
+        if text and len(text) <= 200:
             lines.append(text)
     return lines
 
 
 def generate_self_talk(config: Any) -> bool:
-    """通过 DSH API 生成自言自语候选词，追加到 self_talk_texts。
+    """通过 DSH API 生成自言自语候选词，写入独立文件。
 
     Returns: True 如果成功生成并保存，False 如果跳过或失败。
     """
@@ -58,7 +86,8 @@ def generate_self_talk(config: Any) -> bool:
         if not config.get("dsh_self_talk_enabled", False):
             return False
 
-        last = float(config.get("dsh_self_talk_last_generated", 0) or 0)
+        data = _load_texts_data(config)
+        last = float(data.get("last_generated", 0) or 0)
         if last and (time.time() - last) < _INTERVAL_SECONDS:
             return False
 
@@ -94,16 +123,8 @@ def generate_self_talk(config: Any) -> bool:
         if not new_texts:
             return False
 
-        # DSH 生成的候选词存到独立文件（每次替换，不累计），避免频繁改 config.json
-        import json as _json
-        texts_file = config.dir / "dsh_self_talk_texts.json"
-        texts_file.write_text(
-            _json.dumps(new_texts, ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
-        config.set("dsh_self_talk_last_generated", time.time())
-        config.save()
-        logging.info("DSH 自言自语生成成功: %d 条 (写入 %s)", len(new_texts), texts_file.name)
+        _save_texts_data(config, new_texts, time.time())
+        logging.info("DSH 自言自语生成成功: %d 条 (写入 dsh_self_talk_texts.json)", len(new_texts))
         return True
 
     except Exception:

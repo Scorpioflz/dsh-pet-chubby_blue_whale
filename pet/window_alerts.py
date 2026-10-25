@@ -710,7 +710,8 @@ def show_random_self_talk(host) -> bool:
         import json as _json
         texts_file = host.cfg.dir / "dsh_self_talk_texts.json"
         if texts_file.is_file():
-            dsh_texts = _json.loads(texts_file.read_text(encoding="utf-8"))
+            data = _json.loads(texts_file.read_text(encoding="utf-8"))
+            dsh_texts = data.get("texts", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
             if dsh_texts:
                 texts.extend(dsh_texts)
     except Exception:
