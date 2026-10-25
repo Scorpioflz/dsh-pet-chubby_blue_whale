@@ -25,7 +25,8 @@ param(
     [switch]$SkipBuild,
     [switch]$SkipZip,
     [switch]$SkipCheck,
-    [switch]$SkipSlim
+    [switch]$SkipSlim,
+    [switch]$SkipAssets
 )
 
 $ErrorActionPreference = 'Stop'
@@ -71,6 +72,10 @@ if ($nodeExe) {
 }
 
 $datas = 'assets/characters;assets/characters'
+$assetArgs = @()
+if (-not $SkipAssets) {
+    $assetArgs = @('--add-data', $datas, '--add-data', 'assets\big_blue_fat_fish;assets\big_blue_fat_fish')
+}
 $excludes = @()
 $excludes += @('--exclude-module', 'OpenGL')
 foreach ($m in @('torch','transformers','datasets','langchain','langchain_core',
@@ -109,10 +114,14 @@ if (-not $SkipBuild) {
     python scripts\make_icon.py
     if ($LASTEXITCODE -ne 0) { throw "make_icon failed: $LASTEXITCODE" }
 
-    Write-Host "[frameseq] verifying frame-sequence material completeness..." -ForegroundColor Cyan
-    python scripts\check_frameseq_bundle.py
-    if ($LASTEXITCODE -ne 0) { throw "check_frameseq_bundle failed: $LASTEXITCODE" }
-    Write-Host "[frameseq] frame-sequence material OK" -ForegroundColor Green
+    if (-not $SkipAssets) {
+        Write-Host "[frameseq] verifying frame-sequence material completeness..." -ForegroundColor Cyan
+        python scripts\check_frameseq_bundle.py
+        if ($LASTEXITCODE -ne 0) { throw "check_frameseq_bundle failed: $LASTEXITCODE" }
+        Write-Host "[frameseq] frame-sequence material OK" -ForegroundColor Green
+    } else {
+        Write-Host "[frameseq] skipped (SkipAssets)" -ForegroundColor Yellow
+    }
 
     Write-Host "[presentmon] verifying bundled game-FPS capture backend..." -ForegroundColor Cyan
     python scripts\verify_presentmon.py
@@ -161,8 +170,7 @@ if (-not $SkipBuild) {
         --collect-all tzdata `
         --collect-all psutil `
         @keyringCollect `
-        --add-data $datas `
-        --add-data "assets\big_blue_fat_fish;assets\big_blue_fat_fish" `
+        @assetArgs `
         --add-data "pet\persona_presets;pet\persona_presets" `
         --add-data "pet\menu_templates;pet\menu_templates" `
         @chatData `
