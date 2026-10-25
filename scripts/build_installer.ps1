@@ -35,26 +35,16 @@ if (Test-Path $frameseqDir -PathType Container) {
 # --- Step 2: PyInstaller onedir build ---
 Write-Host "`n[2/5] PyInstaller onedir (webm-chat)" -ForegroundColor Yellow
 $env:PATH = "$PWD\.venv\Scripts;$env:PATH"
-powershell -ExecutionPolicy Bypass -File scripts\build_onedir.ps1 -Variant webm-chat -SkipZip
+powershell -ExecutionPolicy Bypass -File scripts\build_onedir.ps1 -SkipZip
 if ($LASTEXITCODE -ne 0) { Write-Error "PyInstaller build failed"; exit 1 }
 
-# --- Step 3: Verify + Rename ---
-$onedir = "dist-onedir\dsh-pet-standalone-webm-chat"
-if (-not (Test-Path "$onedir\dsh-pet-standalone-webm-chat.exe")) {
+# --- Step 3: Verify ---
+$onedir = "dist-onedir\dsh-pet-chubby_blue_whale"
+if (-not (Test-Path "$onedir\dsh-pet-chubby_blue_whale.exe")) {
     Write-Error "onedir exe not found: $onedir"
     exit 1
 }
 Write-Host "`n[3/5] onedir OK: $onedir" -ForegroundColor Green
-
-$oldExe = "$onedir\dsh-pet-standalone-webm-chat.exe"
-if (Test-Path $oldExe) {
-    Rename-Item $oldExe "dsh-pet-chubby_blue_whale.exe"
-    Write-Host "  Renamed exe -> dsh-pet-chubby_blue_whale.exe" -ForegroundColor Green
-}
-if (Test-Path $onedir) {
-    Rename-Item $onedir "dsh-pet-chubby_blue_whale"
-    Write-Host "  Renamed dir -> dsh-pet-chubby_blue_whale" -ForegroundColor Green
-}
 
 # --- Step 4: Inno Setup compiler ---
 Write-Host "`n[4/5] Inno Setup ISCC" -ForegroundColor Yellow

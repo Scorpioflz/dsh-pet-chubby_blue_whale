@@ -32,41 +32,27 @@ if (Test-Path $frameseqDir -PathType Container) {
 }
 
 # --- Step 2: PyInstaller onedir build ---
-Write-Host "`n[2/4] PyInstaller onedir (webm-chat)" -ForegroundColor Yellow
+Write-Host "`n[2/4] PyInstaller onedir" -ForegroundColor Yellow
 $env:PATH = "$PWD\.venv\Scripts;$env:PATH"
-powershell -ExecutionPolicy Bypass -File scripts\build_onedir.ps1 -Variant webm-chat
+powershell -ExecutionPolicy Bypass -File scripts\build_onedir.ps1
 if ($LASTEXITCODE -ne 0) { Write-Error "PyInstaller build failed"; exit 1 }
 
-# --- Step 3: Verify + Rename ---
-$onedir = "dist-onedir\dsh-pet-standalone-webm-chat"
-if (-not (Test-Path "$onedir\dsh-pet-standalone-webm-chat.exe")) {
+# --- Step 3: Verify ---
+$onedir = "dist-onedir\dsh-pet-chubby_blue_whale"
+if (-not (Test-Path "$onedir\dsh-pet-chubby_blue_whale.exe")) {
     Write-Error "onedir exe not found: $onedir"
     exit 1
 }
 Write-Host "`n[3/4] onedir OK: $onedir" -ForegroundColor Green
 
-$oldExe = "$onedir\dsh-pet-standalone-webm-chat.exe"
-if (Test-Path $oldExe) {
-    Rename-Item $oldExe "dsh-pet-chubby_blue_whale.exe"
-    Write-Host "  Renamed exe -> dsh-pet-chubby_blue_whale.exe" -ForegroundColor Green
-}
-if (Test-Path $onedir) {
-    Rename-Item $onedir "dsh-pet-chubby_blue_whale"
-    Write-Host "  Renamed dir -> dsh-pet-chubby_blue_whale" -ForegroundColor Green
-}
-
-# --- Step 4: Rename portable zip ---
-$oldZip = "dist-onedir\dsh-pet-standalone-webm-chat-portable.zip"
-$newZip = "dist-onedir\dsh-pet-chubby_blue_whale-portable.zip"
-if (Test-Path $oldZip) {
-    Rename-Item $oldZip $newZip
-    Write-Host "`n[4/4] Renamed zip -> dsh-pet-chubby_blue_whale-portable.zip" -ForegroundColor Green
-}
+# --- Step 4: Portable zip ---
+$zip = "dist-onedir\dsh-pet-chubby_blue_whale-portable.zip"
+Write-Host "`n[4/4] Portable zip: $zip" -ForegroundColor Green
 
 # --- Done ---
 Write-Host "`n========================================" -ForegroundColor Green
 Write-Host "  PORTABLE BUILD COMPLETE" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
-Write-Host "  Portable zip: $newZip" -ForegroundColor White
-Write-Host "  Onedir dir:   $newDir" -ForegroundColor White
+Write-Host "  Portable zip: $zip" -ForegroundColor White
+Write-Host "  Onedir dir:   $onedir" -ForegroundColor White
 Write-Host ""
