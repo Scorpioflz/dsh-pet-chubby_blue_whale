@@ -2630,7 +2630,7 @@ class AppShell:
 
     # ------------------------------------------------------------ 启动
     def start(self) -> None:
-        # 自用版：启动时延迟检查工作区 + 天气城市（等 feature activation freeze）
+        # 自用版：启动时延迟检查工作区 + 天气城市 + 自言自语生成（等 feature activation freeze）
         from PySide6.QtCore import QTimer
         def _dsh_startup_checks():
             try:
@@ -2647,6 +2647,17 @@ class AppShell:
                 if "weather" in enabled:
                     from .weather.ip_city import ensure_weather_city
                     ensure_weather_city(config=self.config)
+            except Exception:
+                pass
+            try:
+                import threading
+                from .dsh_self_talk import generate_self_talk
+                threading.Thread(
+                    target=generate_self_talk,
+                    args=(self.config,),
+                    daemon=True,
+                    name="pet-self-talk-gen",
+                ).start()
             except Exception:
                 pass
         QTimer.singleShot(1000, _dsh_startup_checks)

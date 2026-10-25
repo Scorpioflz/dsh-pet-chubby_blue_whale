@@ -1142,6 +1142,8 @@ class Config:
             "self_talk_image_chance": DEFAULT_SELF_TALK_IMAGE_CHANCE,  # 出图概率百分比（0~100）
             "bubble_text_scale": 100,  # 气泡文字显示尺寸百分比（50~300，100 = 默认；气泡与字号一起放大）
             "self_talk_texts": list(DEFAULT_SELF_TALK_TEXTS),
+            "dsh_self_talk_enabled": False,  # 自用版：每天通过 DSH API 自动生成自言自语候选词
+            "dsh_self_talk_last_generated": 0,  # 上次生成时间戳
             "self_talk_image_dir": "assets/big_blue_fat_fish",
             "self_talk_bubble_style": DEFAULT_SELF_TALK_BUBBLE_STYLE,
             # Existing event wording: legacy is deliberately the default.
