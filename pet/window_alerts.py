@@ -621,7 +621,7 @@ def expression_style_text(host, text: str) -> str:
 
 def schedule_self_talk(host, *, after_display: bool = False) -> None:
     host._self_talk_timer.stop()
-    print(f"[DEBUG] schedule_self_talk: enabled={host._self_talk_enabled} texts={len(host._self_talk_texts)} images={len(host._self_talk_images)}")
+
     if not host._self_talk_enabled or not (
         host._self_talk_texts or host._self_talk_images
     ):
