@@ -20,7 +20,7 @@ if ($LASTEXITCODE -ne 0) { Write-Error "uv sync failed"; exit 1 }
 # --- Step 2: PyInstaller onedir build (skip assets) ---
 Write-Host "`n[2/4] PyInstaller onedir (skip assets)" -ForegroundColor Yellow
 $env:PATH = "$PWD\.venv\Scripts;$env:PATH"
-powershell -ExecutionPolicy Bypass -File scripts\build_onedir.ps1 -SkipZip -SkipAssets
+powershell -ExecutionPolicy Bypass -File scripts\build_onedir.ps1 -SkipZip -SkipAssets -SkipCheck
 if ($LASTEXITCODE -ne 0) { Write-Error "PyInstaller build failed"; exit 1 }
 
 # --- Step 3: Verify ---
