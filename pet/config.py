@@ -1555,7 +1555,7 @@ class Config:
             "self_talk_voice_precache_enabled",
             "dsh_self_talk_enabled",
             "dsh_self_talk_last_generated",
-            "dsh_self_talk_texts",
+
             "balance_refresh_minutes",
             "autostart_wanted",
             "harness_autostart",

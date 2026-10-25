@@ -704,12 +704,15 @@ def show_random_self_talk(host) -> bool:
     if len(live_images) != len(host._self_talk_images):
         host._self_talk_images = live_images
 
-    # 自用版：合并 DSH 自动生成的候选词（时效性内容，每次替换）
+    # 自用版：合并 DSH 自动生成的候选词（从独立文件读取，时效性内容每次替换）
     texts = list(host._self_talk_texts)
     try:
-        dsh_texts = host.cfg.get("dsh_self_talk_texts", [])
-        if dsh_texts:
-            texts.extend(dsh_texts)
+        import json as _json
+        texts_file = host.cfg.dir / "dsh_self_talk_texts.json"
+        if texts_file.is_file():
+            dsh_texts = _json.loads(texts_file.read_text(encoding="utf-8"))
+            if dsh_texts:
+                texts.extend(dsh_texts)
     except Exception:
         pass
 

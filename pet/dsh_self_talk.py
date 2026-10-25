@@ -94,11 +94,16 @@ def generate_self_talk(config: Any) -> bool:
         if not new_texts:
             return False
 
-        # DSH 生成的候选词存到单独列表（每次替换，不累计），用户手设的 self_talk_texts 不变
-        config.set("dsh_self_talk_texts", new_texts)
+        # DSH 生成的候选词存到独立文件（每次替换，不累计），避免频繁改 config.json
+        import json as _json
+        texts_file = config.dir / "dsh_self_talk_texts.json"
+        texts_file.write_text(
+            _json.dumps(new_texts, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
         config.set("dsh_self_talk_last_generated", time.time())
         config.save()
-        logging.info("DSH 自言自语生成成功: %d 条 (替换旧生成)", len(new_texts))
+        logging.info("DSH 自言自语生成成功: %d 条 (写入 %s)", len(new_texts), texts_file.name)
         return True
 
     except Exception:
