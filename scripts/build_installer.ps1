@@ -9,11 +9,9 @@ Write-Host "  dsh-pet-chubby_blue_whale installer" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 
 # --- Step 1: Install dependencies ---
-Write-Host "`n[1/5] uv sync + pyinstaller" -ForegroundColor Yellow
-uv sync
-if ($LASTEXITCODE -ne 0) { Write-Error "uv sync failed"; exit 1 }
+Write-Host "`n[1/5] uv sync --extra build" -ForegroundColor Yellow
 uv sync --extra build
-if ($LASTEXITCODE -ne 0) { Write-Error "build deps install failed"; exit 1 }
+if ($LASTEXITCODE -ne 0) { Write-Error "uv sync failed"; exit 1 }
 
 # --- Step 1.5: Generate frame-sequence material ---
 $frameseqDir = "assets\characters\shenshen\frameseq"
