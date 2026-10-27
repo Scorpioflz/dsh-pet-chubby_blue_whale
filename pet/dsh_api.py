@@ -116,6 +116,27 @@ class DshApiClient:
         data = self._extract_data(result)
         return data.get("id") or data.get("sessionId") if data else None
 
+    def update_session(
+        self,
+        session_id: str,
+        title: str | None = None,
+        model: str | None = None,
+    ) -> bool:
+        """修改会话标题和/或模型（PUT /sessions/:id）。成功返回 True。"""
+        body: dict[str, Any] = {}
+        if title:
+            body["title"] = title
+        if model:
+            body["model"] = model
+        if not body:
+            return False
+        try:
+            self._request("PUT", f"/sessions/{session_id}", body=body)
+            return True
+        except Exception:
+            logging.exception("DSH 更新会话失败 (session=%s)", session_id)
+            return False
+
     def upload_file(self, session_id: str, file_bytes: bytes, filename: str) -> str | None:
         """上传文件到会话工作区，返回文件 path（供提示中引用）。"""
         url = f"{self.base_url}/sessions/{session_id}/files"

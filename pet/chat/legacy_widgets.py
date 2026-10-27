@@ -40,6 +40,7 @@ from .service import ChatService
 from .session_store import SessionStore
 from .utils import _short_title
 from ..context_menus.icons import vector_widget_icon
+from ..application_icon import load_application_icon
 from . import themes as chat_themes
 
 
@@ -301,6 +302,7 @@ class ChatWindow(QDialog):
         # 避免深色系统 palette 白前景造成白底白图
         self.setProperty("menuStyle", "modern")
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
+        self.setWindowIcon(load_application_icon())
         # 手机式聊天窗尺寸范围：最小 380×620，最大 560×980
         self.setMinimumSize(380, 620)
         self.setMaximumSize(560, 980)
@@ -1145,6 +1147,8 @@ class ChatWindow(QDialog):
         self.store.save(self.session)
         config = self.settings.active_config
         config.api_key = self.config.resolve_api_key(config)
+        config.character_name = self.character_name
+        config.character_id = self.character_id
         messages = self.prompt_builder.build_messages(
             self.settings, self.character_id, self.session.messages[:-1], text,
             memory_payload=self._memory_injection(),

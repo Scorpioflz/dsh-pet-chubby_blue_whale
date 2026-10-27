@@ -51,6 +51,7 @@ from .service import ChatService
 from .session_store import SessionStore
 from .utils import _short_title
 from ..context_menus.icons import vector_widget_icon
+from ..application_icon import load_application_icon
 
 
 _COLOR_RE = re.compile(r"^#[0-9a-fA-F]{6}$")
@@ -1083,6 +1084,7 @@ class ChatWindow(QDialog):
         # 会让关闭/最小化/新建/删除等图标白底白图不可见（见 icons._icon_theme）
         self.setProperty("menuStyle", "modern")
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
+        self.setWindowIcon(load_application_icon())
         # Desktop AI-chat workspace: conversation navigation on the left and
         # the focused message canvas on the right.
         self.setMinimumSize(560, 480)
@@ -2349,6 +2351,8 @@ class ChatWindow(QDialog):
         self.store.save(self.session)
         config = self.settings.active_config
         config.api_key = self.config.resolve_api_key(config)
+        config.character_name = self.character_name
+        config.character_id = self.character_id
         messages = self.prompt_builder.build_messages(
             self.settings,
             self.character_id,
