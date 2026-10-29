@@ -26,8 +26,10 @@
 | 插件 | 用途 | 地址 | 安装 |
 |---|---|---|---|
 | `dsh-web-service` | REST API 服务（会话/工作区/文件上传/SSE 流式对话） | [toddpan/dsh-webapi](https://github.com/toddpan/dsh-webapi) | `dsh plugin --profile web add @toddpan/dsh-webapi` |
-| `@dsh-pet/memory` | 按工作区共享的长期记忆（基于 fish-memory 改造，14 天半衰期） | 内置 `integrations/dsh-pet-memory/` | 设置 → AI → API 列表选 `dsh-webapi` → DSH 记忆插件 → 一键安装 |
+| `@dsh-pet/memory` | 按工作区共享的长期记忆（基于 fish-memory 改造，14 天半衰期） | 内置 `integrations/dsh-pet-memory/` | 桌宠设置或 AI 设置 → API 列表选 `dsh-webapi` → DSH 记忆插件 → 一键安装 |
 | `@wycto/dsh-balance-panel` | 余额查询 REST 端点 `GET /dsh-balance-panel` | [wycto/dsh-balance-panel](https://github.com/wycto/dsh-balance-panel) | `dsh plugin --profile web add @wycto/dsh-balance-panel` |
+
+> **注意**：`@dsh-pet/memory` 与原版 `dsh-fish-memory` 都注册 `remember` 工具，**不可装在同一个 DSH profile**。安装前如已有 fish-memory，先卸载：`dsh plugin --profile <profile> remove dsh-fish-memory`。
 
 ## 目录
 
@@ -174,6 +176,7 @@ pet.log
 | `pet/chat/service.py` | 注入 `ProviderRouter`（按 provider_id 路由到 DSH 或原 OpenAI）；移除记忆提炼 hook |
 | `pet/chat/prompt.py` | 新增 `MEMORY_GUIDE` 引导段，`build_messages` 追加记忆使用引导 |
 | `pet/chat/ai_settings_page.py` | 新增 DSH 记忆插件设置区 + 一键安装按钮 |
+| `pet/chat/settings_dialog.py` | 旧版 AI 设置对话框也加 DSH 记忆插件安装按钮 |
 | `pet/chat/widgets.py` / `pet/legacy_widgets.py` | 移除记忆相关 UI 与逻辑 |
 | `pet/quick_chat.py` / `pet/modern_settings_dialog.py` | 移除记忆相关引用 |
 | `pet/config.py` | 默认 provider 改为 `dsh-webapi`；`APP_DIR_NAME` 改为 `dsh-pet-chubby_blue_whale`（无变体后缀）；`reload()` 键列表加 `dsh_self_talk_enabled`；清理废置记忆键（`chat_memory_enabled` 等 3 个） |

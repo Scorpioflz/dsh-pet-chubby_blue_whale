@@ -28,6 +28,7 @@ class ChatSettingsDialog(QDialog):
     "Destroyed while thread is still running" 崩溃（多次连续测试时偶发）。
     """
     _test_done = Signal(bool, str)
+    _memory_install_done = Signal(bool, str)
     def __init__(self, config, parent=None):
         super().__init__(parent)
         self.config = config
@@ -38,6 +39,7 @@ class ChatSettingsDialog(QDialog):
         self._deleted_provider_ids: set[str] = set()
         self._loading_provider = False
         self._test_done.connect(self._on_test_done)
+        self._memory_install_done.connect(self._on_memory_install_done)
         self.setWindowTitle('AI 对话设置')
 
         # API 列表：管理多套 Provider，快速切换当前 API
@@ -158,6 +160,15 @@ class ChatSettingsDialog(QDialog):
         layout.addLayout(form)
         layout.addWidget(self.result)
         layout.addLayout(buttons)
+
+        self.memory_plugin_status = QLabel('检查中…', self)
+        self.memory_plugin_status.setWordWrap(True)
+        self.memory_plugin_btn = QPushButton('安装记忆插件', self)
+        self.memory_plugin_btn.clicked.connect(self._install_memory_plugin)
+        mem_row = QHBoxLayout()
+        mem_row.addWidget(self.memory_plugin_status, 1)
+        mem_row.addWidget(self.memory_plugin_btn)
+        layout.addLayout(mem_row)
 
         self.provider_combo.currentIndexChanged.connect(self._on_provider_changed)
         self.add_provider_btn.clicked.connect(self._add_provider)
@@ -302,6 +313,52 @@ class ChatSettingsDialog(QDialog):
 
     def _update_provider_buttons(self) -> None:
         self.delete_provider_btn.setEnabled(len(self.settings.providers) > 1)
+        is_dsh = getattr(self.settings.active_config, 'provider_id', '') == 'dsh-webapi'
+        if is_dsh:
+            self._refresh_memory_plugin_status()
+        else:
+            self.memory_plugin_status.setText('DSH 记忆插件：仅 DSH Web API 可用')
+            self.memory_plugin_btn.setEnabled(False)
+
+    def _refresh_memory_plugin_status(self) -> None:
+        from ..memory_plugin_link import check_status
+        bundled, installed = check_status()
+        if installed:
+            self.memory_plugin_status.setText('DSH 记忆插件：已安装✓')
+            self.memory_plugin_btn.setEnabled(False)
+            self.memory_plugin_btn.setText('已安装')
+        elif bundled:
+            self.memory_plugin_status.setText('DSH 记忆插件：未安装（注意：如已装 dsh-fish-memory 请先卸载，两者 remember 工具会冲突）')
+            self.memory_plugin_btn.setEnabled(True)
+            self.memory_plugin_btn.setText('安装记忆插件')
+        else:
+            self.memory_plugin_status.setText('DSH 记忆插件：内置插件目录缺失')
+            self.memory_plugin_btn.setEnabled(False)
+
+    def _install_memory_plugin(self) -> None:
+        self.memory_plugin_btn.setEnabled(False)
+        self.memory_plugin_btn.setText('安装中…')
+        self.memory_plugin_status.setText('正在安装…')
+
+        def _work():
+            from ..memory_plugin_link import install_memory_plugin
+            try:
+                ok, msg = install_memory_plugin()
+            except Exception as e:
+                ok, msg = False, str(e)
+            self._memory_install_done.emit(ok, msg)
+
+        threading.Thread(target=_work, daemon=True).start()
+
+    def _on_memory_install_done(self, ok: bool, msg: str) -> None:
+        if ok:
+            self.memory_plugin_status.setText('DSH 记忆插件：已安装✓')
+            self.memory_plugin_btn.setText('已安装')
+            self.memory_plugin_btn.setEnabled(False)
+        else:
+            self.memory_plugin_status.setText(f'安装失败：{msg}')
+            self.memory_plugin_btn.setText('安装记忆插件')
+            self.memory_plugin_btn.setEnabled(True)
 
     # ---------------------------------------------------------------- 保存与测试
     def _pick_bg(self):
