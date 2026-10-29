@@ -135,7 +135,7 @@ def install_memory_plugin() -> tuple[bool, str]:
             failed.append(f"{profile.name}: package.json 读取失败")
             continue
         if _profile_has_plugin(profile):
-            rc, out, _repaired = _run_pnpm_repairing_specs(profile, "add", str(plugin))
+            rc, out, _repaired = _run_pnpm_repairing_specs(profile, "add", str(plugin), "--config.package-import-method=copy")
             if rc != 0:
                 failed.append(f"{profile.name}: pnpm refresh 失败 {(out or '')[-150:]}")
                 continue
@@ -150,7 +150,7 @@ def install_memory_plugin() -> tuple[bool, str]:
                 continue
             succeeded.append(profile.name)
             continue
-        rc, out, _repaired = _run_pnpm_repairing_specs(profile, "add", str(plugin))
+        rc, out, _repaired = _run_pnpm_repairing_specs(profile, "add", str(plugin), "--config.package-import-method=copy")
         if rc != 0:
             failed.append(f"{profile.name}: pnpm add 失败 {(out or '')[-150:]}")
             continue
