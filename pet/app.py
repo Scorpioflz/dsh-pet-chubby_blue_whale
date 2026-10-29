@@ -1183,6 +1183,35 @@ class PetInstance:
         ):
             self._hint_dock_hidden_recovery()
 
+    def _show_memory_plugin_dialog(self) -> None:
+        from PySide6.QtWidgets import QMessageBox
+        win = getattr(self, "win", None)
+        if win is None and self.instance is not None:
+            win = getattr(self.instance, "win", None)
+        msg = QMessageBox(win)
+        msg.setWindowTitle("记忆插件")
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setText("DSH 记忆插件未安装，记忆功能无法生效。")
+        msg.setInformativeText(
+            "记忆插件按工作区共享记忆，安装后桌宠对话才有长期记忆。\n"
+            "注意：如已装 dsh-fish-memory，请先卸载（两者 remember 工具会冲突）。"
+        )
+        btn_install = msg.addButton("立即安装", QMessageBox.ButtonRole.AcceptRole)
+        btn_later = msg.addButton("下次再说", QMessageBox.ButtonRole.RejectRole)
+        btn_7d = msg.addButton("7天后再提醒", QMessageBox.ButtonRole.ApplyRole)
+        btn_never = msg.addButton("不再提醒", QMessageBox.ButtonRole.DestructiveRole)
+        msg.exec()
+        clicked = msg.clickedButton()
+        if clicked is btn_never:
+            self.config.set('memory_plugin_remind', 'never')
+            self.config.save()
+        elif clicked is btn_7d:
+            from datetime import datetime, timedelta
+            self.config.set('memory_plugin_remind', (datetime.now() + timedelta(days=7)).isoformat())
+            self.config.save()
+        elif clicked is btn_install:
+            self.install_memory_plugin_dialog()
+
     def install_memory_plugin_dialog(self) -> None:
         from .memory_plugin_link import check_status, install_memory_plugin
 
@@ -2714,14 +2743,20 @@ class AppShell:
                     from .memory_plugin_link import check_status
                     bundled, installed = check_status()
                     if bundled and not installed:
-                        win = getattr(self, "win", None)
-                        if win is None and self.instance is not None:
-                            win = getattr(self.instance, "win", None)
-                        if win is not None:
-                            win.show_bubble(
-                                "记忆插件未安装，可在设置中一键安装～",
-                                duration_ms=7000,
-                            )
+                        remind = str(self.config.get('memory_plugin_remind', ''))
+                        if remind == 'never':
+                            pass
+                        elif remind:
+                            try:
+                                from datetime import datetime
+                                if datetime.now().isoformat() < remind:
+                                    pass
+                                else:
+                                    self._show_memory_plugin_dialog()
+                            except Exception:
+                                self._show_memory_plugin_dialog()
+                        else:
+                            self._show_memory_plugin_dialog()
             except Exception:
                 pass
             try:

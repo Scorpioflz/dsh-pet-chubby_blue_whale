@@ -1552,6 +1552,7 @@ class Config:
             "self_talk_speak_enabled",
             "self_talk_voice_precache_enabled",
             "dsh_self_talk_enabled",
+            "memory_plugin_remind",
 
 
             "balance_refresh_minutes",
