@@ -72,7 +72,7 @@ const VERSION = (() => {
 })()
 
 const DEFAULT_POLICY = {
-  baseHalfLifeDays: 14,
+  baseHalfLifeDays: 30,
   emotionHalfLifeDays: 7,
   baselineWeight: 0.55,
   activationWeight: 0.25,

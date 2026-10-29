@@ -26,7 +26,7 @@
 | 插件 | 用途 | 地址 | 安装 |
 |---|---|---|---|
 | `dsh-web-service` | REST API 服务（会话/工作区/文件上传/SSE 流式对话） | [toddpan/dsh-webapi](https://github.com/toddpan/dsh-webapi) | `dsh plugin --profile web add @toddpan/dsh-webapi` |
-| `@dsh-pet/memory` | 按工作区共享的长期记忆（基于 fish-memory 改造，14 天半衰期） | 内置 `integrations/dsh-pet-memory/` | 设置 → AI → DSH 记忆插件 → 一键安装 |
+| `@dsh-pet/memory` | 按工作区共享的长期记忆（基于 fish-memory 改造，14 天半衰期） | 内置 `integrations/dsh-pet-memory/` | 设置 → AI → API 列表选 `dsh-webapi` → DSH 记忆插件 → 一键安装 |
 | `@wycto/dsh-balance-panel` | 余额查询 REST 端点 `GET /dsh-balance-panel` | [wycto/dsh-balance-panel](https://github.com/wycto/dsh-balance-panel) | `dsh plugin --profile web add @wycto/dsh-balance-panel` |
 
 ## 目录
@@ -171,12 +171,16 @@ pet.log
 
 | 文件 | 改动 |
 |---|---|
-| `pet/chat/service.py` | 注入 `ProviderRouter`（按 provider_id 路由到 DSH 或原 OpenAI） |
-| `pet/config.py` | 默认 provider 改为 `dsh-webapi`；`APP_DIR_NAME` 改为 `dsh-pet-chubby_blue_whale`（无变体后缀）；`reload()` 键列表加 `dsh_self_talk_enabled` |
+| `pet/chat/service.py` | 注入 `ProviderRouter`（按 provider_id 路由到 DSH 或原 OpenAI）；移除记忆提炼 hook |
+| `pet/chat/prompt.py` | 新增 `MEMORY_GUIDE` 引导段，`build_messages` 追加记忆使用引导 |
+| `pet/chat/ai_settings_page.py` | 新增 DSH 记忆插件设置区 + 一键安装按钮 |
+| `pet/chat/widgets.py` / `pet/legacy_widgets.py` | 移除记忆相关 UI 与逻辑 |
+| `pet/quick_chat.py` / `pet/modern_settings_dialog.py` | 移除记忆相关引用 |
+| `pet/config.py` | 默认 provider 改为 `dsh-webapi`；`APP_DIR_NAME` 改为 `dsh-pet-chubby_blue_whale`（无变体后缀）；`reload()` 键列表加 `dsh_self_talk_enabled`；清理废置记忆键（`chat_memory_enabled` 等 3 个） |
 | `pet/vision.py` | 截图提问 DSH 分支：上传截图到 DSH 会话 → 提问 → 返回回复 |
 | `pet/window.py` | 看看屏幕 DSH 分支：截图 → 上传到 DSH 会话 → 提问 → 气泡 |
 | `pet/overlay_shell.py` | 看看屏幕 DSH 分支（overlay 版）；`PetSprite` + `ScreenHost` 的 `_show_random_self_talk` 合并 DSH 候选词 |
-| `pet/app.py` | 启动时检查工作区 + 天气城市 + 自言自语生成（`QTimer.singleShot`）；余额查询 DSH 分支（`show_balance` + `_quiet_balance_refresh` + `_balance_worker_dsh`） |
+| `pet/app.py` | 启动时检查角色工作区绑定 + 记忆插件安装提醒 + 天气城市 + 自言自语生成（`QTimer.singleShot`）；余额查询 DSH 分支（`show_balance` + `_quiet_balance_refresh` + `_balance_worker_dsh`） |
 | `pet/settings_features.py` | 天气功能激活时触发城市检测 |
 | `pet/window_alerts.py` | `merge_dsh_texts` 函数：从独立文件 `dsh_self_talk_texts.json` 读取 DSH 候选词并合并；`show_random_self_talk` 调用合并 |
 | `pet/pack_download.py` | 素材包下载 URL 顺序反转（代理优先，GitHub 官方最后） |
@@ -199,6 +203,11 @@ pet.log
 | `注意事项.txt` | 内容整合到 README |
 | 4 个 android 脚本 | android 相关 |
 | 3 个 android/CI 测试 | 引用已删目录 |
+| `pet/chat/memory.py` | 桌宠自带记忆存储（1104 行），已下沉到 `@dsh-pet/memory` 插件 |
+| `pet/chat/memory_recall.py` | 记忆回捞（531 行） |
+| `pet/chat/memory_extract.py` | 记忆提炼（306 行） |
+| `tests/test_chat_memory*.py` | chat memory 测试 |
+| `tests/test_memory_recall.py` | memory_recall 测试 |
 
 ### 配置说明
 

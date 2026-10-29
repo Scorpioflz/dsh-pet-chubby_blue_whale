@@ -340,7 +340,7 @@ def grant(*, run=subprocess.run, sid: str | None = None, powershell: str | None 
     deadline = int(now() + GRANT_TIMEOUT_S - DEADLINE_MARGIN_S)
     try:
         proc = run(build_command(sid, powershell, deadline), capture_output=True, text=True,
-                   timeout=GRANT_TIMEOUT_S, creationflags=_NO_WINDOW)
+                   encoding="utf-8", timeout=GRANT_TIMEOUT_S, creationflags=_NO_WINDOW)
     except subprocess.TimeoutExpired:
         return GrantResult("unknown", "等待授权超时：超时后才批准的请求不会执行；"
                                       "若已在超时前批准，注销或重启电脑后生效")

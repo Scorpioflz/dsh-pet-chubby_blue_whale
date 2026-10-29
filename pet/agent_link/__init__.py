@@ -456,7 +456,7 @@ def _pnpm_cli() -> str | None:
     try:
         proc = subprocess.run(
             [node, npm_cli, "install", "-g", "pnpm"],
-            capture_output=True, text=True, timeout=300, shell=False,
+            capture_output=True, text=True, encoding="utf-8", timeout=300, shell=False,
             env={**os.environ, "PATH": _augmented_path()},
             **_HIDDEN_KWARGS,
         )
@@ -500,7 +500,7 @@ def _run_pnpm(profile_dir: Path, *args: str) -> tuple[int, str]:
         return 127, _PNPM_MISSING_HINT
     try:
         proc = subprocess.run(
-            [*command, *args], capture_output=True, text=True,
+            [*command, *args], capture_output=True, text=True, encoding="utf-8",
             timeout=300, shell=False, cwd=str(profile_dir),
             env={**os.environ, "PATH": _augmented_path()},
             **_HIDDEN_KWARGS,
