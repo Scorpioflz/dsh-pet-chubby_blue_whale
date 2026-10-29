@@ -42,7 +42,7 @@ from .utils import _safe_emit
 
 class _AiSettingsPage(QWidget):
     test_done = Signal(bool, str)
-    _memory_install_done = Signal(bool, str)
+
 
     def __init__(self, config, parent=None):
         super().__init__(parent)
@@ -210,11 +210,6 @@ class _AiSettingsPage(QWidget):
         self.test_result = QLabel("验证当前 Provider、API 地址和凭据是否可用。")
         self.test_result.setWordWrap(True)
 
-        self.memory_plugin_btn = QPushButton("安装记忆插件", self)
-        self.memory_plugin_btn.clicked.connect(self._install_memory_plugin)
-        self.memory_plugin_status = QLabel("检查中…")
-        self.memory_plugin_status.setWordWrap(True)
-        self._memory_install_done.connect(self._on_memory_install_done)
 
         root = QVBoxLayout(self)
         root.setContentsMargins(0, 0, 0, 0)
@@ -238,19 +233,7 @@ class _AiSettingsPage(QWidget):
             SettingRow("system_prompt", "System Prompt", "定义桌宠对话时的身份、语气和行为。", self.prompt, stacked=True),
             SettingRow("connection_test", "连接测试", self.test_result.text(), self.test_button),
         ], self))
-        self._memory_plugin_section = SettingsSection("DSH 记忆插件", [
-            SettingRow(
-                "memory_plugin_status", "安装状态",
-                "记忆插件按工作区共享记忆，仅 DSH Web API 可用。",
-                self.memory_plugin_status,
-            ),
-            SettingRow(
-                "memory_plugin_install", "一键安装",
-                "将内置记忆插件安装到所有 DSH 实例。",
-                self.memory_plugin_btn,
-            ),
-        ], self)
-        root.addWidget(self._memory_plugin_section)
+
         root.addWidget(SettingsSection("场景扮演", [
             SettingRow(
                 "roleplay_enabled", "场景扮演",
@@ -652,55 +635,7 @@ class _AiSettingsPage(QWidget):
 
     def _update_provider_buttons(self) -> None:
         self.delete_provider_btn.setEnabled(len(self.settings.providers) > 1)
-        is_dsh = getattr(self.settings.active_config, 'provider_id', '') == 'dsh-webapi'
-        if is_dsh:
-            self._refresh_memory_plugin_status()
-        else:
-            self.memory_plugin_status.setText("仅 DSH Web API 可用")
-            self.memory_plugin_btn.setEnabled(False)
-            self.memory_plugin_btn.setText("安装记忆插件")
 
-    def _refresh_memory_plugin_status(self) -> None:
-        from ..memory_plugin_link import check_status
-        bundled, installed = check_status()
-        if installed:
-            self.memory_plugin_status.setText("已安装✓")
-            self.memory_plugin_btn.setEnabled(False)
-            self.memory_plugin_btn.setText("已安装")
-        elif bundled:
-            self.memory_plugin_status.setText("未安装")
-            self.memory_plugin_btn.setEnabled(True)
-            self.memory_plugin_btn.setText("安装记忆插件")
-        else:
-            self.memory_plugin_status.setText("内置插件目录缺失")
-            self.memory_plugin_btn.setEnabled(False)
-
-    def _install_memory_plugin(self) -> None:
-        self.memory_plugin_btn.setEnabled(False)
-        self.memory_plugin_btn.setText("安装中…")
-        self.memory_plugin_status.setText("正在安装…")
-
-        def _worker():
-            from ..memory_plugin_link import install_memory_plugin
-            ok, msg = install_memory_plugin()
-            try:
-                self._memory_install_done.emit(ok, msg)
-            except RuntimeError:
-                pass
-
-        threading.Thread(
-            target=_worker, daemon=True, name="pet-memory-plugin-install",
-        ).start()
-
-    def _on_memory_install_done(self, ok: bool, msg: str) -> None:
-        if ok:
-            self.memory_plugin_status.setText("已安装✓")
-            self.memory_plugin_btn.setText("已安装")
-            self.memory_plugin_btn.setEnabled(False)
-        else:
-            self.memory_plugin_status.setText(f"安装失败：{msg}")
-            self.memory_plugin_btn.setText("安装记忆插件")
-            self.memory_plugin_btn.setEnabled(True)
 
     def _apply_draft_to_provider(self, provider_id: str) -> None:
         p = self.settings.providers.get(provider_id)

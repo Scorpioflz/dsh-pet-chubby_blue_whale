@@ -93,7 +93,7 @@ ACTION_LABELS = {
     "quiet_mode": "免打扰",
     "weather": "查看天气", "weather_cities": "天气城市",
     "network_info": "网络信息",
-    "modern_settings": "桌宠设置", "memory_plugin": "安装记忆插件", "quit": "退出",
+    "modern_settings": "桌宠设置", "quit": "退出",
 }
 
 
@@ -123,7 +123,7 @@ ACTION_ICONS = {
     "quiet_mode": "pause",
     "weather": "weather", "weather_cities": "weather",
     "network_info": "web",
-    "modern_settings": "settings", "memory_plugin": "settings", "quit": "quit",
+    "modern_settings": "settings", "quit": "quit",
     "voice_chime_now": "chat", "voice_chime_toggle": "chat",
     "divination_draw": "todo",
     "festival_now": "todo", "festival_toggle": "todo",
@@ -204,9 +204,6 @@ def _build_animations(menu, pet):
 def _build_settings(menu, pet):
     return add_action(menu, "桌宠设置", "settings", pet.on_open_modern_settings, close_on_trigger=True)
 
-
-def _build_memory_plugin(menu, pet):
-    return add_action(menu, "安装记忆插件…", "settings", pet.on_install_memory_plugin, close_on_trigger=True)
 
 
 def _build_todo_panel(menu, pet):
@@ -383,9 +380,7 @@ class MenuActionRegistry:
             "modern_settings": MenuActionSpec(
                 _build_settings, _callback_available("on_open_modern_settings")
             ),
-            "memory_plugin": MenuActionSpec(
-                _build_memory_plugin, _callback_available("on_install_memory_plugin")
-            ),
+
             "todo_panel": MenuActionSpec(
                 _build_todo_panel, _callback_available("on_open_todo_panel")
             ),

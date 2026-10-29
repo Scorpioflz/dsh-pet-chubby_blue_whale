@@ -615,7 +615,7 @@ class PetInstance:
         # 没有别的路径，这里显式注入取岛回调（岛会被重建，所以传可调用者而非实例）。
         win.screen_capture_island = lambda: getattr(self.shell, "island", None)
         win.on_open_modern_settings = self._slot_wrap(self.open_modern_settings)
-        win.on_install_memory_plugin = self._slot_wrap(self.install_memory_plugin_dialog)
+
         # 桌宠隐藏时的气泡改道面（DSH 联动等非交互反馈气泡 → 灵动岛，见
         # window_alerts.redirect_hidden_bubble）；岛对话不可用时注入方返回 False。
         win.hidden_bubble_redirect = self.shell._island_feedback_bubble
@@ -2758,7 +2758,7 @@ class AppShell:
                         else:
                             self._show_memory_plugin_dialog()
             except Exception:
-                pass
+                logging.exception("memory plugin check failed")
             try:
                 fa = self.config.get("feature_activation", {})
                 enabled = fa.get("enabled", []) if isinstance(fa, dict) else []

@@ -344,10 +344,7 @@ class SpriteMenuFacade:
         return lambda: opener(sprite)
 
     @property
-    def on_install_memory_plugin(self):
-        return _first_callable(self._hosts(), ("on_install_memory_plugin",))
 
-    @property
     def on_look_screen(self):
         """「看看屏幕」：``OverlayShell.look_at_screen(sprite)``（PetWindow.look_at_screen
         的 sprite 等价物，同样只在聊天可用时注入）。
