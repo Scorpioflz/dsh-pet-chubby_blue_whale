@@ -26,7 +26,7 @@
 | 插件 | 用途 | 地址 | 安装 |
 |---|---|---|---|
 | `dsh-web-service` | REST API 服务（会话/工作区/文件上传/SSE 流式对话） | [toddpan/dsh-webapi](https://github.com/toddpan/dsh-webapi) | `dsh plugin --profile web add @toddpan/dsh-webapi` |
-| `@dsh-pet/memory` | 按工作区共享的长期记忆（基于 fish-memory 改造，14 天半衰期） | 内置 `integrations/dsh-pet-memory/` | 桌宠设置或 AI 设置 → API 列表选 `dsh-webapi` → DSH 记忆插件 → 一键安装 |
+| `@dsh-pet/memory` | 按工作区共享的长期记忆（基于 fish-memory 改造，14 天半衰期） | 内置 `integrations/dsh-pet-memory/` | 右键桌宠 → 安装记忆插件…；或 桌宠设置/AI 设置 → API 列表选 `dsh-webapi` → DSH 记忆插件 → 一键安装 |
 | `@wycto/dsh-balance-panel` | 余额查询 REST 端点 `GET /dsh-balance-panel` | [wycto/dsh-balance-panel](https://github.com/wycto/dsh-balance-panel) | `dsh plugin --profile web add @wycto/dsh-balance-panel` |
 
 > **注意**：`@dsh-pet/memory` 与原版 `dsh-fish-memory` 都注册 `remember` 工具，**不可装在同一个 DSH profile**。安装前如已有 fish-memory，先卸载：`dsh plugin --profile <profile> remove dsh-fish-memory`。

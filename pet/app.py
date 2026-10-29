@@ -615,6 +615,7 @@ class PetInstance:
         # 没有别的路径，这里显式注入取岛回调（岛会被重建，所以传可调用者而非实例）。
         win.screen_capture_island = lambda: getattr(self.shell, "island", None)
         win.on_open_modern_settings = self._slot_wrap(self.open_modern_settings)
+        win.on_install_memory_plugin = self._slot_wrap(self.install_memory_plugin_dialog)
         # 桌宠隐藏时的气泡改道面（DSH 联动等非交互反馈气泡 → 灵动岛，见
         # window_alerts.redirect_hidden_bubble）；岛对话不可用时注入方返回 False。
         win.hidden_bubble_redirect = self.shell._island_feedback_bubble
@@ -1182,6 +1183,39 @@ class PetInstance:
         ):
             self._hint_dock_hidden_recovery()
 
+    def install_memory_plugin_dialog(self) -> None:
+        from .memory_plugin_link import check_status, install_memory_plugin
+
+        bundled, installed = check_status()
+        if installed:
+            QMessageBox.information(self.win, "记忆插件", "DSH 记忆插件已安装✓")
+            return
+        if not bundled:
+            QMessageBox.warning(self.win, "记忆插件", "内置记忆插件目录缺失（integrations/dsh-pet-memory）")
+            return
+        ret = QMessageBox.question(
+            self.win, "安装记忆插件",
+            "将内置 @dsh-pet/memory 插件安装到所有 DSH 实例。\n\n"
+            "注意：如已安装 dsh-fish-memory，请先卸载（两者 remember 工具会冲突）。\n\n"
+            "是否安装？",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.Yes,
+        )
+        if ret != QMessageBox.StandardButton.Yes:
+            return
+
+        def _work():
+            try:
+                ok, msg = install_memory_plugin()
+            except Exception as e:
+                ok, msg = False, str(e)
+            if ok:
+                QMessageBox.information(self.win, "记忆插件", msg)
+            else:
+                QMessageBox.warning(self.win, "记忆插件", f"安装失败：{msg}")
+
+        import threading
+        threading.Thread(target=_work, daemon=True).start()
 
     def _dock_hidden_recovery_message(self) -> str:
         return (
