@@ -2527,7 +2527,7 @@ class DshMonitor(BaseAgentMonitor):
             # 与安装路径同源：manifest 里可能存在指向不存在路径的依赖（旧构建目录 /
             # 版本号变更的 tgz），裸 pnpm 会一直失败。先按探测结果修正再重试一次，
             # 否则启动自检每次都在同一处静默失败，link 永远刷不新。
-            rc, out, repaired = _run_pnpm_repairing_specs(profile, "add", str(plugin))
+            rc, out, repaired = _run_pnpm_repairing_specs(profile, "add", str(plugin), "--config.package-import-method=copy")
             if rc != 0:
                 log.warning(
                     "桥接 link 刷新失败 %s: %s", profile.name, (out or "")[-200:],
@@ -2658,7 +2658,7 @@ class DshMonitor(BaseAgentMonitor):
                 # 已安装也要刷新本地 link。否则源码/打包版升级后，profile
                 # 仍可能指向旧的 dist-onedir bridge，重启 dsh 只会继续加载旧代码。
                 # pnpm add 会更新已有的 link spec；失败时保留原安装并报告。
-                rc, out, repaired = _run_pnpm_repairing_specs(profile, "add", str(plugin))
+                rc, out, repaired = _run_pnpm_repairing_specs(profile, "add", str(plugin), "--config.package-import-method=copy")
                 if rc != 0:
                     failed.append(
                         f"{profile.name}: pnpm refresh 失败 {(out or '')[-150:]}"
@@ -2679,7 +2679,7 @@ class DshMonitor(BaseAgentMonitor):
                     continue
                 succeeded.append(profile.name)
                 continue
-            rc, out, repaired = _run_pnpm_repairing_specs(profile, "add", str(plugin))
+            rc, out, repaired = _run_pnpm_repairing_specs(profile, "add", str(plugin), "--config.package-import-method=copy")
             if rc != 0:
                 failed.append(
                     f"{profile.name}: pnpm add 失败 {(out or '')[-150:]}"
