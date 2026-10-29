@@ -7,12 +7,12 @@
 本项目是 **DSH (DeepSeek Harness) 的桌宠前端**，通过 dsh-web-service 插件的会话 API 接入 DSH：
 
 - **对话**：通过 DSH Web Service 会话 API（`/sessions/:id/prompt-stream`）实现连续对话，DSH 侧显示为同一会话
-- **角色对应会话**：每个桌宠角色对应独立 DSH 会话（按 system prompt 指纹映射）
+- **角色对应工作区**：每个桌宠角色绑定独立 DSH 工作区（`~/.dsh-pet-workspace/<char_id>`），工作区内共享记忆
+- **记忆**：由 DSH 插件 `@dsh-pet/memory`（基于 fish-memory 改造）按工作区共享记忆，桌宠前端只做纯 UI；记忆开关按角色配置，默认开启
 - **看看屏幕/截图提问**：截图上传到 DSH 会话（`POST /sessions/:id/files`）→ 提问 → 气泡显示回复
 - **余额查询**：通过 dsh-balance-panel 插件查询 DeepSeek 余额
 - **IP 定位城市**：首次启动检测城市，提醒设置默认天气城市
 - **自动自言自语**：每天通过 DSH API 以桌宠身份自动生成自言自语候选词（含热搜、新闻、吐槽），替换更新不累计
-- **工作区**：所有对话放在指定 DSH 工作区（默认 "pet"），便于整理与权限管理
 - **不发布、无 CI/CD、无 Release**，仅供自行封装使用
 - 依赖管理用 uv + `pyproject.toml`（Python 3.14+）
 - 上游同步：`git remote add upstream https://github.com/MerZlin/dsh-pet-indesktop.git && git fetch upstream`
@@ -26,6 +26,7 @@
 | 插件 | 用途 | 地址 | 安装 |
 |---|---|---|---|
 | `dsh-web-service` | REST API 服务（会话/工作区/文件上传/SSE 流式对话） | [toddpan/dsh-webapi](https://github.com/toddpan/dsh-webapi) | `dsh plugin --profile web add @toddpan/dsh-webapi` |
+| `@dsh-pet/memory` | 按工作区共享的长期记忆（基于 fish-memory 改造，14 天半衰期） | 内置 `integrations/dsh-pet-memory/` | 设置 → AI → DSH 记忆插件 → 一键安装 |
 | `@wycto/dsh-balance-panel` | 余额查询 REST 端点 `GET /dsh-balance-panel` | [wycto/dsh-balance-panel](https://github.com/wycto/dsh-balance-panel) | `dsh plugin --profile web add @wycto/dsh-balance-panel` |
 
 ## 目录
@@ -136,6 +137,8 @@ powershell -ExecutionPolicy Bypass -File scripts\build_portable.ps1
 ```text
 config.json                # 全局设置
 config-slot-0.json         # 主宠的每宠设置
+dsh_session.json           # 角色工作区/会话映射（每角色一个 DSH 工作区）
+dsh_workspaces.json        # 角色工作区绑定 + 记忆开关
 sessions/<character_id>/   # 会话历史
 pet.log
 ```
@@ -151,8 +154,10 @@ pet.log
 | 文件 | 用途 |
 |---|---|
 | `pet/dsh_api.py` | DSH Web Service REST API 客户端（工作区/会话/上传/SSE 流式） |
-| `pet/chat/dsh_provider.py` | `DshWebApiProvider`（会话 API 连续对话 + 附件上传 + 角色对应会话）+ `ProviderRouter`（按 provider_id 路由） |
-| `pet/dsh_workspace.py` | 工作区标题管理：首次启动弹窗询问，存储到数据目录 |
+| `pet/chat/dsh_provider.py` | `DshWebApiProvider`（每角色一个工作区 + 会话 API 连续对话 + 附件上传 + 记忆 toggle）+ `ProviderRouter` |
+| `pet/dsh_workspace.py` | 按角色绑定工作区 + 记忆开关配置（`dsh_workspaces.json`） |
+| `pet/memory_plugin_link.py` | 记忆插件 `@dsh-pet/memory` 安装检查与一键安装 |
+| `integrations/dsh-pet-memory/` | DSH 记忆插件（基于 fish-memory 改造，按工作区共享记忆，14 天半衰期） |
 | `pet/dsh_self_talk.py` | 每天通过 DSH API 以桌宠身份自动生成自言自语候选词（含热搜、新闻、吐槽），独立文件存储 |
 | `pet/weather/ip_city.py` | IP 定位城市：优先高德 API（精度高，需 Key），回退免费 API |
 | `tools/convert_frameseq_progress.py` | 帧序列转换器（带进度显示和 ETA） |

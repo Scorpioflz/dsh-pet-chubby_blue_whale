@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 from .models import ChatMessage, ChatSettings
-from .memory_recall import augment_for_turn
+
 
 def load_character_manifest(root:Path,character_id:str):
     try: raw=json.loads((Path(root)/character_id/'manifest.json').read_text(encoding='utf-8'))
@@ -39,6 +39,18 @@ ROLEPLAY_GUIDE = (
     '⑦ 绝不替用户做决定，不写用户的动作、台词和心理——用户的（动作）是剧情的一部分，'
     '接着演，不重复不点评。\n'
     '⑧ 场景卡是硬设定：与场景卡冲突时以场景卡为准。'
+)
+
+
+MEMORY_GUIDE = (
+    '【记忆引导】你可以使用 remember 工具记录值得长期记住的信息。\n'
+    '当你从对话中识别到以下内容时，请主动调用 remember 工具：\n'
+    '- 关于用户的长期事实（偏好、身份、习惯、背景）\n'
+    '- 重要的约定、承诺或计划\n'
+    '- 情感显著的时刻（开心、难过、感动、担忧等）\n'
+    '- 用户明确要求记住的任何事\n'
+    '记录时设置合适的 importance（1-10，越重要越大）和 emotion（-1 到 1，正面为正）。\n'
+    '不需要记住琐碎的寒暄、一次性的问答或已经记过的内容。'
 )
 
 
@@ -94,17 +106,10 @@ class PromptBuilder:
             prompt=load_character_prompt(self.characters_root,character_id)
             if prompt.strip(): return prompt.strip()
         return settings.default_system_prompt.strip()
-    def build_messages(self,settings,character_id,history,user_text,role_prompt=None,now=None,memory_text=None,
-                       roleplay_enabled=None,roleplay_scene=None,roleplay_cast=None,memory_payload=None):
+    def build_messages(self,settings,character_id,history,user_text,role_prompt=None,now=None,
+                       roleplay_enabled=None,roleplay_scene=None,roleplay_cast=None):
         """时间感知：历史用户消息前加发送时间标记，system 末尾附当前时间与距上条消息的间隔。
         时间取自已落盘的 ChatMessage.created_at，只在发给模型时附加，不改动会话文件。
-        memory_text（user 层快照，pet/chat/memory.injection_text 渲染）追加在
-        system 最末、与 time_context 同级；fact/lesson/topic 的按需命中由
-        augment_for_turn 用本次真实用户消息补第二段（首轮不命中）。
-        v2b：优先使用显式 memory_payload（pet/chat/memory.memory_payload）——
-        它的 text 作 user 快照、entries 作命中候选、session_key 作已见命名空间，
-        并负责调用 note_hits；与 memory_text 同时给时以 payload 为准（不重复注入）。
-        None/空 = 不注入，输出与无记忆逐字节一致。
         roleplay_*：每宠场景卡；未显式传入时从 settings 上读同名属性（测试/旧调用方
         直接构造 ChatSettings() 时为默认关）。引导的注入门槛是**有效 system prompt
         非空**（role_prompt → 角色 manifest 的 persona → 全局默认人设），不是
@@ -122,19 +127,7 @@ class PromptBuilder:
         if roleplay_enabled and system.strip():
             system=(system+'\n\n'+roleplay_context(roleplay_scene,roleplay_cast)).strip()
         system=(system+'\n\n'+time_context(history,now)).strip()
-        if memory_payload is not None:
-            memory_text=memory_payload.text
-        memory_text=str(memory_text or '').strip()
-        if memory_text: system=(system+'\n\n'+memory_text).strip()
-        recall_text=augment_for_turn(
-            memory_payload.entries if memory_payload is not None else [],
-            memory_payload.session_key if memory_payload is not None else '',
-            history,
-            user_text,
-            now=now,
-            note_hits=memory_payload.note_hits if memory_payload is not None else None,
-        )
-        if recall_text: system=(system+'\n\n'+recall_text).strip()
+        system=(system+'\n\n'+MEMORY_GUIDE).strip()
         trimmed=self.trim_history(history,settings.history_message_limit,settings.history_char_limit)
         return [{'role':'system','content':system},*({'role':m.role,'content':stamp_message(m)} for m in trimmed),{'role':'user','content':user_text.strip()}]
     @staticmethod

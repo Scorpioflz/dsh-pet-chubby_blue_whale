@@ -737,6 +737,21 @@ class PetInstance:
         self.config.set('character', character_id)
         self.config.save()
 
+        # 工作区随角色走：切换角色时检查工作区绑定，未绑定则弹窗要求提供名称
+        try:
+            from .dsh_workspace import get_character_workspace_title, ensure_character_workspace_title
+            if not get_character_workspace_title(character_id):
+                char_name = ''
+                try:
+                    manifest = catalog.load_character_manifest(character_id)
+                    if manifest:
+                        char_name = str(manifest.get('displayName', manifest.get('name', '')))
+                except Exception:
+                    pass
+                ensure_character_workspace_title(character_id, char_name, parent=self.win)
+        except Exception:
+            logging.exception("工作区绑定检查失败 (char=%s)", character_id)
+
         try:
             # 预创建新库，失败则保留当前角色（在动旧窗口之前完成）
             lib = self._create_library(character_id)
@@ -2637,8 +2652,42 @@ class AppShell:
                 settings = self.config.chat_settings()
                 provider = settings.active_config
                 if getattr(provider, 'provider_id', '') == 'dsh-webapi':
-                    from .dsh_workspace import ensure_workspace_title
+                    from .dsh_workspace import (
+                        ensure_workspace_title,
+                        get_character_workspace_title,
+                        ensure_character_workspace_title,
+                    )
                     ensure_workspace_title()
+                    character_id = str(self.config.get('character', catalog.DEFAULT_CHARACTER))
+                    if not get_character_workspace_title(character_id):
+                        char_name = ''
+                        try:
+                            manifest = catalog.load_character_manifest(character_id)
+                            if manifest:
+                                char_name = str(manifest.get('displayName', manifest.get('name', '')))
+                        except Exception:
+                            pass
+                        win = getattr(self, "win", None)
+                        if win is None and self.instance is not None:
+                            win = getattr(self.instance, "win", None)
+                        ensure_character_workspace_title(character_id, char_name, parent=win)
+            except Exception:
+                pass
+            try:
+                settings = self.config.chat_settings()
+                provider = settings.active_config
+                if getattr(provider, 'provider_id', '') == 'dsh-webapi':
+                    from .memory_plugin_link import check_status
+                    bundled, installed = check_status()
+                    if bundled and not installed:
+                        win = getattr(self, "win", None)
+                        if win is None and self.instance is not None:
+                            win = getattr(self.instance, "win", None)
+                        if win is not None:
+                            win.show_bubble(
+                                "记忆插件未安装，可在设置中一键安装～",
+                                duration_ms=7000,
+                            )
             except Exception:
                 pass
             try:
@@ -3196,7 +3245,7 @@ class AppShell:
         # 退出标记（R2 第五缺口）：在途自动拉起 worker 凭它中止或补偿收口——
         # 否则「退出时登记表为空 → worker 随后 spawn 登记」会留下永远无人收的进程。
         self._quitting = True
-        self._flush_chat_memory_hits()
+
         # 窗级收口：逐窗保存位置、停本窗预热与 Agent、提交本窗会话
         for inst in self._instances:
             win = inst.win
@@ -3331,16 +3380,6 @@ class AppShell:
         # timeout 连接会从 Qt C++ 侧强引用住本对象图，不停则阻碍回收）。
         self._teardown_config_watcher()
 
-    def _flush_chat_memory_hits(self) -> None:
-        """退出前冲刷对话记忆命中队列（L2）：带总超时，失败只记日志。"""
-        try:
-            from .chat.memory import flush_pending_hits
-        except ImportError:
-            return  # 纯桌宠构建没有 chat 模块
-        try:
-            flush_pending_hits(timeout=2.0)
-        except Exception:
-            logging.exception("退出时冲刷对话记忆命中失败")
 
     @classmethod
     def _shutdown_live_for_tests(cls) -> None:

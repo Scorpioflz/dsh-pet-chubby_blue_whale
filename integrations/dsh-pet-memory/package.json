@@ -1,0 +1,45 @@
+{
+  "name": "@dsh-pet/memory",
+  "version": "0.1.0",
+  "private": true,
+  "description": "桌宠记忆插件：基于 fish-memory 改造，按工作区共享记忆",
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "slots"
+      ],
+      "external": [
+        "react"
+      ]
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "*",
+    "@deepseek-ai/dsh-llm": "*"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-tools": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-llm": {
+      "optional": true
+    }
+  }
+}
