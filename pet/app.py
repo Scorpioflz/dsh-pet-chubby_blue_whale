@@ -1186,8 +1186,7 @@ class PetInstance:
     def _show_memory_plugin_dialog(self) -> None:
         from PySide6.QtWidgets import QMessageBox
         win = getattr(self, "win", None)
-        if win is None and self.instance is not None:
-            win = getattr(self.instance, "win", None)
+
         msg = QMessageBox(win)
         msg.setWindowTitle("记忆插件")
         msg.setIcon(QMessageBox.Icon.Information)
@@ -2752,11 +2751,11 @@ class AppShell:
                                 if datetime.now().isoformat() < remind:
                                     pass
                                 else:
-                                    self._show_memory_plugin_dialog()
+                                    self.instance._show_memory_plugin_dialog()
                             except Exception:
-                                self._show_memory_plugin_dialog()
+                                self.instance._show_memory_plugin_dialog()
                         else:
-                            self._show_memory_plugin_dialog()
+                            self.instance._show_memory_plugin_dialog()
             except Exception:
                 logging.exception("memory plugin check failed")
             try:
