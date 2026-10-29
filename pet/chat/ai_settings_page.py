@@ -241,7 +241,7 @@ class _AiSettingsPage(QWidget):
         self._memory_plugin_section = SettingsSection("DSH 记忆插件", [
             SettingRow(
                 "memory_plugin_status", "安装状态",
-                "记忆插件按工作区共享记忆，需安装到 DSH 才能生效。",
+                "记忆插件按工作区共享记忆，仅 DSH Web API 可用。",
                 self.memory_plugin_status,
             ),
             SettingRow(
@@ -653,9 +653,12 @@ class _AiSettingsPage(QWidget):
     def _update_provider_buttons(self) -> None:
         self.delete_provider_btn.setEnabled(len(self.settings.providers) > 1)
         is_dsh = getattr(self.settings.active_config, 'provider_id', '') == 'dsh-webapi'
-        self._memory_plugin_section.setVisible(is_dsh)
         if is_dsh:
             self._refresh_memory_plugin_status()
+        else:
+            self.memory_plugin_status.setText("仅 DSH Web API 可用")
+            self.memory_plugin_btn.setEnabled(False)
+            self.memory_plugin_btn.setText("安装记忆插件")
 
     def _refresh_memory_plugin_status(self) -> None:
         from ..memory_plugin_link import check_status
