@@ -1,3 +1,3 @@
 - insert:
     - id: pet-memory
-      name: @dsh-pet/memory
+      name: '@dsh-pet/memory'
