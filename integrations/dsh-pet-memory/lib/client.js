@@ -1,6 +1,6 @@
 // DSH 桌宠记忆 · 客户端半边（设置左侧栏一项「桌宠记忆」）
 window.__ModuleLoader__.load({
-  id: 'dsh-pet-memory',
+  id: '@dsh-pet/memory',
   factory: (require) => {
     var module = { exports: {} }
     var exports = module.exports
