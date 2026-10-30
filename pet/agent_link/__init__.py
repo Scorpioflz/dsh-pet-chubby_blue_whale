@@ -872,15 +872,62 @@ def _repair_missing_dependency_specs(profile_dir: Path, pkg: dict) -> list[str]:
     return [f"{name}: {old} → {new}" for name, old, new in changes]
 
 
-def _run_pnpm_repairing_specs(profile_dir: Path, *args: str) -> tuple[int, str, list[str]]:
-    """跑 pnpm；失败且存在可唯一修正的坏依赖路径时，修正后重试一次。
+def _clear_reparse_point(path: Path) -> bool:
+    """删除 NTFS reparse point（junction/symlink），不跟随目标。
 
-    返回 (返回码, 输出, 修正说明列表)。修正会备份 package.json，并由 pnpm
-    在重试时重新生成 lockfile。
+    os error 448 的根因是 pnpm 创建的 junction 指向旧路径（如已删除的打包目录），
+    pnpm 遍历时被 Windows 拒绝。删除 junction 本身（不是目标）后 pnpm add 可重试。
+    """
+    import ctypes
+    if not path.exists() and not path.is_symlink():
+        return False
+    try:
+        is_dir = path.is_dir()
+        if is_dir:
+            ctypes.windll.kernel32.RemoveDirectoryW(str(path))
+        else:
+            ctypes.windll.kernel32.DeleteFileW(str(path))
+        return True
+    except OSError:
+        return False
+
+
+def _extract_reparse_paths(pnpm_output: str) -> list[Path]:
+    """从 pnpm os error 448 输出中提取被拒绝的路径。
+
+    错误格式：Failed to read package manifest at "C:\\...\\package.json": ... (os error 448)
+    返回 junction 目录路径（package.json 的父目录）。
+    """
+    import re
+    paths: list[Path] = []
+    for m in re.finditer(r'Failed to read package manifest at "(.+?)"', pnpm_output):
+        manifest_path = Path(m.group(1))
+        if manifest_path.name == "package.json":
+            paths.append(manifest_path.parent)
+    return paths
+
+
+def _run_pnpm_repairing_specs(profile_dir: Path, *args: str) -> tuple[int, str, list[str]]:
+    """跑 pnpm；失败时按序尝试：清理 os error 448 junction、修正坏依赖路径，各重试一次。
+
+    返回 (返回码, 输出, 修正说明列表)。
     """
     rc, out = _run_pnpm(profile_dir, *args)
     if rc == 0:
         return rc, out, []
+
+    # os error 448: pnpm 遍历旧 junction 被拒，删除 junction 后重试
+    if "os error 448" in (out or ""):
+        cleared: list[str] = []
+        for broken in _extract_reparse_points(out or ""):
+            if _clear_reparse_point(broken):
+                cleared.append(str(broken))
+        if cleared:
+            log.warning("清理旧 reparse point 后重试 pnpm: %s", "；".join(cleared))
+            rc, out = _run_pnpm(profile_dir, *args)
+            if rc == 0:
+                return rc, out, cleared
+
     pkg = _read_manifest(profile_dir)
     if pkg is None:
         return rc, out, []
