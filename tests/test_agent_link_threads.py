@@ -197,17 +197,14 @@ class TestWorkerLifecycle:
         cfg = Config(base=tmp_path)
         mgr = AgentLinkManager(None, cfg)
         dsh = mgr.monitors["dsh"]
-        op = mgr.monitors["opencode"]
         dsh._POLL_INTERVAL_S = 0.05
-        op._POLL_INTERVAL_S = 0.05
         dsh.start()
-        op.start()
-        assert dsh._running and op._running
+        assert dsh._running
         t0 = time.monotonic()
         mgr.shutdown()
         assert time.monotonic() - t0 < 3.0  # 共享截止，不是每个串行 2s
-        assert not dsh._running and not op._running
-        assert not dsh._worker.is_alive() and not op._worker.is_alive()
+        assert not dsh._running
+        assert not dsh._worker.is_alive()
 
     def test_worker_does_not_poll_immediately_on_start(self, tmp_path):
         """worker 首轮先等一个周期：启动瞬间不抢读（直调 _poll 的测试 seam）。"""

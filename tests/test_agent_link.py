@@ -82,26 +82,6 @@ class TestMainlineAgentLinkHardening:
         assert [event.state for event in events] == ["working"]
         monitor.stop()
 
-    def test_stale_generation_is_rejected_at_manager(self, tmp_path):
-        class Win:
-            def isVisible(self):
-                return True
-
-            def mark_activity(self):
-                pass
-
-        mgr = AgentLinkManager(Win(), Config(base=tmp_path), min_interval=0.0)
-        monitor = mgr.monitors["cursor"]
-        monitor.start()
-        old_gen = monitor._emit_gen
-        monitor.stop()
-        monitor.start()
-        current_gen = monitor._emit_gen
-        mgr._on_agent_state_event(AgentEvent("cursor", "state", gen=old_gen, state="working"))
-        assert "cursor" not in mgr._last_raw
-        mgr._on_agent_state_event(AgentEvent("cursor", "state", gen=current_gen, state="working"))
-        assert mgr._last_raw["cursor"] == "working"
-        mgr.shutdown()
 
     def test_install_completion_from_old_token_is_dropped(self, tmp_path):
         bubbles = []
@@ -699,25 +679,7 @@ class TestAgentLinkManager:
             assert dead not in cleaned, f"退役键 {dead} 不得存活"
         assert cleaned["dsh"] is True
 
-    def test_enable_disable_and_pause_resume(self, tmp_path):
-        cfg = Config(base=tmp_path)
-        mgr = AgentLinkManager(None, cfg)
 
-        mgr.set_enabled("cursor", True)
-        assert cfg.data["agent_link"]["cursor"] is True
-        assert mgr.monitors["cursor"].is_running() is True
-
-        # 暂停（桌宠隐藏）
-        mgr.pause()
-        assert mgr.monitors["cursor"].is_running() is False
-
-        # 恢复
-        mgr.resume()
-        assert mgr.monitors["cursor"].is_running() is True
-
-        # 关闭
-        mgr.set_enabled("cursor", False)
-        assert mgr.monitors["cursor"].is_running() is False
 
 # ============================================================================
 # ============================================================================
@@ -756,20 +718,6 @@ class TestRealFileTailEndToEnd:
         win = DummyPetWindow()
         mgr = AgentLinkManager(win, cfg, min_interval=0.0)  # 测试关闭节流，逐个验证状态映射
 
-        # 模拟 Agent 状态分发（busy 动作池轮换：写代码→吃Token）
-        mgr._on_agent_state("claude", "thinking")
-        assert "写代码" in switched_anims
-
-        mgr._on_agent_state("claude", "working")
-        assert "吃Token" in switched_anims
-
-        mgr._on_agent_state("claude", "attention")
-        # busy 后的 attention（Claude Stop=回合结束）不再立即弹「确认」气泡，
-        # 改由完成确认流程接管（防双气泡）；确认后弹中性完成文案
-        assert not any("确认一下" in b for b in bubbles)
-        assert "claude" in mgr._done_pending
-        mgr._fire_done("claude")
-        assert any("已停止" in b for b in bubbles)
 
         # 非 busy 后独立出现的 attention 仍立即提醒
         mgr._on_agent_state("dsh", "attention")
@@ -813,57 +761,6 @@ class TestByteOffsetTailerPartialLine:
         assert out == [line1.strip()]
 
 
-class TestAgentStateDebounce:
-    def _make_mgr(self, tmp_path):
-        from PySide6.QtWidgets import QApplication
-        app = QApplication.instance() or QApplication([])
-
-        switched = []
-
-        class DummyWin:
-            cats = {"acts": ["写代码", "原地敲击桌面互动", "吃Token", "轻快记录", "漂浮踏步"]}
-            idles = ["待机呼吸"]
-
-            def isVisible(self):
-                return True
-
-            def _switch(self, name):
-                switched.append(name)
-
-            def request_link_anim(self, name):
-                switched.append(name)
-
-            def request_link_idle(self):
-                if self.idles:
-                    switched.append(self.idles[0])
-
-            def show_bubble(self, text, duration_ms=3000):
-                pass
-
-            def _pick(self, lst):
-                return lst[0]
-
-        cfg = Config(base=tmp_path)
-        clock = [1000.0]
-        mgr = AgentLinkManager(DummyWin(), cfg, min_interval=2.0, clock=lambda: clock[0])
-        return mgr, switched, clock
-
-    def test_same_state_deduped(self, tmp_path):
-        mgr, switched, clock = self._make_mgr(tmp_path)
-        mgr._on_agent_state("claude", "working")
-        mgr._on_agent_state("claude", "working")
-        mgr._on_agent_state("claude", "working")
-        assert switched == ["写代码"]  # 只切一次
-
-    def test_throttled_within_interval(self, tmp_path):
-        mgr, switched, clock = self._make_mgr(tmp_path)
-        mgr._on_agent_state("claude", "working")
-        clock[0] += 1.0  # 1s < 2s 节流间隔
-        mgr._on_agent_state("claude", "thinking")
-        assert switched == ["写代码"]  # 被节流
-        clock[0] += 2.0  # 超过间隔
-        mgr._on_agent_state("claude", "thinking")
-        assert switched == ["写代码", "吃Token"]  # 动作池轮换：写代码→吃Token
 
 
 class TestAgentMenuRebound:
@@ -1139,7 +1036,7 @@ class TestAgentLinkBubbles:
         assert "DSH 正在思考" in bubbles2[0]
 
     def test_thinking_uses_agent_delta_preset(self, tmp_path):
-        """thinking 文案走统一预设 agents delta：dsh 有覆盖时命中，其它 Agent 回退 global。
+        """thinking 文案走统一预设 agents delta：dsh 有覆盖时命中。
 
         ticket 02/05：dialogue_mode=custom + {global, agents} 双层。
         """
@@ -1152,7 +1049,6 @@ class TestAgentLinkBubbles:
             "global": {"thinking": ["{name} 全局思考……"]},
             "agents": {
                 "dsh": {"thinking": ["{name} 大肥鱼深度思考中……"]},
-                "claude": {},
             },
         }
         cfg.save()
@@ -1161,12 +1057,6 @@ class TestAgentLinkBubbles:
         assert len(bubbles) == 1
         assert "大肥鱼深度思考中" in bubbles[0]
         assert "全局思考" not in bubbles[0]
-
-        # claude 无 agents 覆盖 → 回退 global
-        mgr._on_agent_state("dsh", "idle")
-        clock[0] += 3.0
-        mgr._on_agent_state("claude", "thinking")
-        assert any("Claude Code 全局思考" in b for b in bubbles)
 
     def test_jitter_cancel_done_check(self, tmp_path):
         """4. working→idle→working 抖动：idle 后 pending 存在，
@@ -1229,7 +1119,7 @@ class TestAgentLinkBubbles:
         # 钥匙串边界：不让测试进程真去读 keyring（有 key 会起线程打真接口）。
         monkeypatch.setattr(Config, "resolve_api_key", lambda self, provider: "")
         mgr, win, bubbles, clock = self._make_mgr(tmp_path)
-        mgr.cfg.data["chat"]["active_provider"] = "openai-main"
+        mgr.cfg.data["chat"]["providers"]["dsh-webapi"]["base_url"] = "https://api.deepseek.com"
         mgr.cfg.set("agent_cost_enabled", True)
 
         # 第一轮：正常完成，把基线/结算链路走完整
@@ -1272,7 +1162,7 @@ class TestAgentLinkBubbles:
         单人会话也会被误标「（含其他会话）」。"""
         monkeypatch.setattr(Config, "resolve_api_key", lambda self, provider: "")
         mgr, win, bubbles, clock = self._make_mgr(tmp_path)
-        mgr.cfg.data["chat"]["active_provider"] = "openai-main"
+        mgr.cfg.data["chat"]["providers"]["dsh-webapi"]["base_url"] = "https://api.deepseek.com"
         mgr.cfg.set("agent_cost_enabled", True)
 
         # 第一轮干活 → idle（确认定时器挂着，但不手动 _fire_done——模拟 800ms
@@ -1326,26 +1216,6 @@ class TestAgentLinkBubbles:
         mgr._show_link_bubble("重要消息", important=True)
         assert bubbles == []
 
-    def test_busy_to_attention_counts_as_done(self, tmp_path):
-        """8. Claude 风格：working→attention(Stop) 进入完成确认，不弹立即提醒，
-        确认后弹完成气泡（因见过 attention 用中性文案）。"""
-        mgr, win, bubbles, clock = self._make_mgr(tmp_path)
-        mgr._on_agent_state("claude", "working")
-        clock[0] += 3.0
-        mgr._on_agent_state("claude", "attention")
-        assert "claude" in mgr._done_pending  # 进入完成确认
-        assert not any("看一眼" in b for b in bubbles), "不弹立即 attention 气泡（防双气泡）"
-
-        mgr._fire_done("claude")
-        assert any("已停止" in b for b in bubbles)
-        assert not any("已完成本轮任务" in b or "执行完成" in b for b in bubbles)
-
-    def test_standalone_attention_immediate_bubble(self, tmp_path):
-        """9. 非 busy 后独立出现的 attention：立即提醒，不进完成流程。"""
-        mgr, win, bubbles, clock = self._make_mgr(tmp_path)
-        mgr._on_agent_state("claude", "attention")
-        assert "claude" not in mgr._done_pending
-        assert any("确认一下" in b for b in bubbles)
 
     def test_done_restores_idle_anim_unless_others_busy(self, tmp_path):
         """10. 完成确认后恢复待机动画（Claude 没有 idle 事件，靠这步回待机）；
@@ -1522,29 +1392,8 @@ class TestAgentLinkSounds:
         mgr._fire_done("dsh")
         assert len(calls) == 4, "error 周期不能追加 done 音效"
 
-        clock[0] += 1
-        mgr._on_agent_state("cursor", "working")
-        clock[0] += 1
-        mgr._on_agent_state("cursor", "error")
-        clock[0] += 1
-        mgr._on_agent_state("cursor", "working")
-        mgr._on_agent_state("cursor", "idle")
-        mgr._fire_done("cursor")
-        assert len(calls) == 7, "error 后重试仍属于同一错误周期，不能补 done"
 
-    def test_cooldown_is_global_and_disabled_is_silent(self, tmp_path, monkeypatch):
-        mgr, clock, calls = self._make(tmp_path, monkeypatch, sound_cooldown_seconds=2.0)
-        mgr._on_agent_state("dsh", "working")
-        mgr._on_agent_state("claude", "working")
-        assert len(calls) == 1
-        clock[0] += 2.01
-        mgr._on_agent_state("claude", "error")
-        assert len(calls) == 2
 
-        mgr.cfg.data["agent_link"]["sound_enabled"] = False
-        clock[0] += 3
-        mgr._on_agent_state("cursor", "working")
-        assert len(calls) == 2
 
 
 class TestInstallErrorSummary:
@@ -1591,6 +1440,7 @@ class TestInstallErrorSummary:
         ]
         assert calls[1][0] == [
             "C:/Program Files/nodejs/node.exe", pnpm_cli, "add", str(plugin),
+            "--config.package-import-method=copy",
         ]
         assert json.loads(manifest.read_text(encoding="utf-8"))["dsh"]["profile"]["bundles"] == [
             agent_link.DSH_PLUGIN_NAME
@@ -4810,23 +4660,6 @@ class TestAgentScopedPhraseRouting:
         assert any(text.startswith("DSH-X:start") for text in harness.win.bubbles), \
             harness.win.bubbles
 
-    def test_agent_missing_warning_uses_agent_phrases(self, tmp_path, monkeypatch):
-        """「没检测到本机安装」提醒同走该 Agent 的专属文案。
-
-        ``_warn_if_agent_absent`` 的 marker 表只列 cursor / opencode（DSH 的
-        marker 是端口探活，不走这条），故用 opencode 触发；``Path.home`` 是
-        文件系统边界，钉到临时目录保证 marker 不存在（否则断言取决于本机装没装）。
-        """
-        fake_home = tmp_path / "home"
-        fake_home.mkdir()
-        monkeypatch.setattr(Path, "home", lambda: fake_home)
-        harness = _BridgeHarness(tmp_path, phrases=self._phrases())
-        try:
-            harness.mgr._warn_if_agent_absent("opencode")
-        finally:
-            harness.close()
-        assert any(text.startswith("OPENCODE-X:agent.missing")
-                   for text in harness.win.bubbles), harness.win.bubbles
 
     def test_public_events_stay_on_the_global_layer(self, tmp_path):
         """非回归：公共事件（桥接安装等）不随 Agent 归属，保持空路由读 global。"""

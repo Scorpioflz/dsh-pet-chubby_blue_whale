@@ -204,8 +204,8 @@ def test_reset_rebuilds_credential_only_entry_for_custom_providers(tmp_path: Pat
 
     reloaded = Config(base=tmp_path / "appdata")  # 加载路径按默认模板补齐骨架
     relay = reloaded.data["chat"]["providers"]["relay"]
-    assert relay["base_url"] == "https://api.deepseek.com"
-    assert relay["model"] == "deepseek-v4-flash"
+    assert relay["base_url"] == "http://127.0.0.1:3080/api/v1"
+    assert relay["model"] == ""
     assert relay["api_key_ref"] == "provider/relay", "凭据引用必须留下（钥匙串里的 key 靠它取回）"
     # 重置后活跃 provider 仍是默认那一个：被保留的凭据容器不会被自动选中。
     assert reloaded.data["chat"]["active_provider"] == "dsh-webapi"

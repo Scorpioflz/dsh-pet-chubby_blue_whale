@@ -242,7 +242,7 @@ class TestRefreshStaleBridgeLinks:
 
         assert refreshed == ["web"]
         assert [name for name, _args in calls] == ["web"]
-        assert calls[0][1] == ("add", str(plugin))
+        assert calls[0][1] == ("add", str(plugin), "--config.package-import-method=copy")
 
     def test_refresh_repairs_broken_dep_specs_then_retries(self, tmp_path, monkeypatch):
         """陈旧 link 的 profile 里另有可修复的坏依赖时，refresh 也要先修后重试。
