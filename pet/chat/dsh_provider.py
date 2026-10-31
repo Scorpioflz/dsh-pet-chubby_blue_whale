@@ -217,7 +217,7 @@ class DshWebApiProvider:
             enabled = get_character_memory_enabled(char_id)
             base_url = getattr(config, 'base_url', '') or _DEFAULT_BASE
             root = base_url.rsplit('/api/v1', 1)[0].rstrip('/')
-            toggle_url = f"{root}/dsh-pet-memory/toggle"
+            toggle_url = f"{root}/dsh-cbw-memory/toggle"
             body = json.dumps({"session": session_id, "on": enabled}).encode("utf-8")
             req = urllib.request.Request(
                 toggle_url, data=body, method="POST",

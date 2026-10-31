@@ -181,7 +181,7 @@ pet.log
 | `pet/chat/prompt.py` | 移除人设/扮演/记忆引导；`build_messages` 只返回用户消息（DSH 管历史与人设）；移除 roleplay 参数 |
 | `pet/chat/providers.py` | 精简为 HTTP 工具（`_make_ssl_context`、`build_browser_headers`、`normalize_chat_endpoint`）；移除 `OpenAICompatibleProvider`、`SSEParser`、`test_connection`、联网搜索 |
 | `pet/chat/models.py` | `ProviderError`/`StreamEvent` 迁入；`WebSearchSettings`/`WEB_SEARCH_*` 移除；`ChatSettings.web_search` 字段移除；`default_system_prompt` 默认→空；`active_provider` 默认→`dsh-webapi` |
-| `pet/chat/dsh_provider.py` | 移除 `ProviderRouter`；移除 `prompt_sync`/`system_sent`（DSH persona 插件处理人设） |
+| `pet/chat/dsh_provider.py` | 移除 `ProviderRouter`；移除 `prompt_sync`/`system_sent`（DSH persona 插件处理人设）；记忆 toggle URL 前缀 `/dsh-pet-memory/` → `/dsh-cbw-memory/`（v0.4.1） |
 | `pet/chat/ai_settings_page.py` | 移除多 provider 管理 UI、联网搜索控件、扮演 UI + `RoleplaySceneDialog`（960→453 行） |
 | `pet/chat/settings_dialog.py` | 移除多 provider 管理 UI（459→242 行） |
 | `pet/chat/widgets.py` / `pet/legacy_widgets.py` | 移除 roleplay 参数传递 |

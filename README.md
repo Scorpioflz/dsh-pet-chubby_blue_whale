@@ -187,7 +187,7 @@ pet.log
 | `pet/chat/prompt.py` | Remove persona/roleplay/memory guide; `build_messages` returns only user message (DSH handles history & persona); remove roleplay params from signature |
 | `pet/chat/providers.py` | Strip to HTTP utilities only (`_make_ssl_context`, `build_browser_headers`, `normalize_chat_endpoint`); remove `OpenAICompatibleProvider`, `SSEParser`, `test_connection`, web search code |
 | `pet/chat/models.py` | `ProviderError`/`StreamEvent` moved here; `WebSearchSettings`/`WEB_SEARCH_*` removed; `ChatSettings.web_search` field removed; `default_system_prompt` default→empty; `active_provider` default→`dsh-webapi` |
-| `pet/chat/dsh_provider.py` | Remove `ProviderRouter`; remove `prompt_sync`/`system_sent` (DSH persona plugin handles system prompt) |
+| `pet/chat/dsh_provider.py` | Remove `ProviderRouter`; remove `prompt_sync`/`system_sent` (DSH persona plugin handles system prompt); memory toggle URL prefix `/dsh-pet-memory/` → `/dsh-cbw-memory/` (v0.4.1) |
 | `pet/chat/ai_settings_page.py` | Remove multi-provider management UI, web search controls, roleplay UI + `RoleplaySceneDialog` (960→453 lines) |
 | `pet/chat/settings_dialog.py` | Remove multi-provider management UI (459→242 lines) |
 | `pet/chat/widgets.py` / `pet/chat/legacy_widgets.py` | Remove roleplay param passing to `build_messages` |
