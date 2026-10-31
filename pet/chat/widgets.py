@@ -2288,11 +2288,6 @@ class ChatWindow(QDialog):
             self.session.messages[:-1],
             text,
 
-            # 每宠键：config 可能是 slot 路由视图，必须从 get 逐键读（chat_settings()
-            # 转发主配置，读不到这只宠的场景卡）。
-            roleplay_enabled=bool(self.config.get("roleplay_enabled", False)),
-            roleplay_scene=str(self.config.get("roleplay_scene", "") or ""),
-            roleplay_cast=str(self.config.get("roleplay_cast", "") or ""),
         )
         if image_payloads:
             messages[-1]["content"] = [{"type": "text", "text": text}, *image_payloads]

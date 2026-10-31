@@ -1073,11 +1073,6 @@ class ChatWindow(QDialog):
         messages = self.prompt_builder.build_messages(
             self.settings, self.character_id, self.session.messages[:-1], text,
 
-            # 每宠键：config 可能是 slot 路由视图，必须从 get 逐键读（chat_settings()
-            # 转发主配置，读不到这只宠的场景卡）。与 widgets.py / quick_chat.py 同口径。
-            roleplay_enabled=bool(self.config.get("roleplay_enabled", False)),
-            roleplay_scene=str(self.config.get("roleplay_scene", "") or ""),
-            roleplay_cast=str(self.config.get("roleplay_cast", "") or ""),
         )
         # 与 widgets.py 同款：id 必须先落本窗在途状态再 send（`started` 在
         # send() 内同步发出，晚赋值会让 `_started` 的 id 过滤恒命中）。

@@ -30,8 +30,7 @@ class PromptBuilder:
     def effective_system_prompt(self, settings, character_id, role_prompt=None):
         return ''
 
-    def build_messages(self, settings, character_id, history, user_text, role_prompt=None, now=None,
-                       roleplay_enabled=None, roleplay_scene=None, roleplay_cast=None):
+    def build_messages(self, settings, character_id, history, user_text, role_prompt=None, now=None):
         return [{'role': 'user', 'content': user_text.strip()}]
 
     @staticmethod

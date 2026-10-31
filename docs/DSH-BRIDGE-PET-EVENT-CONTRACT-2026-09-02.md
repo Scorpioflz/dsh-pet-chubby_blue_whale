@@ -95,60 +95,6 @@ message.part.updated(tool)        → activity(part.tool)
 
 它不会从 `edit`、`read` 或 `bash` 的工具名称推导出审批请求。
 
-### Custom Agent 旧适配器
-
-`CustomAgentMonitor` 是只读通道，读取用户指定的 JSONL 文件，不创建目录、不改写外部
-配置，也不提供 Agent 响应回写。它适合输出显式 `state` 或基础 `event/tool`：
-
-```json
-{"ts": 0, "agent": "myagent", "event": "PreToolUse", "tool": "read"}
-```
-
-旧式基础适配器的能力边界：
-
-```text
-支持：状态、工具活动、普通错误和完成提示
-不保证：session 隔离、审批按钮、用户问题、resolved 精确关联、决定回写
-```
-
-因此旧适配器直接经过新的标准化解析，目前只会增加语义分析输入，不应自动获得交互
-能力。缺少完整关联键的记录只能作为 Activity/Risk 分析；不能补造 `rpcId`、`requestId`
-或 `sessionId`，也不能凭工具名称生成审批请求。
-
-### 旧适配器行为的统一事件归类
-
-旧适配器的所有有效行为，目前都可以归入以下五类；其中只有前四类会改变 Pet 的直接
-表现，第五类用于分析但不应触发气泡：
-
-| 行为类别 | 旧适配器输入 | 统一事件/Signal | Pet 处理 |
-|---|---|---|---|
-| 开始思考 | `UserPromptSubmit`、Cursor `role=user`、OpenCode 用户消息 | `LifecycleEvent` / `state_changed(thinking)` | 思考动画，可选开始提示 |
-| 正在工作 | `PreToolUse`、Cursor assistant `tool_use`、OpenCode `step-start`、显式 `state=working` | `LifecycleEvent` / `state_changed(working)` | 工作动画 |
-| 工具活动 | `tool` 字段、Cursor tool name、OpenCode `part.tool` | `ToolCallEvent` 或 `activity(agent, tool)` | 读取、搜索、编辑、执行等过程提示；不代表审批 |
-| 完成或等待 | `SessionEnd`、`Stop`、OpenCode `step-finish`、显式 `state=idle/attention` | `LifecycleEvent` / `state_changed(idle/attention)` | 待机、完成提示或普通注意提示 |
-| 失败 | `PostToolUseFailure`、`StopFailure`、显式 `state=error` | `ErrorEvent` / `state_changed(error)` | 错误动画和重要错误气泡 |
-
-其中工具活动的常见工具类别是：
-
-```text
-read / grep / glob / search  → 探索 Activity
-edit / write / patch         → 修改 Activity
-bash / shell / pwsh         → 执行 Activity
-其他工具                     → 通用 Activity
-```
-
-下面这些不是旧适配器提供的事件类别：
-
-```text
-approval/requested
-question/requested
-approval/resolved
-question/resolved
-cordis/request-run
-```
-
-因此旧适配器的“编辑”“执行命令”“读取文件”只能归类为 `ToolCallEvent`、`ActionEvent`、
-`EvidenceEvent` 或风险分析输入，不能直接归类为审批请求。
 
 ## Bridge JSONL 基础记录
 

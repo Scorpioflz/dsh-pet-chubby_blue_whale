@@ -164,7 +164,7 @@ printf '{"ts": %s, "state": "idle"}\n' "$(date +%s)" >> ~/.gemini/pet-events.jso
 | 4 | `pet/agent_link.py` `AgentLinkManager.AGENT_NAMES` | 显示名 |
 | 5 | `pet/context_menus/shared.py` `add_agent_link_menu()` | 菜单条目 |
 
-监视器实现上，走统一协议的只需继承 `BaseAgentMonitor`（参考 `CustomAgentMonitor`）；已有本地事件源的覆写 `_poll()`（参考 `CursorMonitor`/`OpenCodeMonitor`），把解析结果经 `state_changed`/`activity` 信号发出即可。
+监视器实现上，走统一协议的只需继承 `BaseAgentMonitor`（参考 `DshMonitor`），把解析结果经 `state_changed`/`activity` 信号发出即可。
 
 > 后续演进方向（未实施）：把上述 5 处收敛为单一声明式注册表，内置与自定义 Agent 统一由注册表驱动。
 

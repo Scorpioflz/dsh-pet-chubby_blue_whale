@@ -53,9 +53,7 @@ RELOAD_WHITELIST_SNAPSHOT = frozenset(
         "chat_background_opacity",
         "chat_bg_crops",
         "chat_follow_pet",
-        "chat_memory_auto_extract",
-        "chat_memory_extract_interval",
-        "chat_memory_enabled",
+
         "chat_reply_voice_enabled",
         "chat_ui_style",
         "click_show_balance",
@@ -82,6 +80,7 @@ RELOAD_WHITELIST_SNAPSHOT = frozenset(
         "divination_state",
         "drag_physics",
         "drop_gravity",
+        "dsh_self_talk_enabled",
         "dynamic_island",
         "edge_probe_enabled",
         "experimental_shared_decode",
@@ -107,6 +106,7 @@ RELOAD_WHITELIST_SNAPSHOT = frozenset(
         "media_prewarm",
         "mem_min_size_mb",
         "mem_skip_foreground",
+        "memory_plugin_remind",
         "menu_easter_egg",
         "modern_chat_background",
         "modern_chat_background_fill",
@@ -134,10 +134,7 @@ RELOAD_WHITELIST_SNAPSHOT = frozenset(
         "quiet_also_on_fullscreen",
         "quiet_minutes_default",
         "bubble_text_scale",
-        # 2026-10-22 场景扮演 3 键（每宠键；默认关 / 场景与人物留空）
-        "roleplay_cast",
-        "roleplay_enabled",
-        "roleplay_scene",
+
         "rx",
         "ry",
         "scale",
@@ -239,14 +236,8 @@ SPECIAL_CASED_KEYS = frozenset({"version", "proactive_screen", "agent_link", "ch
 # 语音报时的音频通道，只念对话不念歌词），白名单 155。
 # 2026-10-21 加功能模块激活 1 键（feature_activation，默认 None=未判定，由
 # pet/feature_activation 一次性迁移写回 {version, enabled}；NULL 接受键），白名单 156。
-# 2026-10-22 加对话全局记忆 1 键（chat_memory_enabled，默认 True：档 A 手动钉记忆的
-# 注入总开关；非 NULL 接受键，盘上显式 null 回退默认），白名单 157。
-# 2026-10-22 加记忆自动提炼 1 键（chat_memory_auto_extract，默认 True：档 B 回复后
-# 静默提炼，关 = 只保留手动钉；非 NULL 接受键），白名单 158。
-# 2026-10-21 加提炼频率 1 键（chat_memory_extract_interval，默认 5=每 5 轮提炼
-# 一次；共创者定稿的 token 成本闸），白名单 159。
-# 2026-10-22 加场景扮演 3 键（roleplay_enabled / roleplay_scene / roleplay_cast；
-# 每宠键，默认关/空），白名单 162。
+# 2026-10-31 移除 chat_memory_* 3 键 + roleplay_* 3 键（功能已移除），白名单同步缩减。
+
 DEFAULTS_SNAPSHOT = RELOAD_WHITELIST_SNAPSHOT | SPECIAL_CASED_KEYS
 
 

@@ -175,13 +175,16 @@ pet.log
 | 文件 | 改动 |
 |---|---|
 | `pet/chat/service.py` | 直接注入 `DshWebApiProvider`（无 `ProviderRouter`）；移除记忆提炼 hook |
-| `pet/chat/prompt.py` | 移除人设/扮演/记忆引导；`build_messages` 只返回用户消息（DSH 管历史与人设） |
+| `pet/chat/prompt.py` | 移除人设/扮演/记忆引导；`build_messages` 只返回用户消息（DSH 管历史与人设）；移除 roleplay 参数 |
 | `pet/chat/providers.py` | 精简为 HTTP 工具（`_make_ssl_context`、`build_browser_headers`、`normalize_chat_endpoint`）；移除 `OpenAICompatibleProvider`、`SSEParser`、`test_connection`、联网搜索 |
 | `pet/chat/models.py` | `ProviderError`/`StreamEvent` 迁入；`WebSearchSettings`/`WEB_SEARCH_*` 移除；`ChatSettings.web_search` 字段移除；`default_system_prompt` 默认→空；`active_provider` 默认→`dsh-webapi` |
 | `pet/chat/dsh_provider.py` | 移除 `ProviderRouter`；移除 `prompt_sync`/`system_sent`（DSH persona 插件处理人设） |
 | `pet/chat/ai_settings_page.py` | 移除多 provider 管理 UI、联网搜索控件、扮演 UI + `RoleplaySceneDialog`（960→453 行） |
 | `pet/chat/settings_dialog.py` | 移除多 provider 管理 UI（459→242 行） |
-| `pet/config.py` | 只保留 `dsh-webapi` provider；移除 `openai-main`；移除 `web_search` 默认值 + api_key 剥离；`default_system_prompt`→空 |
+| `pet/chat/widgets.py` / `pet/legacy_widgets.py` | 移除 roleplay 参数传递 |
+| `pet/quick_chat.py` | 移除 roleplay 参数传递 |
+| `pet/pet_profiles.py` | 移除 roleplay 键 |
+| `pet/config.py` | 只保留 `dsh-webapi` provider；移除 `openai-main`；移除 `web_search` 默认值 + api_key 剥离；`default_system_prompt`→空；移除 roleplay 键 + `_clean_roleplay_text` + `ROLEPLAY_*` 常量；新增 `memory_plugin_remind` 默认值 |
 | `pet/file_interpret/__init__.py` | 移除 `provider.web_search` 赋值 |
 | `pet/agent_link/__init__.py` | `AgentLinkManager` 只创建 DSH monitor；移除 Claude/Cursor/OpenCode/CustomAgent 类定义（−387 行）；`AGENT_NAMES` 缩减为 `{"dsh":"DSH"}` |
 | `pet/modern_settings_dialog.py` | 移除扮演 + 联网搜索设置区；「深度思考与联网」→「深度思考」 |
@@ -203,6 +206,13 @@ pet.log
 | `integrations/dsh-pet-memory/lib/client.js` | 设置页"会话"→"工作区" |
 | `README.md` | 英文翻译 + 插件引用 |
 | `THIRD_PARTY_NOTICES.md` | 删除 Android，新增自用组件 |
+| `tests/test_config_schema.py` | 移除 roleplay + chat_memory 键；新增 `dsh_self_talk_enabled` + `memory_plugin_remind` |
+| `tests/test_settings_default_marks.py` | 移除 `web_search_key` |
+| `tests/test_architecture.py` | 更新行数预算（2722→2714） |
+| `docs/AGENT_LINK_PROTOCOL.md` | 更新 Monitor 引用（已删除类→`DshMonitor`） |
+| `docs/DSH-BRIDGE-PET-EVENT-CONTRACT-2026-09-02.md` | 移除 Custom Agent 适配器段落 |
+| `docs/INDEX.md` | 更新 PR 报告描述 + 联网搜索报告指针 |
+| `docs/PR-REPORT-NON-DSH-BACKEND-REMOVAL-2026-10-31.md` | 更新过时描述 |
 
 ### 删除文件
 
@@ -215,6 +225,7 @@ pet.log
 | `pet/chat/memory_extract.py` | 记忆提炼（306 行） |
 | `pet/chat/web_search.py` | 联网搜索（225 行）→ 已移除；DSH 侧处理联网搜索 |
 | `tests/test_chat_thinking_web_search.py` | 联网搜索+思考测试（511 行）— 引用已删除的 `web_search.py` |
+| `tests/test_chat_roleplay.py` | 扮演测试（905 行）— roleplay 功能已完全移除 |
 
 ### 配置说明
 

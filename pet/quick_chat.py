@@ -404,11 +404,7 @@ class QuickChatBubble(QFrame):
 
         messages = self.prompt_builder.build_messages(
             self.settings, self.character_id, self.session.messages[:-1], text,
-            # 每宠键：config 可能是 slot 路由视图，必须从 get 逐键读（chat_settings()
-            # 转发主配置，读不到这只宠的场景卡）。与 widgets.py / legacy_widgets.py 同口径。
-            roleplay_enabled=bool(self.config.get("roleplay_enabled", False)),
-            roleplay_scene=str(self.config.get("roleplay_scene", "") or ""),
-            roleplay_cast=str(self.config.get("roleplay_cast", "") or ""),
+
         )
         self._request_pet_window = self.pet_window
         self._active_request_id = self.service.send(messages, config)

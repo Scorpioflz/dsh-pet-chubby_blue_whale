@@ -74,7 +74,7 @@
 
 **providers.py 精简边界**：不能完全删除——`_make_ssl_context`、`build_browser_headers`、`normalize_chat_endpoint` 被 `pet/island/balance.py`（余额查询 HTTP）和 `pet/screen_capture/translate.py`（截图翻译 HTTP）引用。改为精简为 HTTP 工具模块，re-export `ProviderError`/`StreamEvent`（从 `models.py`）。
 
-**UI 兼容桩策略**：`WebSearchSettings` 保留为禁用桩（UI 文件深嵌 web search 控件，直接移除会崩）。`WEB_SEARCH_KEYED_ENGINES = ()`、`WEB_SEARCH_ENGINES = ()` 保留为空元组。`ChatSettings` 保留 `providers` dict 和 `active_provider` 骨架（UI 大量引用），但默认只有 `dsh-webapi` 一个 provider。`ai_settings_page.py`/`settings_dialog.py` 中断裂导入桩化为本地 no-op 函数。
+**UI 兼容桩策略（第一轮 cc881933，第二轮 c2e4d3ac 已全部移除）**：第一轮保留 `WebSearchSettings` 为禁用桩（UI 文件深嵌 web search 控件，直接移除会崩）。第二轮清理 UI 死代码后，`WebSearchSettings`/`WEB_SEARCH_*` 常量、roleplay 配置键（`roleplay_enabled`/`roleplay_scene`/`roleplay_cast`）、`RoleplaySceneDialog` 类、非 DSH Monitor 类（`ClaudeCodeMonitor`/`CursorMonitor`/`OpenCodeMonitor`/`CustomAgentMonitor`）全部移除。`ChatSettings` 保留 `providers` dict 和 `active_provider` 骨架（UI 大量引用），但默认只有 `dsh-webapi` 一个 provider。
 
 **人设传递机制变更**：此前桌宠通过 `POST /sessions` 的 `systemPrompt` 字段首发人设，并通过 `prompt_sync` 在每轮对话时同步。现在 `default_system_prompt` 默认空串，`build_messages()` 只返回用户消息，`prompt_sync`/`system_sent` 逻辑移除。人设改由 DSH persona 插件通过 `ctx.systemPrompt.section()` 注入（固定 section 可被 prompt caching 缓存）。
 
@@ -111,13 +111,12 @@
 ## 七、已知限制与后续
 
 1. **未跑全量测试**：应补跑 `python -m pytest -q`。
-2. **roleplay config keys 未清理**：`roleplay_enabled`/`roleplay_scene` 仍保留在 config.py 和 chat widgets 中（`build_messages` 忽略这些参数；纯死数据）。
-3. **未安装 persona 插件**：应安装 `dsh-persona-dafeiyu` 并导入最终人设文档（`D:\华为云盘\DSH\大肥鱼_蓝鲸女仆人设_最终版.md`）。
-4. **旧记忆数据迁移**：仍待做（见 task1 §三）。
+2. **未安装 persona 插件**：应安装 `dsh-persona-dafeiyu` 并导入最终人设文档（`D:\华为云盘\DSH\大肥鱼_蓝鲸女仆人设_最终版.md`）。
+3. **旧记忆数据迁移**：仍待做（见 task1 §三）。
 
 ## 八、风险与回滚
 
 - **影响面**：对话链路（provider 构造 + prompt 构建 + session 创建）、agent 联动（只 DSH）、卸载清理、UI 设置页（桩化导入）。
 - **配置迁移**：`config.py` 的 `_merge_chat_data()` 自动将旧 `openai-main` provider 迁移为 `dsh-webapi`；`default_system_prompt` 旧值保留（不强制清空），但 `build_messages()` 不再使用它。
-- **回滚**：`git revert cc881933` 即可恢复全部移除的代码。无残留状态或落盘数据问题（配置迁移是单向的，回滚后旧配置仍可用）。
+- **回滚**：`git revert c2e4d3ac cc881933` 即可恢复全部移除的代码。无残留状态或落盘数据问题（配置迁移是单向的，回滚后旧配置仍可用）。
 - **主要风险**：若用户依赖非 DSH provider（如自建 OpenAI 兼容端点），本次改动后该功能不可用。但项目目标已明确只保留 DSH 作为唯一后端。
