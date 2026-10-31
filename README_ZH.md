@@ -14,7 +14,7 @@
 
 - **对话**：通过 DSH Web Service 会话 API（`/sessions/:id/prompt-stream`）实现连续对话，DSH 侧显示为同一会话
 - **角色对应工作区**：每个桌宠角色绑定独立 DSH 工作区（`~/.dsh-pet-workspace/<char_id>`），工作区内共享记忆
-- **记忆**：由 DSH 插件 `@dsh-pet/memory`（基于 fish-memory 改造，14 天半衰期）按工作区共享记忆，桌宠前端只做纯 UI；记忆开关按角色配置，默认开启
+- **记忆**：由 DSH 插件 `@dsh-cbw/memory`（[GitHub](https://github.com/Scorpioflz/dsh-cbw-memory)，基于 fish-memory 改造）按工作区共享记忆，桌宠前端只做纯 UI；记忆开关按角色配置，默认开启
 - **看看屏幕/截图提问**：截图上传到 DSH 会话（`POST /sessions/:id/files`）→ 提问 → 气泡显示回复
 - **余额查询**：通过 dsh-balance-panel 插件查询 DeepSeek 余额
 - **IP 定位城市**：首次启动检测城市，提醒设置默认天气城市
@@ -30,10 +30,10 @@
 | 插件 | 用途 | 地址 | 安装 |
 |---|---|---|---|
 | `dsh-web-service` | REST API 服务（会话/工作区/文件上传/SSE 流式对话） | [toddpan/dsh-webapi](https://github.com/toddpan/dsh-webapi) | `dsh plugin --profile web add @toddpan/dsh-webapi` |
-| `@dsh-pet/memory` | 按工作区共享的长期记忆（基于 fish-memory 改造，14 天半衰期） | 内置 `integrations/dsh-pet-memory/` | 启动时自动检测并弹窗提示安装 |
+| `@dsh-cbw/memory` | 按工作区共享的长期记忆（基于 fish-memory 改造，半衰期遗忘 + 情绪衰减） | [Scorpioflz/dsh-cbw-memory](https://github.com/Scorpioflz/dsh-cbw-memory) | `dsh plugin --profile <profile> add github:Scorpioflz/dsh-cbw-memory` |
 | `@wycto/dsh-balance-panel` | 余额查询 REST 端点 `GET /dsh-balance-panel` | [wycto/dsh-balance-panel](https://github.com/wycto/dsh-balance-panel) | `dsh plugin --profile web add @wycto/dsh-balance-panel` |
 
-> **注意**：`@dsh-pet/memory` 与原版 `dsh-fish-memory` 都注册 `remember` 工具，**不可装在同一个 DSH profile**。安装前如已有 fish-memory，先卸载：`dsh plugin --profile <profile> remove dsh-fish-memory`。
+> **注意**：`@dsh-cbw/memory` 与原版 `dsh-fish-memory` 都注册 `remember` 工具，**不可装在同一个 DSH profile**。安装前如已有 fish-memory，先卸载：`dsh plugin --profile <profile> remove dsh-fish-memory`。
 
 ## 建议安装的插件（未内置）
 
@@ -47,7 +47,7 @@
 
 | 插件 | 基于 | 改动 | 源地址 |
 |---|---|---|---|
-| `@dsh-pet/memory` | [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) | 按工作区共享记忆；`<system-reminder>` 检索过滤；queryGate 小库保护（0.8→0.5，<10 条跳过）；设置页会话→工作区；打包目录编码修复 | [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) |
+| `@dsh-cbw/memory` | [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) | 按工作区共享记忆；`<system-reminder>` 检索过滤；queryGate 小库保护；设置页会话→工作区；打包目录编码修复；P0+P1 升级（请求检测、bigram 去重、recall 工具、自动归档、来源标记） | [Scorpioflz/dsh-cbw-memory](https://github.com/Scorpioflz/dsh-cbw-memory) |
 
 ### 依赖的插件（未改动）
 
@@ -162,9 +162,9 @@ pet.log
 | `pet/dsh_api.py` | DSH Web Service REST API 客户端 |
 | `pet/chat/dsh_provider.py` | `DshWebApiProvider`（DSH 会话 API 流式对话） |
 | `pet/dsh_workspace.py` | 按角色绑定工作区 + 记忆开关 |
-| `pet/memory_plugin_link.py` | 记忆插件安装检查与一键安装 |
+| `pet/memory_plugin_link.py` | 记忆插件安装检查与 GitHub 链接建议 |
 | `pet/webapi_plugin_link.py` | `dsh-web-service` 插件安装检查（硬依赖——无此插件无 API 可用） |
-| `integrations/dsh-pet-memory/` | DSH 记忆插件（基于 fish-memory 改造） |
+| `integrations/dsh-pet-memory/` | 已提取为独立项目 [`dsh-cbw-memory`](https://github.com/Scorpioflz/dsh-cbw-memory) |
 | `pet/dsh_self_talk.py` | 每天自动生成自言自语候选词 |
 | `pet/weather/ip_city.py` | IP 定位城市 |
 | `tools/convert_frameseq_progress.py` | 帧序列转换器 |
@@ -206,8 +206,8 @@ pet.log
 | `scripts/build_onedir.ps1` | 统一名称；加 `-SkipAssets` |
 | `pyproject.toml` | Python 3.14 + uv |
 | `.gitignore` | 加 CodeArts、uv、tmp/ |
-| `integrations/dsh-pet-memory/lib/index.js` | ① `<system-reminder>` 过滤 ② queryGate 0.8→0.5 + 小库保护 ③ 工作区去重 ④ 编码修复 |
-| `integrations/dsh-pet-memory/lib/client.js` | 设置页"会话"→"工作区" |
+| `integrations/dsh-pet-memory/lib/index.js` | 已提取到独立项目 dsh-cbw-memory |
+| `integrations/dsh-pet-memory/lib/client.js` | 已提取到独立项目 dsh-cbw-memory |
 | `README.md` | 英文翻译 + 插件引用 |
 | `THIRD_PARTY_NOTICES.md` | 删除 Android，新增自用组件 |
 | `tests/test_config_schema.py` | 移除 roleplay + chat_memory 键；新增 `dsh_self_talk_enabled` + `memory_plugin_remind` + `webapi_plugin_remind` |
@@ -224,7 +224,7 @@ pet.log
 |---|---|
 | `.github/` | 不需要 CI/CD |
 | `android/` | 不需要 Android |
-| `pet/chat/memory.py` | 桌宠自带记忆（1104 行），已下沉到插件 |
+| `pet/chat/memory.py` | 桌宠自带记忆（1104 行），已下沉到 `@dsh-cbw/memory` 插件 |
 | `pet/chat/memory_recall.py` | 记忆回捞（531 行） |
 | `pet/chat/memory_extract.py` | 记忆提炼（306 行） |
 | `pet/chat/web_search.py` | 联网搜索（225 行）→ 已移除；DSH 侧处理联网搜索 |
@@ -261,5 +261,5 @@ pet.log
 - [MerZlin/dsh-pet-indesktop](https://github.com/MerZlin/dsh-pet-indesktop)（MIT, Copyright (c) 2026 Merzlin）— 上游项目
 - [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet) — 动画素材基础
 - [MeteorNOX/DeepSeek-Balance-Whale-Widget](https://github.com/MeteorNOX/DeepSeek-Balance-Whale-Widget) — 余额气泡参考
-- [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) — `@dsh-pet/memory` 是本插件的衍生作品。按其 **Yuuyuko-uu 插件许可 1.2**（见 [`integrations/dsh-pet-memory/LICENSE`](integrations/dsh-pet-memory/LICENSE)）声明：`@dsh-pet/memory` 派生自上述上游仓库，原作者 Yuuyuko-uu，继续使用同一许可。相对上游的改动：记忆按工作区共享（上游按会话）；`<system-reminder>` 机器来源检索过滤；queryGate 小库保护（0.8→0.5，<10 条跳过）；设置页会话→工作区归类；打包目录编码修复；包名改为 `@dsh-pet/memory`（注册名仍为 `memory`，与上游 remember 工具兼容）。
+- [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) — `@dsh-cbw/memory` 是本插件的衍生作品。按其 **Yuuyuko-uu 插件许可 1.2**（见 [dsh-cbw-memory/LICENSE](https://github.com/Scorpioflz/dsh-cbw-memory/blob/main/LICENSE)）声明：`@dsh-cbw/memory` 派生自上述上游仓库，原作者 Yuuyuko-uu，继续使用同一许可。相对上游的改动：记忆按工作区共享；`<system-reminder>` 检索过滤；queryGate 小库保护；设置页会话→工作区；打包目录编码修复；P0+P1 升级（请求检测、bigram 去重、recall 工具、自动归档、来源标记）；包名改为 `@dsh-cbw/memory`（注册名仍为 `memory`，与上游 remember 工具兼容）。
 - [huaizhuanghub/dsh-persona-dafeiyu](https://github.com/huaizhuanghub/dsh-persona-dafeiyu) — 建议安装的人设插件

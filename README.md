@@ -15,7 +15,7 @@ A **desktop pet frontend for DSH (DeepSeek Harness)**, connecting to DSH via the
 - **Chat**: Continuous conversation via DSH Web Service session API (`/sessions/:id/prompt-stream`), shown as a single session on the DSH side
 - **Persona**: Managed by DSH persona plugin (e.g. `dsh-persona-dafeiyu`), injected via `systemPrompt.section()` — pet no longer sends system prompts
 - **Character → Workspace mapping**: Each pet character binds to an independent DSH workspace (`~/.dsh-pet-workspace/<char_id>`); memories are shared within the workspace
-- **Memory**: Powered by the `@dsh-pet/memory` DSH plugin (forked from fish-memory, 14-day half-life), shared per workspace; the pet frontend is pure UI; toggle per character, enabled by default
+- **Memory**: Powered by the `@dsh-cbw/memory` DSH plugin ([GitHub](https://github.com/Scorpioflz/dsh-cbw-memory), derived from fish-memory), shared per workspace; the pet frontend is pure UI; toggle per character, enabled by default
 - **Screen capture / screenshot Q&A**: Upload screenshot to DSH session (`POST /sessions/:id/files`) → ask → bubble shows reply
 - **Balance query**: Query DeepSeek balance via the `dsh-balance-panel` plugin
 - **IP city detection**: Detect city on first launch, prompt to set default weather city
@@ -31,10 +31,10 @@ A **desktop pet frontend for DSH (DeepSeek Harness)**, connecting to DSH via the
 | Plugin | Purpose | Source | Install |
 |---|---|---|---|
 | `dsh-web-service` | REST API (sessions/workspaces/upload/SSE streaming) | [toddpan/dsh-webapi](https://github.com/toddpan/dsh-webapi) | `dsh plugin --profile web add @toddpan/dsh-webapi` |
-| `@dsh-pet/memory` | Per-workspace long-term memory (forked from fish-memory, 14-day half-life) | Bundled in `integrations/dsh-pet-memory/` | Auto-detected on startup with install prompt |
+| `@dsh-cbw/memory` | Per-workspace long-term memory (derived from fish-memory, half-life decay + emotion weighting) | [Scorpioflz/dsh-cbw-memory](https://github.com/Scorpioflz/dsh-cbw-memory) | `dsh plugin --profile <profile> add github:Scorpioflz/dsh-cbw-memory` |
 | `@wycto/dsh-balance-panel` | Balance query endpoint `GET /dsh-balance-panel` | [wycto/dsh-balance-panel](https://github.com/wycto/dsh-balance-panel) | `dsh plugin --profile web add @wycto/dsh-balance-panel` |
 
-> **Note**: `@dsh-pet/memory` and the original `dsh-fish-memory` both register the `remember` tool — **do not install both in the same DSH profile**. If fish-memory is already installed, remove it first: `dsh plugin --profile <profile> remove dsh-fish-memory`.
+> **Note**: `@dsh-cbw/memory` and the original `dsh-fish-memory` both register the `remember` tool — **do not install both in the same DSH profile**. If fish-memory is already installed, remove it first: `dsh plugin --profile <profile> remove dsh-fish-memory`.
 
 ## Recommended Plugins (not bundled)
 
@@ -48,7 +48,7 @@ A **desktop pet frontend for DSH (DeepSeek Harness)**, connecting to DSH via the
 
 | Plugin | Based on | Modifications | Source |
 |---|---|---|---|
-| `@dsh-pet/memory` | [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) | Per-workspace memory sharing; `<system-reminder>` query filter; queryGate small-lib guard (0.8→0.5, skip when <10 memories); settings UI session→workspace; packed-dir encoding fix | [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) |
+| `@dsh-cbw/memory` | [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) | Per-workspace memory sharing; `<system-reminder>` query filter; queryGate small-lib guard; settings UI session→workspace; packed-dir encoding fix; P0+P1 upgrades (request detection, bigram dedup, recall tool, auto-archive, source tagging) | [Scorpioflz/dsh-cbw-memory](https://github.com/Scorpioflz/dsh-cbw-memory) |
 
 ### Dependencies (unmodified)
 
@@ -167,9 +167,9 @@ pet.log
 | `pet/dsh_api.py` | DSH Web Service REST API client (workspaces/sessions/upload/SSE) |
 | `pet/chat/dsh_provider.py` | `DshWebApiProvider` (DSH session API streaming) |
 | `pet/dsh_workspace.py` | Per-character workspace binding + memory toggle |
-| `pet/memory_plugin_link.py` | `@dsh-pet/memory` install check & one-click install |
+| `pet/memory_plugin_link.py` | `@dsh-cbw/memory` install check & GitHub link suggestion |
 | `pet/webapi_plugin_link.py` | `dsh-web-service` install check (hard dependency — no API without it) |
-| `integrations/dsh-pet-memory/` | DSH memory plugin (forked from fish-memory, per-workspace, 14-day half-life) |
+| `integrations/dsh-pet-memory/` | Extracted to independent project [`dsh-cbw-memory`](https://github.com/Scorpioflz/dsh-cbw-memory) |
 | `pet/dsh_self_talk.py` | Daily auto self-talk generation via DSH API |
 | `pet/weather/ip_city.py` | IP city detection (Gaode API → free fallback) |
 | `tools/convert_frameseq_progress.py` | Frame sequence converter with progress/ETA |
@@ -234,7 +234,7 @@ pet.log
 | `android/` | No Android client |
 | `update.json` | No auto-update |
 | `requirements.txt` | Migrated to pyproject.toml |
-| `pet/chat/memory.py` | Pet-side memory (1104 lines) → moved to `@dsh-pet/memory` plugin |
+| `pet/chat/memory.py` | Pet-side memory (1104 lines) → moved to `@dsh-cbw/memory` plugin |
 | `pet/chat/memory_recall.py` | Memory recall (531 lines) |
 | `pet/chat/memory_extract.py` | Memory extraction (306 lines) |
 | `pet/chat/web_search.py` | Web search module (225 lines) → removed; DSH handles web search |
@@ -279,5 +279,5 @@ DSH Web API provider config (`config.json`):
 - [MerZlin/dsh-pet-indesktop](https://github.com/MerZlin/dsh-pet-indesktop) (MIT, Copyright (c) 2026 Merzlin) — upstream project
 - [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet) — animation asset basis
 - [MeteorNOX/DeepSeek-Balance-Whale-Widget](https://github.com/MeteorNOX/DeepSeek-Balance-Whale-Widget) — balance bubble inspiration
-- [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) — `@dsh-pet/memory` is a derivative work of this plugin. Per its **Yuuyuko-uu Plugin License 1.2** (see [`integrations/dsh-pet-memory/LICENSE`](integrations/dsh-pet-memory/LICENSE)): `@dsh-pet/memory` derives from the upstream repository above, original author Yuuyuko-uu, and continues under the same license. Changes relative to upstream: per-workspace memory sharing (vs per-session); `<system-reminder>` machine-source query filtering; queryGate small-lib guard (0.8→0.5, skip when <10 memories); settings UI session→workspace mode; packed-dir encoding fix; package renamed to `@dsh-pet/memory` (register name stays `memory` for `remember` tool compatibility).
+- [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) — `@dsh-cbw/memory` is a derivative work of this plugin. Per its **Yuuyuko-uu Plugin License 1.2** (see [dsh-cbw-memory/LICENSE](https://github.com/Scorpioflz/dsh-cbw-memory/blob/main/LICENSE)): `@dsh-cbw/memory` derives from the upstream repository above, original author Yuuyuko-uu, and continues under the same license. Changes relative to upstream: per-workspace memory sharing; `<system-reminder>` query filtering; queryGate small-lib guard; settings UI session→workspace; packed-dir encoding fix; P0+P1 upgrades (request detection, bigram dedup, recall tool, auto-archive, source tagging); package renamed to `@dsh-cbw/memory` (register name stays `memory` for `remember` tool compatibility).
 - [huaizhuanghub/dsh-persona-dafeiyu](https://github.com/huaizhuanghub/dsh-persona-dafeiyu) — recommended persona plugin

@@ -1192,10 +1192,11 @@ class PetInstance:
         msg.setIcon(QMessageBox.Icon.Information)
         msg.setText("DSH 记忆插件未安装，记忆功能无法生效。")
         msg.setInformativeText(
-            "记忆插件按工作区共享记忆，安装后桌宠对话才有长期记忆。\n"
+            "记忆插件已提取为独立项目，请手动安装：\n"
+            "https://github.com/Scorpioflz/dsh-cbw-memory\n\n"
+            "安装命令：dsh plugin --profile <profile> add github:Scorpioflz/dsh-cbw-memory\n"
             "注意：如已装 dsh-fish-memory，请先卸载（两者 remember 工具会冲突）。"
         )
-        btn_install = msg.addButton("立即安装", QMessageBox.ButtonRole.AcceptRole)
         btn_later = msg.addButton("下次再说", QMessageBox.ButtonRole.RejectRole)
         btn_7d = msg.addButton("7天后再提醒", QMessageBox.ButtonRole.ApplyRole)
         btn_never = msg.addButton("不再提醒", QMessageBox.ButtonRole.DestructiveRole)
@@ -1208,8 +1209,6 @@ class PetInstance:
             from datetime import datetime, timedelta
             self.config.set('memory_plugin_remind', (datetime.now() + timedelta(days=7)).isoformat())
             self.config.save()
-        elif clicked is btn_install:
-            self.install_memory_plugin_dialog()
 
     def _show_webapi_plugin_dialog(self) -> None:
         from PySide6.QtWidgets import QMessageBox
@@ -1232,39 +1231,6 @@ class PetInstance:
             self.config.save()
 
 
-    def install_memory_plugin_dialog(self) -> None:
-        from .memory_plugin_link import check_status, install_memory_plugin
-
-        bundled, installed = check_status()
-        if installed:
-            QMessageBox.information(self.win, "记忆插件", "DSH 记忆插件已安装✓")
-            return
-        if not bundled:
-            QMessageBox.warning(self.win, "记忆插件", "内置记忆插件目录缺失（integrations/dsh-pet-memory）")
-            return
-        ret = QMessageBox.question(
-            self.win, "安装记忆插件",
-            "将内置 @dsh-pet/memory 插件安装到所有 DSH 实例。\n\n"
-            "注意：如已安装 dsh-fish-memory，请先卸载（两者 remember 工具会冲突）。\n\n"
-            "是否安装？",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.Yes,
-        )
-        if ret != QMessageBox.StandardButton.Yes:
-            return
-
-        def _work():
-            try:
-                ok, msg = install_memory_plugin()
-            except Exception as e:
-                ok, msg = False, str(e)
-            if ok:
-                QMessageBox.information(self.win, "记忆插件", msg)
-            else:
-                QMessageBox.warning(self.win, "记忆插件", f"安装失败：{msg}")
-
-        import threading
-        threading.Thread(target=_work, daemon=True).start()
 
     def _dock_hidden_recovery_message(self) -> str:
         return (
