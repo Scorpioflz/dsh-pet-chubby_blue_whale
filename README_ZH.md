@@ -164,7 +164,7 @@ pet.log
 | `pet/dsh_workspace.py` | 按角色绑定工作区 + 记忆开关 |
 | `pet/memory_plugin_link.py` | 记忆插件安装检查与 GitHub 链接建议 |
 | `pet/webapi_plugin_link.py` | `dsh-web-service` 插件安装检查（硬依赖——无此插件无 API 可用） |
-| `integrations/dsh-pet-memory/` | 已提取为独立项目 [`dsh-cbw-memory`](https://github.com/Scorpioflz/dsh-cbw-memory) |
+
 | `pet/dsh_self_talk.py` | 每天自动生成自言自语候选词 |
 | `pet/weather/ip_city.py` | IP 定位城市 |
 | `tools/convert_frameseq_progress.py` | 帧序列转换器 |
@@ -206,8 +206,7 @@ pet.log
 | `scripts/build_onedir.ps1` | 统一名称；加 `-SkipAssets` |
 | `pyproject.toml` | Python 3.14 + uv |
 | `.gitignore` | 加 CodeArts、uv、tmp/ |
-| `integrations/dsh-pet-memory/lib/index.js` | 已提取到独立项目 dsh-cbw-memory |
-| `integrations/dsh-pet-memory/lib/client.js` | 已提取到独立项目 dsh-cbw-memory |
+
 | `README.md` | 英文翻译 + 插件引用 |
 | `THIRD_PARTY_NOTICES.md` | 删除 Android，新增自用组件 |
 | `tests/test_config_schema.py` | 移除 roleplay + chat_memory 键；新增 `dsh_self_talk_enabled` + `memory_plugin_remind` + `webapi_plugin_remind` |
@@ -230,6 +229,7 @@ pet.log
 | `pet/chat/web_search.py` | 联网搜索（225 行）→ 已移除；DSH 侧处理联网搜索 |
 | `tests/test_chat_thinking_web_search.py` | 联网搜索+思考测试（511 行）— 引用已删除的 `web_search.py` |
 | `tests/test_chat_roleplay.py` | 扮演测试（905 行）— roleplay 功能已完全移除 |
+| `integrations/dsh-pet-memory/` | 已提取为独立项目 [`dsh-cbw-memory`](https://github.com/Scorpioflz/dsh-cbw-memory) — 源码移出桌宠 |
 | `docs/PR-REPORT-*.md`（119 个） | 上游 PR 报告 — 与自用改造无关 |
 | `docs/RELEASE-v*.md`（8 个） | 上游版本发布说明 |
 | `docs/plugin-phase-*/`（7 个目录） | 上游插件化路线图文档 |

@@ -169,7 +169,7 @@ pet.log
 | `pet/dsh_workspace.py` | Per-character workspace binding + memory toggle |
 | `pet/memory_plugin_link.py` | `@dsh-cbw/memory` install check & GitHub link suggestion |
 | `pet/webapi_plugin_link.py` | `dsh-web-service` install check (hard dependency — no API without it) |
-| `integrations/dsh-pet-memory/` | Extracted to independent project [`dsh-cbw-memory`](https://github.com/Scorpioflz/dsh-cbw-memory) |
+
 | `pet/dsh_self_talk.py` | Daily auto self-talk generation via DSH API |
 | `pet/weather/ip_city.py` | IP city detection (Gaode API → free fallback) |
 | `tools/convert_frameseq_progress.py` | Frame sequence converter with progress/ETA |
@@ -214,8 +214,7 @@ pet.log
 | `scripts/build_onedir.ps1` | Unify name; add `-SkipAssets` flag |
 | `pyproject.toml` | Python 3.14 + uv dependency management |
 | `.gitignore` | Add CodeArts, uv, tmp/ |
-| `integrations/dsh-pet-memory/lib/index.js` | ① Filter `<system-reminder>` in query cleaner ② queryGate 0.8→0.5 + small-lib guard (<10 memories skip) ③ Workspace dedup in `buildMemoryList` ④ Packed-dir U+FFFD encoding fix |
-| `integrations/dsh-pet-memory/lib/client.js` | Settings UI: "session"→"workspace" wording |
+
 | `README.md` | English translation + plugin references |
 | `THIRD_PARTY_NOTICES.md` | Remove Android, add self-use components |
 | `tests/test_config_schema.py` | Remove roleplay + chat_memory keys from whitelist; add `dsh_self_talk_enabled` + `memory_plugin_remind` + `webapi_plugin_remind` |
@@ -241,6 +240,7 @@ pet.log
 | `tests/test_chat_memory*.py` | Chat memory tests |
 | `tests/test_chat_thinking_web_search.py` | Web search + thinking tests (511 lines) — references deleted `web_search.py` |
 | `tests/test_chat_roleplay.py` | Roleplay tests (905 lines) — roleplay feature fully removed |
+| `integrations/dsh-pet-memory/` | Extracted to independent project [`dsh-cbw-memory`](https://github.com/Scorpioflz/dsh-cbw-memory) — source code moved out of pet |
 | `docs/PR-REPORT-*.md` (119 files) | Upstream PR reports — not relevant to self-use fork |
 | `docs/RELEASE-v*.md` (8 files) | Upstream release notes |
 | `docs/plugin-phase-*/` (7 dirs) | Upstream plugin phase roadmap docs |
