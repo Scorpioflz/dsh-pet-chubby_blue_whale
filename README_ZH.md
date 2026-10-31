@@ -216,6 +216,14 @@ pet.log
 | `docs/DSH-BRIDGE-PET-EVENT-CONTRACT-2026-09-02.md` | 移除 Custom Agent 适配器段落 |
 | `docs/INDEX.md` | 更新 PR 报告描述 + 联网搜索报告指针 |
 | `docs/PR-REPORT-NON-DSH-BACKEND-REMOVAL-2026-10-31.md` | 更新过时描述 |
+| `pet/config.py` | 恢复 `api_key_ref` 迁移逻辑（cc881933 误删）：自定义 provider 继承的 `provider/openai-main` 或 `provider/dsh-webapi` 引用迁移到 `provider/{自身}` |
+| `pet/chat/legacy_widgets.py` | `new_session()` 调用 `service.invalidate_session()`（b3a22be1 漏修经典窗口路径） |
+| `pet/chat/settings_dialog.py` | keyring 不可用时弹 QMessageBox 警告（原为静默回退） |
+| `tests/test_chat_subsystem.py` | 清理已删导入；删除 7 个过时测试；更新 DSH-only 断言；修正 spec 分组；更新 MessageBubble 测试（pin 已移除）；加 importorskip(keyring) |
+| `tests/test_chat_service.py` | 删除引用已移除 `OpenAICompatibleProvider` 的测试 |
+| `tests/test_config_concurrent_save.py` | 5 处 provider key `openai-main` → `dsh-webapi` |
+| `tests/test_config_instance.py` | 3 处 provider key `openai-main` → `dsh-webapi` |
+| `tests/test_packaging_keyring_notices.py` | 删除过时 `test_windows_build_excludes_only_the_chat_subsystem` |
 
 ### 删除文件
 
@@ -229,6 +237,7 @@ pet.log
 | `pet/chat/web_search.py` | 联网搜索（225 行）→ 已移除；DSH 侧处理联网搜索 |
 | `tests/test_chat_thinking_web_search.py` | 联网搜索+思考测试（511 行）— 引用已删除的 `web_search.py` |
 | `tests/test_chat_roleplay.py` | 扮演测试（905 行）— roleplay 功能已完全移除 |
+| `tests/manual_ssl_proxy_check.py` | SSL 代理手动检查脚本 — 引用已删除的 `SSEParser` |
 | `integrations/dsh-pet-memory/` | 已提取为独立项目 [`dsh-cbw-memory`](https://github.com/Scorpioflz/dsh-cbw-memory) — 源码移出桌宠 |
 | `docs/PR-REPORT-*.md`（119 个） | 上游 PR 报告 — 与自用改造无关 |
 | `docs/RELEASE-v*.md`（8 个） | 上游版本发布说明 |

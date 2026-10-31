@@ -224,6 +224,14 @@ pet.log
 | `docs/DSH-BRIDGE-PET-EVENT-CONTRACT-2026-09-02.md` | Remove Custom Agent adapter section (deleted `CustomAgentMonitor`) |
 | `docs/INDEX.md` | Update PR report description + web search report pointer |
 | `docs/PR-REPORT-NON-DSH-BACKEND-REMOVAL-2026-10-31.md` | Update stale "保留禁用桩" description + remove roleplay limitation |
+| `pet/config.py` | Restore `api_key_ref` migration logic (erroneously removed in cc881933): custom providers with inherited `provider/openai-main` or `provider/dsh-webapi` refs migrate to `provider/{self}` |
+| `pet/chat/legacy_widgets.py` | `new_session()` now calls `service.invalidate_session()` (fix in b3a22be1 missed legacy window path) |
+| `pet/chat/settings_dialog.py` | Show QMessageBox warning when keyring unavailable on save (was silent fallback) |
+| `tests/test_chat_subsystem.py` | Remove deleted imports; delete 7 obsolete tests; update DSH-only assertions; fix spec grouping; update MessageBubble test (pin removed); add importorskip(keyring) |
+| `tests/test_chat_service.py` | Delete test for removed `OpenAICompatibleProvider` |
+| `tests/test_config_concurrent_save.py` | Update 5 provider key references `openai-main` → `dsh-webapi` |
+| `tests/test_config_instance.py` | Update 3 provider key references `openai-main` → `dsh-webapi` |
+| `tests/test_packaging_keyring_notices.py` | Delete obsolete `test_windows_build_excludes_only_the_chat_subsystem` |
 
 ### Deleted Files
 
@@ -240,6 +248,7 @@ pet.log
 | `tests/test_chat_memory*.py` | Chat memory tests |
 | `tests/test_chat_thinking_web_search.py` | Web search + thinking tests (511 lines) — references deleted `web_search.py` |
 | `tests/test_chat_roleplay.py` | Roleplay tests (905 lines) — roleplay feature fully removed |
+| `tests/manual_ssl_proxy_check.py` | Manual SSL proxy check script — references deleted `SSEParser` |
 | `integrations/dsh-pet-memory/` | Extracted to independent project [`dsh-cbw-memory`](https://github.com/Scorpioflz/dsh-cbw-memory) — source code moved out of pet |
 | `docs/PR-REPORT-*.md` (119 files) | Upstream PR reports — not relevant to self-use fork |
 | `docs/RELEASE-v*.md` (8 files) | Upstream release notes |

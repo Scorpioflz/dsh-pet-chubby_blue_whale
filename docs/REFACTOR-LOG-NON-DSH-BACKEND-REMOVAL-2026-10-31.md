@@ -94,9 +94,9 @@
 ## 五、实机运行记录
 
 - **模块导入验证**：`python -c "import pet.app; ..."` 全部子模块导入通过，无 `ImportError`/`ModuleNotFoundError`。
-- **未跑全量 pytest 套件**：本次改动涉及 13 文件，应跑 `python -m pytest -q` 确认无回归，但**本次未跑**——如实登记。后续应补跑。
+- **聚焦测试**：chat/config/packaging 三域 299 测试通过（166+82+51），2 skipped。环境缺 `tzdata`/`numpy` 的 15 个测试文件未跑。
 - **未做实机对话验证**：未启动桌宠确认 DSH webapi 对话链路正常、人设不再由桌宠首发。后续应启动桌宠 + DSH 确认。
-- **未安装 `dsh-persona-dafeiyu` 插件**：人设移除后，若未安装 persona 插件，对话将无人设。后续应安装插件并导入人设文档。
+- **`dsh-persona-dafeiyu` 插件已安装并配置好**：人设由 DSH persona 插件通过 `systemPrompt.section()` 注入。
 
 ## 六、测试与验证
 
@@ -104,15 +104,14 @@
 |---|---|---|
 | 模块导入 | `python -c "import pet.app; ..."` | ✅ 通过 |
 | 静态检查 | `python -m ruff check pet tests scripts` | **未跑** |
-| 聚焦 | — | **未跑** |
-| 全量 | `python -m pytest -q` | **未跑** |
+| 聚焦 | `pytest tests/test_chat_*.py tests/test_config_*.py tests/test_packaging_*.py` | ✅ 299 passed, 2 skipped |
+| 全量 | `python -m pytest -q` | **未跑**（15 文件因缺 tzdata/numpy 无法收集） |
 | 架构红线 | `tests/test_architecture.py` | **未跑** |
 
 ## 七、已知限制与后续
 
-1. **未跑全量测试**：应补跑 `python -m pytest -q`。
-2. **未安装 persona 插件**：应安装 `dsh-persona-dafeiyu` 并导入最终人设文档（`D:\华为云盘\DSH\大肥鱼_蓝鲸女仆人设_最终版.md`）。
-3. **旧记忆数据迁移**：仍待做（见 task1 §三）。
+1. **未跑全量测试**：15 文件因缺 `tzdata`/`numpy` 无法收集，应补装依赖后跑全量。
+2. **未做实机对话验证**：应启动桌宠 + DSH 确认对话链路正常。
 
 ## 八、风险与回滚
 
@@ -137,3 +136,29 @@
 ### 9.3 文档全面整理（本次 commit）
 
 移除上游历史文档（191→13 条目）：119 个上游 PR-REPORT、8 个 RELEASE notes、7 个 plugin-phase 目录、plugin-roadmap 目录、35 个上游开发历史文档。保留：INDEX.md（重写）、AGENTS.md（精简 Context pointers）、DEV-HANDOVER.md、ONEDIR_PACKAGING.md、SETTINGS-CHANGE-GATES.md、STABLE_BUILDS.md、NETWORK-PROXY-AND-VPN、DSH-BRIDGE-PET-EVENT-CONTRACT、AGENT_LINK_PROTOCOL、PR-REPORT-NON-DSH-BACKEND-REMOVAL、PR-REPORT-TEMPLATE、agents/、third_party_doc/、screenshots/。README 添加指向 `dsh-selfuse-index` 索引仓库的链接。
+## 十、Bug 修复（commit `fade273d` + `5f9c15bc`，2026-10-31）
+
+重构后测试验证发现并修复 13 个 bug（3 个功能 bug + 10 个测试对齐）。
+
+### 10.1 功能 bug（commit `fade273d`）
+
+| Bug | 文件 | 问题 | 修复 |
+|---|---|---|---|
+| 1 | `pet/chat/legacy_widgets.py` | `new_session()` 缺 `invalidate_session` 调用（`b3a22be1` 漏修经典窗口路径） | 补加 invalidate 调用 |
+| 7 | `pet/chat/settings_dialog.py` | keyring 不可用时 save 静默回退不弹警告 | 模块级导入 QMessageBox + 弹警告 |
+| 12 | `pet/config.py` | `cc881933` 误删 `api_key_ref` 迁移逻辑：自定义 provider 继承的 `provider/openai-main` ref 不再迁移到自身，用户升级后凭据丢失 | 恢复迁移逻辑，覆盖 `openai-main` + `dsh-webapi` 两种 ref |
+
+### 10.2 测试对齐（commit `5f9c15bc`）
+
+| Bug | 文件 | 问题 | 修复 |
+|---|---|---|---|
+| 2 | `test_chat_subsystem.py` | 顶层导入已删的 `SSEParser`/`_is_cert_verify_error` → 143 测试无法收集 | 移除导入 |
+| 3 | `test_chat_service.py` + `manual_ssl_proxy_check.py` | 引用已删的 `OpenAICompatibleProvider`/`SSEParser` | 删测试函数 + 删脚本 |
+| 4 | `test_chat_subsystem.py` | `build_messages` 断言期望 system 消息（已改为只返回 user） | 更新断言 |
+| 5 | `test_chat_subsystem.py` | config 迁移断言期望 `provider/openai-main`（已改为 `dsh-webapi`） | 更新断言 |
+| 6 | `test_chat_subsystem.py` | spec 分组错误（`.spec` 用 `pet_entry.py` 带 chat，归错无 chat 列表） | 修正分组 |
+| 8 | `test_chat_subsystem.py` | MessageBubble 断言期望 pin 按钮（已移除）+ 矛盾断言 | 删矛盾断言 + 重命名 |
+| 9 | `test_chat_subsystem.py` | keyring 测试缺 `importorskip` → `ModuleNotFoundError` | 加 `importorskip` |
+| 10 | `test_config_instance.py` | 3 处 `openai-main` → `dsh-webapi` | 更新 |
+| 11 | `test_config_concurrent_save.py` | 5 处 `openai-main` → `dsh-webapi` | 更新 |
+| 13 | `test_packaging_keyring_notices.py` | `test_windows_build_excludes_only_the_chat_subsystem` 期望 `build_onedir.ps1` 排除 `pet.chat`（no-chat 变体已改用独立 spec） | 删过时测试 |
