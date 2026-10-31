@@ -1,222 +1,219 @@
 # dsh-pet-chubby_blue_whale
 
-> **继承声明**｜基于 [MerZlin/dsh-pet-indesktop](https://github.com/MerZlin/dsh-pet-indesktop)（MIT License, Copyright (c) 2026 Merzlin）个人自用再开发。保留原版权声明（[`LICENSE`](LICENSE)）与第三方声明（[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)）。
+> **Fork Notice** | Based on [MerZlin/dsh-pet-indesktop](https://github.com/MerZlin/dsh-pet-indesktop) (MIT License, Copyright (c) 2026 Merzlin) — personal self-use re-development. Original copyright notice ([`LICENSE`](LICENSE)) and third-party notices ([`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)) are preserved.
 
-## 自用定位
+A **desktop pet frontend for DSH (DeepSeek Harness)**, connecting to DSH via the `dsh-web-service` plugin's session API.
 
-本项目是 **DSH (DeepSeek Harness) 的桌宠前端**，通过 dsh-web-service 插件的会话 API 接入 DSH：
+[中文文档](README_ZH.md)
 
-- **对话**：通过 DSH Web Service 会话 API（`/sessions/:id/prompt-stream`）实现连续对话，DSH 侧显示为同一会话
-- **角色对应工作区**：每个桌宠角色绑定独立 DSH 工作区（`~/.dsh-pet-workspace/<char_id>`），工作区内共享记忆
-- **记忆**：由 DSH 插件 `@dsh-pet/memory`（基于 fish-memory 改造）按工作区共享记忆，桌宠前端只做纯 UI；记忆开关按角色配置，默认开启
-- **看看屏幕/截图提问**：截图上传到 DSH 会话（`POST /sessions/:id/files`）→ 提问 → 气泡显示回复
-- **余额查询**：通过 dsh-balance-panel 插件查询 DeepSeek 余额
-- **IP 定位城市**：首次启动检测城市，提醒设置默认天气城市
-- **自动自言自语**：每天通过 DSH API 以桌宠身份自动生成自言自语候选词（含热搜、新闻、吐槽），替换更新不累计
-- **不发布、无 CI/CD、无 Release**，仅供自行封装使用
-- 依赖管理用 uv + `pyproject.toml`（Python 3.14+）
-- 上游同步：`git remote add upstream https://github.com/MerZlin/dsh-pet-indesktop.git && git fetch upstream`
+## Features
 
-> **平台验证**：当前修改版**仅在 Windows 11 上验证通过**。Linux/macOS 由于没有使用条件，尚未进行验证。
+- **Chat**: Continuous conversation via DSH Web Service session API (`/sessions/:id/prompt-stream`), shown as a single session on the DSH side
+- **Character → Workspace mapping**: Each pet character binds to an independent DSH workspace (`~/.dsh-pet-workspace/<char_id>`); memories are shared within the workspace
+- **Memory**: Powered by the `@dsh-pet/memory` DSH plugin (forked from fish-memory, 14-day half-life), shared per workspace; the pet frontend is pure UI; toggle per character, enabled by default
+- **Screen capture / screenshot Q&A**: Upload screenshot to DSH session (`POST /sessions/:id/files`) → ask → bubble shows reply
+- **Balance query**: Query DeepSeek balance via the `dsh-balance-panel` plugin
+- **IP city detection**: Detect city on first launch, prompt to set default weather city
+- **Auto self-talk**: Daily auto-generated self-talk candidates (trending topics, news, quips) via DSH API in the pet's identity; replaces rather than accumulates
+- **No releases, no CI/CD** — personal self-use packaging only
+- Dependency management via uv + `pyproject.toml` (Python 3.14+)
+- Upstream sync: `git remote add upstream https://github.com/MerZlin/dsh-pet-indesktop.git && git fetch upstream`
 
-## DSH 插件依赖
+> **Platform**: Currently verified **only on Windows 11**. Linux/macOS not yet tested.
 
-本桌宠依赖以下 DSH 插件：
+## DSH Plugin Dependencies
 
-| 插件 | 用途 | 地址 | 安装 |
+| Plugin | Purpose | Source | Install |
 |---|---|---|---|
-| `dsh-web-service` | REST API 服务（会话/工作区/文件上传/SSE 流式对话） | [toddpan/dsh-webapi](https://github.com/toddpan/dsh-webapi) | `dsh plugin --profile web add @toddpan/dsh-webapi` |
-| `@dsh-pet/memory` | 按工作区共享的长期记忆（基于 fish-memory 改造，14 天半衰期） | 内置 `integrations/dsh-pet-memory/` | 启动时自动检测并弹窗提示安装 |
-| `@wycto/dsh-balance-panel` | 余额查询 REST 端点 `GET /dsh-balance-panel` | [wycto/dsh-balance-panel](https://github.com/wycto/dsh-balance-panel) | `dsh plugin --profile web add @wycto/dsh-balance-panel` |
+| `dsh-web-service` | REST API (sessions/workspaces/upload/SSE streaming) | [toddpan/dsh-webapi](https://github.com/toddpan/dsh-webapi) | `dsh plugin --profile web add @toddpan/dsh-webapi` |
+| `@dsh-pet/memory` | Per-workspace long-term memory (forked from fish-memory, 14-day half-life) | Bundled in `integrations/dsh-pet-memory/` | Auto-detected on startup with install prompt |
+| `@wycto/dsh-balance-panel` | Balance query endpoint `GET /dsh-balance-panel` | [wycto/dsh-balance-panel](https://github.com/wycto/dsh-balance-panel) | `dsh plugin --profile web add @wycto/dsh-balance-panel` |
 
-> **注意**：`@dsh-pet/memory` 与原版 `dsh-fish-memory` 都注册 `remember` 工具，**不可装在同一个 DSH profile**。安装前如已有 fish-memory，先卸载：`dsh plugin --profile <profile> remove dsh-fish-memory`。
+> **Note**: `@dsh-pet/memory` and the original `dsh-fish-memory` both register the `remember` tool — **do not install both in the same DSH profile**. If fish-memory is already installed, remove it first: `dsh plugin --profile <profile> remove dsh-fish-memory`.
 
-## 目录
+## Recommended Plugins (not bundled)
 
-- [从源码运行](#从源码运行)
-- [打包](#打包)
-- [素材包说明](#素材包说明)
-- [数据目录](#数据目录)
-- [修改记录](#修改记录)
-- [项目来源与素材声明](#项目来源与素材声明)
-- [许可证与致谢](#许可证与致谢)
+| Plugin | Purpose | Source |
+|---|---|---|
+| `dsh-persona-dafeiyu` | Persona library: built-in characters, import custom personas, per-workspace scoping, hot-swap without restart. Injects via `ctx.systemPrompt.section()` (prompt-caching friendly). | [huaizhuanghub/dsh-persona-dafeiyu](https://github.com/huaizhuanghub/dsh-persona-dafeiyu) |
+
+## Acknowledged Plugins & References
+
+### Bundled (modified)
+
+| Plugin | Based on | Modifications | Source |
+|---|---|---|---|
+| `@dsh-pet/memory` | [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) | Per-workspace memory sharing; `<system-reminder>` query filter; queryGate small-lib guard (0.8→0.5, skip when <10 memories); settings UI session→workspace; packed-dir encoding fix | [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) |
+
+### Dependencies (unmodified)
+
+| Plugin | Purpose | Source |
+|---|---|---|
+| `dsh-web-service` | REST/SSE API server | [toddpan/dsh-webapi](https://github.com/toddpan/dsh-webapi) |
+| `@wycto/dsh-balance-panel` | DeepSeek balance query | [wycto/dsh-balance-panel](https://github.com/wycto/dsh-balance-panel) |
+
+### Recommended (not installed)
+
+| Plugin | Purpose | Source |
+|---|---|---|
+| `dsh-persona-dafeiyu` | Persona/system-prompt management (per-workspace, hot-swap) | [huaizhuanghub/dsh-persona-dafeiyu](https://github.com/huaizhuanghub/dsh-persona-dafeiyu) |
+| `dsh-whale-musume-persona` | Whale-girl (大肥鱼) persona | [Kaalia0912/dsh-whale-musume-persona](https://github.com/Kaalia0912/dsh-whale-musume-persona) |
+| `dsh-prompt-persona` | Edit deployment persona from settings page | [Xilin3/dsh-prompt-persona](https://github.com/Xilin3/dsh-prompt-persona) |
 
 ---
 
-## 从源码运行
+## Table of Contents
 
-需要 Python 3.14+。使用 uv 管理依赖与虚拟环境：
+- [Quick Start](#quick-start)
+- [Packaging](#packaging)
+- [Asset Packs](#asset-packs)
+- [Data Directory](#data-directory)
+- [Changelog](#changelog)
+- [License & Acknowledgements](#license--acknowledgements)
+
+---
+
+## Quick Start
+
+Requires Python 3.14+. Uses uv for dependency management:
 
 ```powershell
-uv sync                    # 按 pyproject.toml 安装依赖到 .venv
-uv run python -m pet       # 启动桌宠
+uv sync                    # Install dependencies from pyproject.toml into .venv
+uv run python -m pet       # Launch the pet
 ```
 
-依赖管理通过 `pyproject.toml`（uv 方式），无需手动 pip install。
+## Packaging
 
-## 打包
-
-### 安装包（exe）
+### Full Installer (exe)
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\build_installer.ps1
 ```
 
-产物：`dist-onedir\dsh-pet-chubby_blue_whale-setup.exe`（双击安装，免管理员权限，含全部素材 ~500MB）
+Output: `dist-onedir\dsh-pet-chubby_blue_whale-setup.exe` (~500MB, includes all assets, no admin required)
 
-### 增量更新（exe，不含素材）
+### Incremental Update (exe, no assets)
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\build_update.ps1
 ```
 
-产物：`dist-onedir\dsh-pet-chubby_blue_whale-update-setup.exe`（~100MB，不含动画素材，安装时不覆盖已有素材）
+Output: `dist-onedir\dsh-pet-chubby_blue_whale-update-setup.exe` (~100MB, code-only, preserves existing assets)
 
-适用于日常代码更新：打包时跳过素材（`-SkipAssets`），安装时只替换代码和依赖，保留已有的动画素材。首次安装需用完整安装包。
-
-### 便携版（zip）
+### Portable (zip)
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\build_portable.ps1
 ```
 
-产物：`dist-onedir\dsh-pet-chubby_blue_whale-portable.zip`（解压即用，含全部素材）
+Output: `dist-onedir\dsh-pet-chubby_blue_whale-portable.zip` (~500MB, extract and run)
 
-三个脚本共享前置步骤（uv sync → PyInstaller），区别：
-
-| 脚本 | 素材 | ISCC | portable.zip | 产物大小 |
+| Script | Assets | ISCC | Portable zip | Size |
 |---|---|---|---|---|
-| `build_installer.ps1` | ✅ 含 | ✅ | ❌ 跳过 | ~500MB |
-| `build_update.ps1` | ❌ 不含 | ✅ | ❌ 跳过 | ~100MB |
-| `build_portable.ps1` | ✅ 含 | ❌ | ✅ 生成 | ~500MB |
+| `build_installer.ps1` | ✅ | ✅ | ❌ | ~500MB |
+| `build_update.ps1` | ❌ | ✅ | ❌ | ~100MB |
+| `build_portable.ps1` | ✅ | ❌ | ✅ | ~500MB |
 
-**前提**：
-- [uv](https://docs.astral.sh/uv/) 已安装
-- 安装包/增量更新需 Inno Setup 7（ISCC 路径在脚本中配置，默认 `D:\Tool\Inno Setup 7\ISCC.exe`）
+**Prerequisites**: [uv](https://docs.astral.sh/uv/) installed; Inno Setup 7 for installer/update builds (default path: `D:\Tool\Inno Setup 7\ISCC.exe`).
 
-## 素材包说明
+## Asset Packs
 
-### 仓库素材 vs 素材包
+The repo includes **106 WebM animations** (`assets/characters/shenshen/videos/`). Frame sequences (WebP) are generated at build time via `convert_frameseq_progress.py`.
 
-仓库中自带 **106 个 WebM 动画**（`assets/characters/shenshen/videos/`），分布在 click/drag/events/idle/move/random/turn 目录。打包时通过 `convert_frameseq_progress.py` 从 WebM 生成帧序列（WebP），无需额外下载。
+`packs-index.json` lists pre-built asset packs (core + extra1-6, ~1.45GB total) — WebP frame sequences corresponding 1:1 to the 106 WebM files. These are for **installer users** who don't have the repo.
 
-`packs-index.json` 中的素材包（core + extra1-6，共 ~1.45GB）是**打包好的帧序列**（WebP 逐帧），与仓库中 106 个 WebM 一一对应，不多不少。素材包是给**安装包用户**用的（没有仓库、不想自己转换的用户）。
-
-### anim/ vs frameseq/ 目录
-
-| 目录 | 来源 | 格式 | 使用场景 |
+| Directory | Source | Format | Use case |
 |---|---|---|---|
-| `videos/` | 仓库自带 | WebM 视频 | 源素材（开发调试） |
-| `anim/` | 素材包安装 | WebP 帧序列 | 安装包用户（无源视频，帧序列随包下发） |
-| `frameseq/` | `convert_frameseq.py` 生成 | WebP 帧序列 | 有仓库的用户（从 WebM 转换） |
+| `videos/` | Repo | WebM | Source material (dev) |
+| `anim/` | Asset pack | WebP frames | Installer users |
+| `frameseq/` | Generated | WebP frames | Repo users (auto-converted from WebM) |
 
-运行时 `library.py` 根据是否有素材包索引决定用哪套：
-- **有素材包**（`anim/` 存在）→ 直接用 `anim/` 中的帧序列，不需要 `frameseq/`
-- **无素材包** → 从 `videos/` 中的 WebM 自动生成 `frameseq/`（运行时首跑自动供给）
+Runtime auto-selects: uses `anim/` if available, otherwise generates `frameseq/` from `videos/` on first run.
 
-两者**可以共存**，不互相替换。优先用素材包（如果有）。
+## Data Directory
 
-### 手动导入素材包
+Settings and DSH sessions persist across reinstalls:
 
-设置 → **角色与素材** → 点击 **"从本地文件安装…"** → 选择下载的 zip 文件。
-
-### 帧序列转换
-
-打包时自动执行 `convert_frameseq_progress.py` 生成帧序列（带进度和 ETA），已有则跳过。被 Ctrl+C 打断后下次运行会跳过已完成的 clip，幂等安全。
-
-## 数据目录
-
-设置与 DSH 会话保存在数据目录里（重装不会丢失）：
-
-| 系统 | 数据目录 |
+| OS | Path |
 |---|---|
 | Windows | `%APPDATA%/dsh-pet-chubby_blue_whale/` |
 | macOS | `~/Library/Application Support/dsh-pet-chubby_blue_whale/` |
 | Linux | `~/.config/dsh-pet-chubby_blue_whale/` |
 
-目录中主要包含：
-
 ```text
-config.json                # 全局设置
-config-slot-0.json         # 主宠的每宠设置
-dsh_session.json           # 角色工作区/会话映射（每角色一个 DSH 工作区）
-dsh_workspaces.json        # 角色工作区绑定 + 记忆开关
-sessions/<character_id>/   # 会话历史
+config.json                # Global settings
+config-slot-0.json         # Per-pet settings (main pet)
+dsh_session.json           # Character→workspace/session mapping
+dsh_workspaces.json        # Workspace bindings + memory toggle
+sessions/<character_id>/   # Session history
 pet.log
 ```
 
-## 修改记录
+## Changelog
 
-> 本节记录所有对原作者代码的修改，便于后续合并上游更新。
+> Tracks all modifications from upstream for merge conflict reference.
 >
-> **合并策略**：`git remote add upstream https://github.com/MerZlin/dsh-pet-indesktop.git && git fetch upstream && git merge upstream/main`。冲突时以本节为参考保留自用改动。
+> **Merge strategy**: `git remote add upstream https://github.com/MerZlin/dsh-pet-indesktop.git && git fetch upstream && git merge upstream/main`
 
-### 新增文件
+### Added Files
 
-| 文件 | 用途 |
+| File | Purpose |
 |---|---|
-| `pet/dsh_api.py` | DSH Web Service REST API 客户端（工作区/会话/上传/SSE 流式） |
-| `pet/chat/dsh_provider.py` | `DshWebApiProvider`（每角色一个工作区 + 会话 API 连续对话 + 附件上传 + 记忆 toggle）+ `ProviderRouter` |
-| `pet/dsh_workspace.py` | 按角色绑定工作区 + 记忆开关配置（`dsh_workspaces.json`） |
-| `pet/memory_plugin_link.py` | 记忆插件 `@dsh-pet/memory` 安装检查与一键安装 |
-| `integrations/dsh-pet-memory/` | DSH 记忆插件（基于 fish-memory 改造，按工作区共享记忆，14 天半衰期） |
-| `pet/dsh_self_talk.py` | 每天通过 DSH API 以桌宠身份自动生成自言自语候选词（含热搜、新闻、吐槽），独立文件存储 |
-| `pet/weather/ip_city.py` | IP 定位城市：优先高德 API（精度高，需 Key），回退免费 API |
-| `tools/convert_frameseq_progress.py` | 帧序列转换器（带进度显示和 ETA） |
-| `scripts/build_installer.ps1` | 完整安装包打包脚本（PyInstaller + ISCC，含素材） |
-| `scripts/build_update.ps1` | 增量更新打包脚本（PyInstaller + ISCC，不含素材，`-SkipAssets`） |
-| `scripts/build_portable.ps1` | 便携版打包脚本（PyInstaller + zip，含素材） |
-| `scripts/run_all_tests.ps1` | 逐个运行所有测试（带超时） |
-| `packaging/dsh-pet-chubby_blue_whale.iss` | Inno Setup 安装包脚本 |
+| `pet/dsh_api.py` | DSH Web Service REST API client (workspaces/sessions/upload/SSE) |
+| `pet/chat/dsh_provider.py` | `DshWebApiProvider` + `ProviderRouter` |
+| `pet/dsh_workspace.py` | Per-character workspace binding + memory toggle |
+| `pet/memory_plugin_link.py` | `@dsh-pet/memory` install check & one-click install |
+| `integrations/dsh-pet-memory/` | DSH memory plugin (forked from fish-memory, per-workspace, 14-day half-life) |
+| `pet/dsh_self_talk.py` | Daily auto self-talk generation via DSH API |
+| `pet/weather/ip_city.py` | IP city detection (Gaode API → free fallback) |
+| `tools/convert_frameseq_progress.py` | Frame sequence converter with progress/ETA |
+| `scripts/build_installer.ps1` | Full installer build script |
+| `scripts/build_update.ps1` | Incremental update build script |
+| `scripts/build_portable.ps1` | Portable zip build script |
+| `scripts/run_all_tests.ps1` | Run all tests with timeout |
+| `packaging/dsh-pet-chubby_blue_whale.iss` | Inno Setup script |
 
-### 修改文件
+### Modified Files
 
-| 文件 | 改动 |
+| File | Changes |
 |---|---|
-| `pet/chat/service.py` | 注入 `ProviderRouter`（按 provider_id 路由到 DSH 或原 OpenAI）；移除记忆提炼 hook |
-| `pet/chat/prompt.py` | 新增 `MEMORY_GUIDE` 引导段，`build_messages` 追加记忆使用引导 |
-| `pet/chat/ai_settings_page.py` | 新增 DSH 记忆插件设置区 + 一键安装按钮 |
+| `pet/chat/service.py` | Inject `ProviderRouter`; remove memory extraction hook |
+| `pet/chat/prompt.py` | Add `MEMORY_GUIDE` segment to `build_messages` |
+| `pet/chat/ai_settings_page.py` | Add DSH memory plugin settings + install button |
+| `pet/chat/widgets.py` / `pet/legacy_widgets.py` | Remove memory UI & logic |
+| `pet/quick_chat.py` / `pet/modern_settings_dialog.py` | Remove memory references |
+| `pet/config.py` | Default provider → `dsh-webapi`; clean deprecated memory keys |
+| `pet/vision.py` | Screenshot Q&A: DSH branch (upload → ask → reply) |
+| `pet/window.py` | Screen capture: DSH branch |
+| `pet/overlay_shell.py` | Screen capture overlay DSH branch; merge self-talk candidates |
+| `pet/app.py` | Startup checks: workspace binding, memory plugin, city detection, self-talk |
+| `pet/settings_features.py` | Trigger city detection on weather activation |
+| `pet/window_alerts.py` | `merge_dsh_texts`: read self-talk from `dsh_self_talk_texts.json` |
+| `pet/pack_download.py` | Asset pack URL order (proxy first, GitHub last) |
+| `scripts/build_onedir.ps1` | Unify name; add `-SkipAssets` flag |
+| `pyproject.toml` | Python 3.14 + uv dependency management |
+| `.gitignore` | Add CodeArts, uv, tmp/ |
+| `integrations/dsh-pet-memory/lib/index.js` | ① Filter `<system-reminder>` in query cleaner ② queryGate 0.8→0.5 + small-lib guard (<10 memories skip) ③ Workspace dedup in `buildMemoryList` ④ Packed-dir U+FFFD encoding fix |
+| `integrations/dsh-pet-memory/lib/client.js` | Settings UI: "session"→"workspace" wording |
+| `README.md` | English translation + plugin references |
+| `THIRD_PARTY_NOTICES.md` | Remove Android, add self-use components |
 
-| `pet/chat/widgets.py` / `pet/legacy_widgets.py` | 移除记忆相关 UI 与逻辑 |
-| `pet/quick_chat.py` / `pet/modern_settings_dialog.py` | 移除记忆相关引用 |
-| `pet/config.py` | 默认 provider 改为 `dsh-webapi`；`APP_DIR_NAME` 改为 `dsh-pet-chubby_blue_whale`（无变体后缀）；`reload()` 键列表加 `dsh_self_talk_enabled`；清理废置记忆键（`chat_memory_enabled` 等 3 个） |
-| `pet/vision.py` | 截图提问 DSH 分支：上传截图到 DSH 会话 → 提问 → 返回回复 |
-| `pet/window.py` | 看看屏幕 DSH 分支：截图 → 上传到 DSH 会话 → 提问 → 气泡 |
-| `pet/overlay_shell.py` | 看看屏幕 DSH 分支（overlay 版）；`PetSprite` + `ScreenHost` 的 `_show_random_self_talk` 合并 DSH 候选词 |
-| `pet/app.py` | 启动时检查角色工作区绑定 + 记忆插件安装提醒 + 天气城市 + 自言自语生成（`QTimer.singleShot`）；余额查询 DSH 分支（`show_balance` + `_quiet_balance_refresh` + `_balance_worker_dsh`） |
-| `pet/settings_features.py` | 天气功能激活时触发城市检测 |
-| `pet/window_alerts.py` | `merge_dsh_texts` 函数：从独立文件 `dsh_self_talk_texts.json` 读取 DSH 候选词并合并；`show_random_self_talk` 调用合并 |
-| `pet/pack_download.py` | 素材包下载 URL 顺序反转（代理优先，GitHub 官方最后） |
-| `scripts/build_onedir.ps1` | 去掉变体相关，统一为 `dsh-pet-chubby_blue_whale`；加 `-SkipAssets` 开关 |
-| `pyproject.toml` | Python 3.14 + uv 依赖管理（`[project]` dependencies + `[project.optional-dependencies]` build） |
-| `.gitignore` | CodeArts + uv 配置不追踪 |
-| `integrations/dsh-pet-memory/lib/index.js` | 修三项：① `清掉注入上下文` 加 `<system-reminder>` 块过滤（DSH 把系统提醒当 user 消息塞进来污染检索 query）② `queryGate` 默认 0.8→0.5 + 小库保护（memories<10 跳过门槛，新用户正常问句不被挡）③ 打包目录文件编码损坏修复（U+FFFD）。设置页按工作区去重：`buildMemoryList` 同一工作区多个 session 只输出一个条目，`_refreshSessionWorkspaceMap` 缓存工作区标题 |
-| `integrations/dsh-pet-memory/lib/client.js` | 设置页文案"会话"→"工作区"（列表标题、开关说明、手动加记忆、复制记忆等用户可见文案） |
-| `README.md` | 继承声明 + 自用定位 + 精简 |
-| `THIRD_PARTY_NOTICES.md` | 删除 Android 声明，新增自用版第三方组件 |
-| 2 个测试文件 | 删除引用已删目录的测试函数 |
-| 多个测试文件 | 适配默认 provider 改动 + Python 3.14 pathlib 兼容性 |
+### Deleted Files
 
-### 删除文件
-
-| 文件/目录 | 原因 |
+| File/Dir | Reason |
 |---|---|
-| `.github/` | 不需要 CI/CD |
-| `android/` | 不需要 Android 客户端 |
-| `update.json` | 更新功能不需要 |
-| `requirements.txt` | 依赖整合到 pyproject.toml |
-| `注意事项.txt` | 内容整合到 README |
-| 4 个 android 脚本 | android 相关 |
-| 3 个 android/CI 测试 | 引用已删目录 |
-| `pet/chat/memory.py` | 桌宠自带记忆存储（1104 行），已下沉到 `@dsh-pet/memory` 插件 |
-| `pet/chat/memory_recall.py` | 记忆回捞（531 行） |
-| `pet/chat/memory_extract.py` | 记忆提炼（306 行） |
-| `tests/test_chat_memory*.py` | chat memory 测试 |
-| `tests/test_memory_recall.py` | memory_recall 测试 |
+| `.github/` | No CI/CD needed |
+| `android/` | No Android client |
+| `update.json` | No auto-update |
+| `requirements.txt` | Migrated to pyproject.toml |
+| `pet/chat/memory.py` | Pet-side memory (1104 lines) → moved to `@dsh-pet/memory` plugin |
+| `pet/chat/memory_recall.py` | Memory recall (531 lines) |
+| `pet/chat/memory_extract.py` | Memory extraction (306 lines) |
+| `tests/test_chat_memory*.py` | Chat memory tests |
 
-### 配置说明
+### Configuration
 
-DSH Web API provider 配置（`config.json`）：
+DSH Web API provider config (`config.json`):
 
 ```json
 {
@@ -235,30 +232,14 @@ DSH Web API provider 配置（`config.json`）：
 }
 ```
 
-切换回原 AI API 对话：把 `active_provider` 改为 `"openai-main"`。
+## License & Acknowledgements
 
-### 合并上游更新步骤
+**MIT License** (see [`LICENSE`](LICENSE)). Third-party assets: [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
-```bash
-git remote add upstream https://github.com/MerZlin/dsh-pet-indesktop.git
-git fetch upstream
-git merge upstream/main
-# 处理冲突时参考上方"修改文件"部分，保留自用改动
-git push origin main
-```
+**Credits:**
 
-## 项目来源与素材声明
-
-**上游代码**来自原作者 [MerZlin/dsh-pet-indesktop](https://github.com/MerZlin/dsh-pet-indesktop)（MIT License, Copyright (c) 2026 Merzlin）。桌宠的基础功能（窗口、动画、菜单、设置等）完整来自上游，详见 [上游 README](https://github.com/MerZlin/dsh-pet-indesktop#readme)。
-
-第三方素材与组件授权声明见 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)。
-
-## 许可证与致谢
-
-本项目采用 **MIT License**（见仓库根目录 `LICENSE`），第三方素材与组件授权声明见 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)。
-
-**原作者：**
-
-- [MerZlin/dsh-pet-indesktop](https://github.com/MerZlin/dsh-pet-indesktop)（MIT License, Copyright (c) 2026 Merzlin）：本项目基于此开源项目个人自用再开发。
-- [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet)：原作者参考的动画素材基础。
-- [MeteorNOX/DeepSeek-Balance-Whale-Widget](https://github.com/MeteorNOX/DeepSeek-Balance-Whale-Widget)：DeepSeek 余额气泡思路参考。
+- [MerZlin/dsh-pet-indesktop](https://github.com/MerZlin/dsh-pet-indesktop) (MIT, Copyright (c) 2026 Merzlin) — upstream project
+- [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet) — animation asset basis
+- [MeteorNOX/DeepSeek-Balance-Whale-Widget](https://github.com/MeteorNOX/DeepSeek-Balance-Whale-Widget) — balance bubble inspiration
+- [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) — memory plugin basis for `@dsh-pet/memory`
+- [huaizhuanghub/dsh-persona-dafeiyu](https://github.com/huaizhuanghub/dsh-persona-dafeiyu) — recommended persona plugin
