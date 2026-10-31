@@ -421,21 +421,10 @@ def _default_chat_data():
     return {
         "enabled": True,
         "active_provider": "dsh-webapi",
-        "default_system_prompt": "\u4f60\u662f\u4e00\u53ea\u53ef\u7231\u7684\u684c\u9762\u5ba0\u7269\uff0c\u8bf7\u7528\u81ea\u7136\u3001\u53cb\u5584\u7684\u4e2d\u6587\u548c\u7528\u6237\u4ea4\u6d41\u3002",
+        "default_system_prompt": "",
         "history_message_limit": 40,
         "history_char_limit": 24000,
         "providers": {
-            "openai-main": {
-                "name": "DeepSeek",
-                "base_url": "https://api.deepseek.com",
-                "chat_path": "/v1/chat/completions",
-                "model": "deepseek-v4-flash",
-                "api_key_ref": "provider/openai-main",
-                "api_key": "",
-                "timeout": 60.0,
-                "temperature": 0.7,
-                "max_tokens": 2048,
-            },
             "dsh-webapi": {
                 "name": "DSH Web API",
                 "base_url": "http://127.0.0.1:3080/api/v1",
@@ -447,17 +436,6 @@ def _default_chat_data():
                 "temperature": 0.7,
                 "max_tokens": 2048,
             }
-        },
-        # 联网搜索全局默认值（与 pet/chat/models.py 的 WebSearchSettings 数据类保持一致；
-        # 默认值快照比对按这里的字面量走，不要再抄进 settings_default_marks）。
-        # 不写 api_key：保存路径会做密钥卫生（pop 掉 api_key），写了反而让
-        # 「重置→保存→重载」与出厂初始数据产生结构性差异。
-        "web_search": {
-            "enabled": False,
-            "engine": "baidu",
-            "api_key_ref": "websearch/api",
-            "max_results": 5,
-            "fetch_pages": True,
         },
     }
 
@@ -471,16 +449,9 @@ def _merge_chat_data(raw):
         providers = {}
         for provider_id, provider in incoming.items():
             if isinstance(provider, dict):
-                base = dict(_default_chat_data()["providers"].get("openai-main", {}))
+                base = dict(_default_chat_data()["providers"].get("dsh-webapi", {}))
                 base.update(provider)
-                # 非 openai-main provider 未显式写 api_key_ref 时按自身归位，
-                # 避免沿用 openai-main 的钥匙串条目（密钥串用/查错 key）。
-                # 必须看用户原始输入：base 已被 openai-main 默认值预填，判 base 永远非空。
                 if not str(provider.get("api_key_ref") or "").strip():
-                    base["api_key_ref"] = f"provider/{provider_id}"
-                # 历史 bug 迁移：旧版本曾把 openai-main 的钥匙串引用继承给自定义 provider，
-                # UI 从不暴露该字段，非主 provider 挂着主引用一定是继承错的。
-                if provider_id != "openai-main" and base.get("api_key_ref") == "provider/openai-main":
                     base["api_key_ref"] = f"provider/{provider_id}"
                 providers[str(provider_id)] = base
     else:
@@ -1462,7 +1433,7 @@ class Config:
         if raw.get("chat_api_key"):
             legacy_provider["api_key"] = raw["chat_api_key"]
         if legacy_provider:
-            legacy["providers"] = {"openai-main": legacy_provider}
+            legacy["providers"] = {"dsh-webapi": legacy_provider}
         merged = dict(legacy)
         merged.update(chat)
         # secret 只进不出：磁盘重载不得冲掉内存中的 key。
@@ -1759,7 +1730,7 @@ class Config:
         - 落盘失败整体回滚内存（返回 False），不留"内存已是默认、磁盘还是旧值"的错位。
 
         保留集的落点（缺一即"文案承诺保留密钥、行为却丢密钥"）：
-        - 默认集里已有的 provider（``openai-main``）：只回填凭据字段，名字/地址/模型等
+        - 默认集里已有的 provider（``dsh-webapi``）：只回填凭据字段，名字/地址/模型等
           其余字段按重置口径回默认；
         - 默认集里没有的 provider（用户自建/中转站）：重建一个**只装凭据**的最小条目
           （显示名 + 凭据），否则凭据无处安放——keyring 不可用时明文只存在内存里，

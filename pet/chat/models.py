@@ -9,6 +9,20 @@ from typing import Any
 
 def utc_now(): return datetime.now(timezone.utc).isoformat()
 
+
+class ProviderError(RuntimeError):
+    def __init__(self, message, status=None):
+        self.status = status
+        super().__init__(f'HTTP {status}: {message}' if status else message)
+
+
+@dataclass(frozen=True)
+class StreamEvent:
+    """流中的非正文事件：kind='reasoning' 思考过程增量；kind='status' 进度提示。
+    正文增量仍以 str 产出，旧调用方（只拼接 str）不受影响。"""
+    kind: str
+    text: str
+
 def _safe_float(v, default, lo=None, hi=None):
     """容错数值解析：配置被手改/损坏时回退默认值而不是抛异常。"""
     try:
@@ -30,9 +44,8 @@ def _safe_int(v, default, lo=None, hi=None):
 
 THINKING_MODES=('auto','enabled','disabled')
 REASONING_EFFORTS=('low','high','max')
-WEB_SEARCH_ENGINES=('baidu','duckduckgo','bocha','tavily')
-# 需要 API Key 的搜索引擎（其余为免 Key 的网页抓取）
-WEB_SEARCH_KEYED_ENGINES=('bocha','tavily')
+WEB_SEARCH_ENGINES=()
+WEB_SEARCH_KEYED_ENGINES=()
 
 def _choice(v, choices, default):
     v=str(v or '').strip().lower()
@@ -40,19 +53,15 @@ def _choice(v, choices, default):
 
 @dataclass
 class WebSearchSettings:
-    """联网搜索（全局，所有 provider 共用）。DeepSeek 官方 API 无内置联网，
-    由桌宠先调用搜索引擎、再把结果作为上下文交给模型。"""
+    """已禁用：DSH 侧处理联网搜索。保留接口供 UI 过渡。"""
     enabled: bool=False; engine: str='baidu'; api_key_ref: str='websearch/api'; api_key: str=''; max_results: int=5; fetch_pages: bool=True
     @classmethod
     def from_dict(cls,raw):
-        raw=raw if isinstance(raw,dict) else {}
-        return cls(bool(raw.get('enabled',False)),_choice(raw.get('engine','baidu'),WEB_SEARCH_ENGINES,'baidu'),str(raw.get('api_key_ref','websearch/api') or 'websearch/api'),str(raw.get('api_key','')),_safe_int(raw.get('max_results',5),5,lo=1,hi=10),bool(raw.get('fetch_pages',True)))
+        return cls()
     def to_dict(self,include_secret=True):
-        d=asdict(self)
-        if not include_secret: d.pop('api_key',None)
-        return d
+        return {'enabled':False,'engine':'baidu','api_key_ref':'websearch/api','max_results':5,'fetch_pages':True}
     def resolve_api_key(self):
-        return SecretStore().get(self.api_key_ref) or self.api_key
+        return ''
 
 @dataclass
 class ProviderConfig:
@@ -60,8 +69,7 @@ class ProviderConfig:
     name: str='DeepSeek'; base_url: str='https://api.deepseek.com'; chat_path: str='/v1/chat/completions'; model: str='deepseek-v4-flash'; api_key_ref: str=''; api_key: str=''; timeout: float=60.0; temperature: float=0.7; max_tokens: int=2048; vision_model: str=''; vision_same_as_chat: bool=True; vision_base_url: str=''; vision_api_key_ref: str=''; vision_api_key: str=''; verify_ssl: bool=True
     # 深度思考：auto=不发送思考参数（沿用服务端默认；DeepSeek V4 默认开启思考）；enabled/disabled=显式开关
     thinking: str='auto'; reasoning_effort: str='high'
-    # 运行时注入的联网搜索设置（来自 ChatSettings.web_search，不随 provider 落盘）
-    web_search: Any=field(default=None, repr=False, compare=False)
+
     # 运行时注入的角色显示名（来自 ChatWindow，不随 provider 落盘）
     character_name: str=field(default='', repr=False, compare=False)
     # 运行时注入的角色 ID（来自 ChatWindow，不随 provider 落盘）
@@ -74,31 +82,28 @@ class ProviderConfig:
         c.thinking=_choice(raw.get('thinking','auto'),THINKING_MODES,'auto'); c.reasoning_effort=_choice(raw.get('reasoning_effort','high'),REASONING_EFFORTS,'high')
         return c
     def to_dict(self,include_secret=True):
-        d=asdict(self); d.pop('provider_id',None); d.pop('web_search',None); d.pop('character_name',None); d.pop('character_id',None)
+        d=asdict(self); d.pop('provider_id',None); d.pop('character_name',None); d.pop('character_id',None)
         if not include_secret: d.pop('api_key',None); d.pop('vision_api_key',None)
         return d
 
 @dataclass
 class ChatSettings:
-    enabled: bool=True; active_provider: str='openai-main'; default_system_prompt: str='你是一只可爱的桌面宠物，请用自然、友善的中文和用户交流。'; history_message_limit: int=40; history_char_limit: int=24000; providers: dict[str,ProviderConfig]=field(default_factory=dict); web_search: WebSearchSettings=field(default_factory=WebSearchSettings)
-    def __post_init__(self): self.attach_runtime()
-    def attach_runtime(self):
-        """把全局联网设置挂到每个 provider 上，调用点拿 active_config 即可带上。"""
-        for p in self.providers.values(): p.web_search=self.web_search
+    enabled: bool=True; active_provider: str='dsh-webapi'; default_system_prompt: str=''; history_message_limit: int=40; history_char_limit: int=24000; providers: dict[str,ProviderConfig]=field(default_factory=dict); web_search: WebSearchSettings=field(default_factory=WebSearchSettings)
+    def __post_init__(self): pass
     @classmethod
     def defaults(cls):
-        p=ProviderConfig('openai-main'); return cls(providers={p.provider_id:p})
+        p=ProviderConfig('dsh-webapi',base_url='http://127.0.0.1:3080/api/v1',model=''); return cls(providers={p.provider_id:p})
     @classmethod
     def from_dict(cls,raw):
         raw=raw if isinstance(raw,dict) else {}; d=cls.defaults(); pr=raw.get('providers') if isinstance(raw.get('providers'),dict) else {}
         providers={str(k):ProviderConfig.from_dict(k,v) for k,v in pr.items() if isinstance(v,dict)} or d.providers
         active=str(raw.get('active_provider',next(iter(providers)))); active=active if active in providers else next(iter(providers))
-        return cls(bool(raw.get('enabled',True)),active,str(raw.get('default_system_prompt',d.default_system_prompt)),_safe_int(raw.get('history_message_limit',40),40,lo=1),_safe_int(raw.get('history_char_limit',24000),24000,lo=100),providers,WebSearchSettings.from_dict(raw.get('web_search')))
+        return cls(bool(raw.get('enabled',True)),active,str(raw.get('default_system_prompt','')),_safe_int(raw.get('history_message_limit',40),40,lo=1),_safe_int(raw.get('history_char_limit',24000),24000,lo=100),providers,WebSearchSettings.from_dict(raw.get('web_search')))
     def to_dict(self,include_secrets=True):
         return {'enabled':self.enabled,'active_provider':self.active_provider,'default_system_prompt':self.default_system_prompt,'history_message_limit':self.history_message_limit,'history_char_limit':self.history_char_limit,'providers':{k:v.to_dict(include_secrets) for k,v in self.providers.items()},'web_search':self.web_search.to_dict(include_secrets)}
     @property
     def active_config(self):
-        p=self.providers[self.active_provider]; p.web_search=self.web_search; return p
+        return self.providers[self.active_provider]
 
 @dataclass
 class ChatMessage:

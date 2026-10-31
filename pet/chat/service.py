@@ -4,7 +4,7 @@ from typing import Any
 from PySide6.QtCore import QObject, Qt, QThread, Signal
 from PySide6.QtWidgets import QApplication
 from .models import ProviderConfig
-from .providers import OpenAICompatibleProvider, StreamEvent
+from .models import StreamEvent
 
 log = logging.getLogger(__name__)
 class _Worker(QThread):
@@ -63,8 +63,8 @@ class ChatService(QObject):
     def __init__(self,provider=None,parent=None):
         super().__init__(parent)
         if provider is None:
-            from .dsh_provider import ProviderRouter
-            provider = ProviderRouter()
+            from .dsh_provider import DshWebApiProvider
+            provider = DshWebApiProvider()
 
         self.provider=provider; self._request_id=None; self._cancel=None; self._worker=None; self._workers=set()
         self._detached=False

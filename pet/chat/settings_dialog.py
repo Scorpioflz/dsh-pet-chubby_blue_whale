@@ -6,9 +6,13 @@ from PySide6.QtWidgets import (
     QLineEdit, QMessageBox, QPlainTextEdit, QPushButton, QSpinBox, QVBoxLayout, QWidget,
 )
 from .models import ChatSettings, ProviderConfig, SecretStore
-from .providers import test_connection
 from .themes import CHAT_UI_STYLE_LABELS, CHAT_UI_VIEW_ASPECT, theme_names
 from .utils import _safe_emit
+
+def _test_connection_stub(config, timeout=10.0):
+    return False, "已移除 OpenAI 兼容 provider 测试"
+
+test_connection = _test_connection_stub
 
 # 本对话框只读写经典风格的 chat_background 键（肥鱼版 DeepSeek 走主设置窗的
 # modern_chat_background），所以裁切入口按单一风格标注名称；名字取自 themes 的

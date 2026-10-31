@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 """DSH Web API Provider：通过 dsh-web-service 会话 API 实现连续对话。
 
-自用版新增模块（挂载式）：
 - DshWebApiProvider：用 dsh-web-service 的 /sessions/:id/prompt-stream 实现 SSE 流式对话。
   每个角色绑定一个独立的 DSH 工作区，工作区下按会话类型（chat/琐碎念/后台任务等）
   创建独立会话。切换角色自动切换工作区和会话。
   会话 title 随角色显示名动态更新（PUT /sessions/:id）。
   支持图片附件上传。
-- ProviderRouter：按 config.provider_id 路由到 DSH 或原 OpenAI provider。
 """
 
 from __future__ import annotations
@@ -23,7 +21,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Iterator
 
-from .providers import OpenAICompatibleProvider, ProviderError, StreamEvent
+from .models import ProviderError, StreamEvent
 from ..dsh_api import DshApiClient, default_workspace_path
 from ..dsh_workspace import ensure_character_workspace_title, get_character_workspace_title, get_character_memory_enabled
 
@@ -67,7 +65,7 @@ def _load_persisted() -> dict:
                                 'workspace_title': '',
                                 'sessions': {_DEFAULT_SESSION_TYPE: {
                                     'session_id': info['session_id'],
-                                    'system_sent': info.get('system_sent', False),
+
                                     'last_title': info.get('last_title', ''),
                                 }},
                             }
@@ -202,7 +200,7 @@ class DshWebApiProvider:
             raise ProviderError("DSH 会话创建返回空 ID", 503)
         sessions[_DEFAULT_SESSION_TYPE] = {
             'session_id': session_id,
-            'system_sent': False,
+
             'last_title': session_title,
         }
         info['sessions'] = sessions
@@ -299,20 +297,7 @@ class DshWebApiProvider:
 
         for attempt in range(2):
             session_id, char_id = self._ensure_session(config)
-            info = self._characters[char_id]
-            sess = info.get('sessions', {}).get(_DEFAULT_SESSION_TYPE, {})
 
-            if not sess.get('system_sent'):
-                sys_msg = next((m for m in messages if m.get("role") == "system"), None)
-                if sys_msg:
-                    sys_text = sys_msg.get("content", "")
-                    if isinstance(sys_text, str) and sys_text.strip():
-                        try:
-                            client.prompt_sync(session_id, sys_text)
-                        except Exception:
-                            logging.exception("发送 system prompt 到 DSH 失败")
-                sess['system_sent'] = True
-                _save_persisted(self._characters)
 
             self._maybe_update_title(client, config, char_id)
 
@@ -348,31 +333,3 @@ class DshWebApiProvider:
         """重置所有会话（下次 stream 创建新 DSH 会话）。"""
         self._characters.clear()
         _clear_persisted()
-
-
-class ProviderRouter:
-    """按 config.provider_id 路由到 DSH 或原 OpenAI provider。
-
-    注入到 ChatService 替代默认的 OpenAICompatibleProvider，
-    当 provider_id == 'dsh-webapi' 时走 DSH 会话 API，否则走原 OpenAI 兼容接口。
-    """
-
-    def __init__(self):
-        self._openai: OpenAICompatibleProvider | None = None
-        self._dsh: DshWebApiProvider | None = None
-
-    def stream(
-        self,
-        messages: list[dict[str, Any]],
-        config: Any,
-        cancel_event: threading.Event,
-        response_holder: list | None = None,
-    ) -> Iterator[str | StreamEvent]:
-        if getattr(config, "provider_id", "") == _DSH_PROVIDER_ID:
-            if self._dsh is None:
-                self._dsh = DshWebApiProvider()
-            yield from self._dsh.stream(messages, config, cancel_event, response_holder)
-            return
-        if self._openai is None:
-            self._openai = OpenAICompatibleProvider()
-        yield from self._openai.stream(messages, config, cancel_event, response_holder)

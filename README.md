@@ -11,6 +11,7 @@ A **desktop pet frontend for DSH (DeepSeek Harness)**, connecting to DSH via the
 ## Features
 
 - **Chat**: Continuous conversation via DSH Web Service session API (`/sessions/:id/prompt-stream`), shown as a single session on the DSH side
+- **Persona**: Managed by DSH persona plugin (e.g. `dsh-persona-dafeiyu`), injected via `systemPrompt.section()` — pet no longer sends system prompts
 - **Character → Workspace mapping**: Each pet character binds to an independent DSH workspace (`~/.dsh-pet-workspace/<char_id>`); memories are shared within the workspace
 - **Memory**: Powered by the `@dsh-pet/memory` DSH plugin (forked from fish-memory, 14-day half-life), shared per workspace; the pet frontend is pure UI; toggle per character, enabled by default
 - **Screen capture / screenshot Q&A**: Upload screenshot to DSH session (`POST /sessions/:id/files`) → ask → bubble shows reply
@@ -162,7 +163,7 @@ pet.log
 | File | Purpose |
 |---|---|
 | `pet/dsh_api.py` | DSH Web Service REST API client (workspaces/sessions/upload/SSE) |
-| `pet/chat/dsh_provider.py` | `DshWebApiProvider` + `ProviderRouter` |
+| `pet/chat/dsh_provider.py` | `DshWebApiProvider` (DSH session API streaming) |
 | `pet/dsh_workspace.py` | Per-character workspace binding + memory toggle |
 | `pet/memory_plugin_link.py` | `@dsh-pet/memory` install check & one-click install |
 | `integrations/dsh-pet-memory/` | DSH memory plugin (forked from fish-memory, per-workspace, 14-day half-life) |
@@ -179,8 +180,17 @@ pet.log
 
 | File | Changes |
 |---|---|
-| `pet/chat/service.py` | Inject `ProviderRouter`; remove memory extraction hook |
-| `pet/chat/prompt.py` | Add `MEMORY_GUIDE` segment to `build_messages` |
+| `pet/chat/service.py` | Inject `DshWebApiProvider` directly (no `ProviderRouter`); remove memory extraction hook |
+| `pet/chat/prompt.py` | Remove persona/roleplay/memory guide; `build_messages` returns only user message (DSH handles history & persona) |
+| `pet/chat/providers.py` | Strip to HTTP utilities only (`_make_ssl_context`, `build_browser_headers`, `normalize_chat_endpoint`); remove `OpenAICompatibleProvider`, `SSEParser`, `test_connection`, web search code |
+| `pet/chat/models.py` | `ProviderError`/`StreamEvent` moved here; `WebSearchSettings` → disabled stub; `default_system_prompt` default→empty; `active_provider` default→`dsh-webapi`; remove `web_search` from `ProviderConfig` |
+| `pet/chat/dsh_provider.py` | Remove `ProviderRouter`; remove `prompt_sync`/`system_sent` (DSH persona plugin handles system prompt) |
+| `pet/chat/ai_settings_page.py` | Stub `test_connection`/`web_search` imports (UI cleanup pending) |
+| `pet/chat/settings_dialog.py` | Stub `test_connection` import |
+| `pet/config.py` | Only `dsh-webapi` provider; remove `openai-main`; remove `web_search` defaults; `default_system_prompt`→empty |
+| `pet/file_interpret/__init__.py` | Remove `provider.web_search` assignment |
+| `pet/agent_link/__init__.py` | Only DSH monitor in `AgentLinkManager`; remove Claude/Cursor/OpenCode/CustomAgent monitor creation |
+| `pet/uninstall_cleanup.py` | Remove Claude hooks cleanup; only DSH bridge cleanup |
 | `pet/chat/ai_settings_page.py` | Add DSH memory plugin settings + install button |
 | `pet/chat/widgets.py` / `pet/legacy_widgets.py` | Remove memory UI & logic |
 | `pet/quick_chat.py` / `pet/modern_settings_dialog.py` | Remove memory references |
@@ -211,6 +221,7 @@ pet.log
 | `pet/chat/memory.py` | Pet-side memory (1104 lines) → moved to `@dsh-pet/memory` plugin |
 | `pet/chat/memory_recall.py` | Memory recall (531 lines) |
 | `pet/chat/memory_extract.py` | Memory extraction (306 lines) |
+| `pet/chat/web_search.py` | Web search module (225 lines) → removed; DSH handles web search |
 | `tests/test_chat_memory*.py` | Chat memory tests |
 
 ### Configuration

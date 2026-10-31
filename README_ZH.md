@@ -158,7 +158,7 @@ pet.log
 | 文件 | 用途 |
 |---|---|
 | `pet/dsh_api.py` | DSH Web Service REST API 客户端 |
-| `pet/chat/dsh_provider.py` | `DshWebApiProvider` + `ProviderRouter` |
+| `pet/chat/dsh_provider.py` | `DshWebApiProvider`（DSH 会话 API 流式对话） |
 | `pet/dsh_workspace.py` | 按角色绑定工作区 + 记忆开关 |
 | `pet/memory_plugin_link.py` | 记忆插件安装检查与一键安装 |
 | `integrations/dsh-pet-memory/` | DSH 记忆插件（基于 fish-memory 改造） |
@@ -174,8 +174,17 @@ pet.log
 
 | 文件 | 改动 |
 |---|---|
-| `pet/chat/service.py` | 注入 `ProviderRouter`；移除记忆提炼 hook |
-| `pet/chat/prompt.py` | 新增 `MEMORY_GUIDE` 引导段 |
+| `pet/chat/service.py` | 直接注入 `DshWebApiProvider`（无 `ProviderRouter`）；移除记忆提炼 hook |
+| `pet/chat/prompt.py` | 移除人设/扮演/记忆引导；`build_messages` 只返回用户消息（DSH 管历史与人设） |
+| `pet/chat/providers.py` | 精简为 HTTP 工具（`_make_ssl_context`、`build_browser_headers`、`normalize_chat_endpoint`）；移除 `OpenAICompatibleProvider`、`SSEParser`、`test_connection`、联网搜索 |
+| `pet/chat/models.py` | `ProviderError`/`StreamEvent` 迁入；`WebSearchSettings`→禁用桩；`default_system_prompt` 默认→空；`active_provider` 默认→`dsh-webapi`；`ProviderConfig` 移除 `web_search` |
+| `pet/chat/dsh_provider.py` | 移除 `ProviderRouter`；移除 `prompt_sync`/`system_sent`（DSH persona 插件处理人设） |
+| `pet/chat/ai_settings_page.py` | 桩化 `test_connection`/`web_search` 导入（UI 清理待续） |
+| `pet/chat/settings_dialog.py` | 桩化 `test_connection` 导入 |
+| `pet/config.py` | 只保留 `dsh-webapi` provider；移除 `openai-main`；移除 `web_search` 默认值；`default_system_prompt`→空 |
+| `pet/file_interpret/__init__.py` | 移除 `provider.web_search` 赋值 |
+| `pet/agent_link/__init__.py` | `AgentLinkManager` 只创建 DSH monitor；移除 Claude/Cursor/OpenCode/CustomAgent |
+| `pet/uninstall_cleanup.py` | 移除 Claude hooks 清理；只保留 DSH bridge 清理 |
 | `pet/chat/ai_settings_page.py` | 新增 DSH 记忆插件设置区 |
 | `pet/chat/widgets.py` / `pet/legacy_widgets.py` | 移除记忆相关 UI 与逻辑 |
 | `pet/config.py` | 默认 provider 改为 `dsh-webapi`；清理废置记忆键 |
@@ -202,6 +211,7 @@ pet.log
 | `pet/chat/memory.py` | 桌宠自带记忆（1104 行），已下沉到插件 |
 | `pet/chat/memory_recall.py` | 记忆回捞（531 行） |
 | `pet/chat/memory_extract.py` | 记忆提炼（306 行） |
+| `pet/chat/web_search.py` | 联网搜索（225 行）→ 已移除；DSH 侧处理联网搜索 |
 
 ### 配置说明
 

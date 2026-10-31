@@ -3395,23 +3395,8 @@ class AgentLinkManager(QObject):
 
         self.monitors: dict[str, BaseAgentMonitor] = {
             "dsh": DshMonitor("dsh", self.config_dir, self),
-            "claude": ClaudeCodeMonitor("claude", self.config_dir, self),
-            "cursor": CursorMonitor(self.config_dir, self),
-            "opencode": OpenCodeMonitor(self.config_dir, self),
             }
-        # 自定义联动 Agent：配置驱动的只读监视器（key/path 已在 config 清洗时
-        # 保证合法唯一）；显示名合并进实例级 agent_names，类级 AGENT_NAMES
-        # 保持仅内置（modern_settings_dialog 等按内置枚举处不受影响）。
-        # 注意：运行中新增/修改 custom_agents 需重启桌宠生效。
         self.agent_names: dict[str, str] = dict(self.AGENT_NAMES)
-        for item in (self.cfg.get("agent_link", {}).get("custom_agents") or []):
-            key = str(item.get("key") or "")
-            if not key or key in self.monitors:
-                continue
-            self.monitors[key] = CustomAgentMonitor(
-                key, self.config_dir, str(item.get("path") or ""), self,
-            )
-            self.agent_names[key] = str(item.get("name") or key)
 
         # 阻塞交互兜底清理：会话/turn 结束或 agent 停止时，任何 pending 的
         # 审批/问题交互必然失效（DSH 漏发 resolved 的异常场景），据此清掉，

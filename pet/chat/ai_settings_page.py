@@ -50,13 +50,12 @@ class _AiSettingsPage(QWidget):
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         # No-chat bundles exclude pet.chat and never construct this optional page.
         from .models import ProviderConfig, SecretStore, WEB_SEARCH_KEYED_ENGINES
-        from .providers import test_connection
-        from .web_search import ENGINE_LABELS
 
+        ENGINE_LABELS = {}
         self.config = config
         self._provider_config_type = ProviderConfig
         self._secret_store_type = SecretStore
-        self._test_connection = test_connection
+        self._test_connection = lambda c, timeout=10.0: (False, "已移除 OpenAI 兼容 provider 测试")
         self.settings = config.chat_settings()
         provider = self.settings.active_config
         self._test_thread = None
