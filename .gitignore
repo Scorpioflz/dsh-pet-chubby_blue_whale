@@ -5,6 +5,7 @@ __pycache__/
 .DS_Store
 
 # 运行时产物
+tmp/
 tmp_appdata/
 tests/_tmp_*/
 
