@@ -16,7 +16,7 @@ import pytest
 from PySide6.QtCore import QObject
 from PySide6.QtWidgets import QApplication
 
-from pet.agent_link import AgentEvent, AgentLinkManager, BaseAgentMonitor, CursorMonitor
+from pet.agent_link import AgentEvent, AgentLinkManager, BaseAgentMonitor
 from pet.config import Config
 
 
@@ -439,40 +439,6 @@ class TestOutboxPolicy:
         mon.resume()
         app.processEvents()
         assert received == ["working"]
-
-
-class TestOpenCodeDbRotation:
-    def test_db_replacement_rebackfills(self, tmp_path):
-        """OpenCode 库被替换/重建：身份变化自动重新 backfill，不回放旧库事件、不漏新库事件。"""
-        from pet.agent_link import OpenCodeMonitor
-
-        db1 = tmp_path / "opencode.db"
-        _make_opencode_db(db1, [("session.created", {"sessionID": "s1"})])
-        cfg_dir = tmp_path / "cfg"
-        cfg_dir.mkdir()
-        mon = OpenCodeMonitor(cfg_dir, db_path=db1)
-        mon._running = True
-        received = []
-        mon.state_event.connect(lambda ev: received.append(ev.state))
-        mon._worker_started()  # 模拟 worker 开场（worker 线程独占初始化）
-        mon._poll()  # 首轮 backfill：跳到末尾
-        assert received == []
-        # 替换整个库文件（新内容、新 rowid 序列）
-        _make_opencode_db(db1, [("session.created", {"sessionID": "s1"})])
-        mon._poll()  # 检测到身份变化 → 重新 backfill，不回放新库历史
-        assert received == []
-        # 新库的新事件正常送达（往【当前】库追加，而不是再替换一次——
-        # 替换时点已存在的内容按历史处理，这是 backfill 防护的设计语义）
-        import sqlite3
-        db = sqlite3.connect(db1)
-        db.execute(
-            "INSERT INTO event (type, data) VALUES (?, ?)",
-            ("message.updated", json.dumps({"info": {"role": "user"}, "sessionID": "s1"})),
-        )
-        db.commit()
-        db.close()
-        mon._poll()
-        assert "thinking" in received
 
 
 class TestManagerDeterministicTeardown:

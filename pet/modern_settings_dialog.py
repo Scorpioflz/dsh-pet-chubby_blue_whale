@@ -2014,17 +2014,11 @@ class ModernSettingsDialog(QDialog):
                             "connection_test",
                         ),
                     ),
-                    ("场景扮演", claim("roleplay_enabled", "roleplay_scene")),
                     (
-                        "深度思考与联网",
+                        "深度思考",
                         claim(
                             "thinking_mode",
                             "reasoning_effort",
-                            "web_search_enabled",
-                            "web_search_engine",
-                            "web_search_key",
-                            "web_search_max_results",
-                            "web_search_fetch_pages",
                         ),
                     ),
                     ("系统通知", claim("system_notifications_enabled")),

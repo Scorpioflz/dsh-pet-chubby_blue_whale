@@ -44,24 +44,9 @@ def _safe_int(v, default, lo=None, hi=None):
 
 THINKING_MODES=('auto','enabled','disabled')
 REASONING_EFFORTS=('low','high','max')
-WEB_SEARCH_ENGINES=()
-WEB_SEARCH_KEYED_ENGINES=()
-
 def _choice(v, choices, default):
     v=str(v or '').strip().lower()
     return v if v in choices else default
-
-@dataclass
-class WebSearchSettings:
-    """已禁用：DSH 侧处理联网搜索。保留接口供 UI 过渡。"""
-    enabled: bool=False; engine: str='baidu'; api_key_ref: str='websearch/api'; api_key: str=''; max_results: int=5; fetch_pages: bool=True
-    @classmethod
-    def from_dict(cls,raw):
-        return cls()
-    def to_dict(self,include_secret=True):
-        return {'enabled':False,'engine':'baidu','api_key_ref':'websearch/api','max_results':5,'fetch_pages':True}
-    def resolve_api_key(self):
-        return ''
 
 @dataclass
 class ProviderConfig:
@@ -88,7 +73,7 @@ class ProviderConfig:
 
 @dataclass
 class ChatSettings:
-    enabled: bool=True; active_provider: str='dsh-webapi'; default_system_prompt: str=''; history_message_limit: int=40; history_char_limit: int=24000; providers: dict[str,ProviderConfig]=field(default_factory=dict); web_search: WebSearchSettings=field(default_factory=WebSearchSettings)
+    enabled: bool=True; active_provider: str='dsh-webapi'; default_system_prompt: str=''; history_message_limit: int=40; history_char_limit: int=24000; providers: dict[str,ProviderConfig]=field(default_factory=dict)
     def __post_init__(self): pass
     @classmethod
     def defaults(cls):
@@ -98,9 +83,9 @@ class ChatSettings:
         raw=raw if isinstance(raw,dict) else {}; d=cls.defaults(); pr=raw.get('providers') if isinstance(raw.get('providers'),dict) else {}
         providers={str(k):ProviderConfig.from_dict(k,v) for k,v in pr.items() if isinstance(v,dict)} or d.providers
         active=str(raw.get('active_provider',next(iter(providers)))); active=active if active in providers else next(iter(providers))
-        return cls(bool(raw.get('enabled',True)),active,str(raw.get('default_system_prompt','')),_safe_int(raw.get('history_message_limit',40),40,lo=1),_safe_int(raw.get('history_char_limit',24000),24000,lo=100),providers,WebSearchSettings.from_dict(raw.get('web_search')))
+        return cls(bool(raw.get('enabled',True)),active,str(raw.get('default_system_prompt','')),_safe_int(raw.get('history_message_limit',40),40,lo=1),_safe_int(raw.get('history_char_limit',24000),24000,lo=100),providers)
     def to_dict(self,include_secrets=True):
-        return {'enabled':self.enabled,'active_provider':self.active_provider,'default_system_prompt':self.default_system_prompt,'history_message_limit':self.history_message_limit,'history_char_limit':self.history_char_limit,'providers':{k:v.to_dict(include_secrets) for k,v in self.providers.items()},'web_search':self.web_search.to_dict(include_secrets)}
+        return {'enabled':self.enabled,'active_provider':self.active_provider,'default_system_prompt':self.default_system_prompt,'history_message_limit':self.history_message_limit,'history_char_limit':self.history_char_limit,'providers':{k:v.to_dict(include_secrets) for k,v in self.providers.items()}}
     @property
     def active_config(self):
         return self.providers[self.active_provider]

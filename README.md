@@ -183,13 +183,15 @@ pet.log
 | `pet/chat/service.py` | Inject `DshWebApiProvider` directly (no `ProviderRouter`); remove memory extraction hook |
 | `pet/chat/prompt.py` | Remove persona/roleplay/memory guide; `build_messages` returns only user message (DSH handles history & persona) |
 | `pet/chat/providers.py` | Strip to HTTP utilities only (`_make_ssl_context`, `build_browser_headers`, `normalize_chat_endpoint`); remove `OpenAICompatibleProvider`, `SSEParser`, `test_connection`, web search code |
-| `pet/chat/models.py` | `ProviderError`/`StreamEvent` moved here; `WebSearchSettings` → disabled stub; `default_system_prompt` default→empty; `active_provider` default→`dsh-webapi`; remove `web_search` from `ProviderConfig` |
+| `pet/chat/models.py` | `ProviderError`/`StreamEvent` moved here; `WebSearchSettings`/`WEB_SEARCH_*` removed; `ChatSettings.web_search` field removed; `default_system_prompt` default→empty; `active_provider` default→`dsh-webapi` |
 | `pet/chat/dsh_provider.py` | Remove `ProviderRouter`; remove `prompt_sync`/`system_sent` (DSH persona plugin handles system prompt) |
-| `pet/chat/ai_settings_page.py` | Stub `test_connection`/`web_search` imports (UI cleanup pending) |
-| `pet/chat/settings_dialog.py` | Stub `test_connection` import |
-| `pet/config.py` | Only `dsh-webapi` provider; remove `openai-main`; remove `web_search` defaults; `default_system_prompt`→empty |
+| `pet/chat/ai_settings_page.py` | Remove multi-provider management UI, web search controls, roleplay UI + `RoleplaySceneDialog` (960→453 lines) |
+| `pet/chat/settings_dialog.py` | Remove multi-provider management UI (459→242 lines) |
+| `pet/config.py` | Only `dsh-webapi` provider; remove `openai-main`; remove `web_search` defaults + api_key stripping; `default_system_prompt`→empty |
 | `pet/file_interpret/__init__.py` | Remove `provider.web_search` assignment |
-| `pet/agent_link/__init__.py` | Only DSH monitor in `AgentLinkManager`; remove Claude/Cursor/OpenCode/CustomAgent monitor creation |
+| `pet/agent_link/__init__.py` | Only DSH monitor in `AgentLinkManager`; remove Claude/Cursor/OpenCode/CustomAgent monitor class definitions (−387 lines) + `AGENT_NAMES` reduced to `{"dsh":"DSH"}` |
+| `pet/modern_settings_dialog.py` | Remove roleplay + web_search settings sections; "深度思考与联网"→"深度思考" |
+| `pet/settings_default_marks.py` | Remove web_search default value marks |
 | `pet/uninstall_cleanup.py` | Remove Claude hooks cleanup; only DSH bridge cleanup |
 | `pet/chat/ai_settings_page.py` | Add DSH memory plugin settings + install button |
 | `pet/chat/widgets.py` / `pet/legacy_widgets.py` | Remove memory UI & logic |
@@ -223,6 +225,7 @@ pet.log
 | `pet/chat/memory_extract.py` | Memory extraction (306 lines) |
 | `pet/chat/web_search.py` | Web search module (225 lines) → removed; DSH handles web search |
 | `tests/test_chat_memory*.py` | Chat memory tests |
+| `tests/test_chat_thinking_web_search.py` | Web search + thinking tests (511 lines) — references deleted `web_search.py` |
 
 ### Configuration
 

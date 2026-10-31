@@ -51,16 +51,12 @@ def test_uninstall_cleanup_runs_all_steps(tmp_path, monkeypatch):
     config = _config(tmp_path)
     monkeypatch.setattr("pet.autostart.disable", lambda: True)
     monkeypatch.setattr(
-        "pet.agent_link.ClaudeCodeMonitor.uninstall_hooks", classmethod(lambda cls: True)
-    )
-    monkeypatch.setattr(
         "pet.agent_link.DshMonitor.uninstall_bridge", classmethod(lambda cls: True)
     )
     monkeypatch.setattr(uninstall_cleanup, "other_instances_use_agent", lambda config, key: False)
 
     results = uninstall_cleanup.run_uninstall_cleanup(config)
     assert results["autostart"] is True
-    assert results["claude_hooks"] is True
     assert results["dsh_bridge"] is True
 
 
@@ -68,25 +64,18 @@ def test_uninstall_cleanup_reports_step_failures(tmp_path, monkeypatch):
     config = _config(tmp_path)
     monkeypatch.setattr("pet.autostart.disable", lambda: False)
     monkeypatch.setattr(
-        "pet.agent_link.ClaudeCodeMonitor.uninstall_hooks", classmethod(lambda cls: False)
-    )
-    monkeypatch.setattr(
         "pet.agent_link.DshMonitor.uninstall_bridge", classmethod(lambda cls: False)
     )
     monkeypatch.setattr(uninstall_cleanup, "other_instances_use_agent", lambda config, key: False)
 
     results = uninstall_cleanup.run_uninstall_cleanup(config)
     assert results["autostart"] is False
-    assert results["claude_hooks"] is False
     assert results["dsh_bridge"] is False
 
 
 def test_uninstall_cleanup_skips_bridge_when_other_instance_uses_dsh(tmp_path, monkeypatch):
     config = _config(tmp_path)
     monkeypatch.setattr("pet.autostart.disable", lambda: True)
-    monkeypatch.setattr(
-        "pet.agent_link.ClaudeCodeMonitor.uninstall_hooks", classmethod(lambda cls: True)
-    )
     # 其他实例仍在使用 DSH 联动：桥接插件必须保留
     def fake_other_instances(cfg, key):
         return key == "dsh"
@@ -95,43 +84,9 @@ def test_uninstall_cleanup_skips_bridge_when_other_instance_uses_dsh(tmp_path, m
 
     results = uninstall_cleanup.run_uninstall_cleanup(config)
     assert results["autostart"] is True
-    assert results["claude_hooks"] is True
     assert results["dsh_bridge"] == "skipped"
 
 
-def test_uninstall_cleanup_skips_claude_when_other_instance_uses_claude(tmp_path, monkeypatch):
-    config = _config(tmp_path)
-    monkeypatch.setattr("pet.autostart.disable", lambda: True)
-    monkeypatch.setattr(
-        "pet.agent_link.DshMonitor.uninstall_bridge", classmethod(lambda cls: True)
-    )
-    # 其他实例仍在使用 Claude 联动：hooks 必须保留
-    def fake_other_instances(cfg, key):
-        return key == "claude"
-
-    monkeypatch.setattr(uninstall_cleanup, "other_instances_use_agent", fake_other_instances)
-
-    results = uninstall_cleanup.run_uninstall_cleanup(config)
-    assert results["autostart"] is True
-    assert results["claude_hooks"] == "skipped"
-    assert results["dsh_bridge"] is True
-
-
-def test_uninstall_cleanup_deletes_claude_when_no_other_instance(tmp_path, monkeypatch):
-    config = _config(tmp_path)
-    monkeypatch.setattr("pet.autostart.disable", lambda: True)
-    monkeypatch.setattr(
-        "pet.agent_link.ClaudeCodeMonitor.uninstall_hooks", classmethod(lambda cls: True)
-    )
-    monkeypatch.setattr(
-        "pet.agent_link.DshMonitor.uninstall_bridge", classmethod(lambda cls: True)
-    )
-    monkeypatch.setattr(uninstall_cleanup, "other_instances_use_agent", lambda config, key: False)
-
-    results = uninstall_cleanup.run_uninstall_cleanup(config)
-    assert results["autostart"] is True
-    assert results["claude_hooks"] is True
-    assert results["dsh_bridge"] is True
 
 
 def test_other_instances_use_agent_detects_peers(tmp_path):
@@ -256,18 +211,14 @@ def test_uninstall_cleanup_removes_hooks_despite_own_slot_residue(tmp_path, monk
         "pet.autostart.disable", lambda: (removed.append("autostart"), True)[1]
     )
     monkeypatch.setattr(
-        "pet.agent_link.ClaudeCodeMonitor.uninstall_hooks",
-        classmethod(lambda cls: (removed.append("claude"), True)[1]),
-    )
-    monkeypatch.setattr(
         "pet.agent_link.DshMonitor.uninstall_bridge",
         classmethod(lambda cls: (removed.append("dsh"), True)[1]),
     )
 
     results = uninstall_cleanup.run_uninstall_cleanup(config)
 
-    assert results == {"autostart": True, "claude_hooks": True, "dsh_bridge": True}
-    assert removed == ["autostart", "claude", "dsh"]
+    assert results == {"autostart": True, "dsh_bridge": True}
+    assert removed == ["autostart", "dsh"]
 
 
 def test_peer_variant_and_legacy_shared_dir_keep_protecting(tmp_path):

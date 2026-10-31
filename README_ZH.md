@@ -177,13 +177,15 @@ pet.log
 | `pet/chat/service.py` | 直接注入 `DshWebApiProvider`（无 `ProviderRouter`）；移除记忆提炼 hook |
 | `pet/chat/prompt.py` | 移除人设/扮演/记忆引导；`build_messages` 只返回用户消息（DSH 管历史与人设） |
 | `pet/chat/providers.py` | 精简为 HTTP 工具（`_make_ssl_context`、`build_browser_headers`、`normalize_chat_endpoint`）；移除 `OpenAICompatibleProvider`、`SSEParser`、`test_connection`、联网搜索 |
-| `pet/chat/models.py` | `ProviderError`/`StreamEvent` 迁入；`WebSearchSettings`→禁用桩；`default_system_prompt` 默认→空；`active_provider` 默认→`dsh-webapi`；`ProviderConfig` 移除 `web_search` |
+| `pet/chat/models.py` | `ProviderError`/`StreamEvent` 迁入；`WebSearchSettings`/`WEB_SEARCH_*` 移除；`ChatSettings.web_search` 字段移除；`default_system_prompt` 默认→空；`active_provider` 默认→`dsh-webapi` |
 | `pet/chat/dsh_provider.py` | 移除 `ProviderRouter`；移除 `prompt_sync`/`system_sent`（DSH persona 插件处理人设） |
-| `pet/chat/ai_settings_page.py` | 桩化 `test_connection`/`web_search` 导入（UI 清理待续） |
-| `pet/chat/settings_dialog.py` | 桩化 `test_connection` 导入 |
-| `pet/config.py` | 只保留 `dsh-webapi` provider；移除 `openai-main`；移除 `web_search` 默认值；`default_system_prompt`→空 |
+| `pet/chat/ai_settings_page.py` | 移除多 provider 管理 UI、联网搜索控件、扮演 UI + `RoleplaySceneDialog`（960→453 行） |
+| `pet/chat/settings_dialog.py` | 移除多 provider 管理 UI（459→242 行） |
+| `pet/config.py` | 只保留 `dsh-webapi` provider；移除 `openai-main`；移除 `web_search` 默认值 + api_key 剥离；`default_system_prompt`→空 |
 | `pet/file_interpret/__init__.py` | 移除 `provider.web_search` 赋值 |
-| `pet/agent_link/__init__.py` | `AgentLinkManager` 只创建 DSH monitor；移除 Claude/Cursor/OpenCode/CustomAgent |
+| `pet/agent_link/__init__.py` | `AgentLinkManager` 只创建 DSH monitor；移除 Claude/Cursor/OpenCode/CustomAgent 类定义（−387 行）；`AGENT_NAMES` 缩减为 `{"dsh":"DSH"}` |
+| `pet/modern_settings_dialog.py` | 移除扮演 + 联网搜索设置区；「深度思考与联网」→「深度思考」 |
+| `pet/settings_default_marks.py` | 移除 web_search 默认值标记 |
 | `pet/uninstall_cleanup.py` | 移除 Claude hooks 清理；只保留 DSH bridge 清理 |
 | `pet/chat/ai_settings_page.py` | 新增 DSH 记忆插件设置区 |
 | `pet/chat/widgets.py` / `pet/legacy_widgets.py` | 移除记忆相关 UI 与逻辑 |
@@ -212,6 +214,7 @@ pet.log
 | `pet/chat/memory_recall.py` | 记忆回捞（531 行） |
 | `pet/chat/memory_extract.py` | 记忆提炼（306 行） |
 | `pet/chat/web_search.py` | 联网搜索（225 行）→ 已移除；DSH 侧处理联网搜索 |
+| `tests/test_chat_thinking_web_search.py` | 联网搜索+思考测试（511 行）— 引用已删除的 `web_search.py` |
 
 ### 配置说明
 

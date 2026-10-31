@@ -1,8 +1,9 @@
 # PR 报告：非 DSH 后端移除（provider/persona/agent link）
 
 > **基线**：`cc881933`（refactor: remove non-DSH provider, pet-side persona, non-DSH agent link）
+> **续 commit**：UI 死代码清理 + 非 DSH Monitor 类定义移除（净 −2314 行）
 > **分支**：`main`　**日期**：`2026-10-31`
-> **范围**：13 文件修改 + 1 文件删除（净 −683 行）
+> **范围**：25 文件修改 + 2 文件删除（净 −2997 行）
 > **关联**：[`docs/task1-pet-memory-simplification.md`](../../docs/task1-pet-memory-simplification.md) §七、[`docs/DSH Reference Record.md`](../../docs/DSH Reference Record.md) §二.14
 
 ---
@@ -48,9 +49,26 @@
 
 ### 未改动
 
-- `pet/agent_link/__init__.py` 中非 DSH Monitor **类定义**仍存在（6335 行文件，类未实例化但未删除——后续可清理死代码）
-- UI 文件中多 provider 管理/联网搜索/人设编辑**控件**仍存在（已桩化导入不会崩，但控件是死代码——后续可清理）
 - `pet/proactive/memory.py`、`pet/memory_trim.py` 未动（与 chat memory 无关）
+- roleplay config keys (`roleplay_enabled`/`roleplay_scene`) 仍保留在 config.py 和 chat widgets 中（`build_messages` 忽略这些参数；纯死数据，不影响功能）
+
+## 二·B、UI 死代码清理 + 非 DSH Monitor 类移除（续 commit）
+
+| 文件 | 增删 | 改动意图 |
+|---|---|---|
+| `pet/chat/ai_settings_page.py` | +38 / −545 | 移除多 provider 管理 UI（combo/add/delete + 草稿逻辑）、web search 控件（5 个）、roleplay UI + `RoleplaySceneDialog` 类 |
+| `pet/chat/settings_dialog.py` | +22 / −239 | 移除多 provider 管理 UI（combo/add/delete + 草稿逻辑 + `_apply_draft_to_provider`） |
+| `pet/chat/models.py` | +3 / −18 | 移除 `WebSearchSettings` 类、`WEB_SEARCH_ENGINES`/`WEB_SEARCH_KEYED_ENGINES` 常量、`ChatSettings.web_search` 字段及 from_dict/to_dict 引用 |
+| `pet/config.py` | +1 / −3 | 移除 `_redacted_data` 中 web_search api_key 剥离逻辑 |
+| `pet/modern_settings_dialog.py` | +1 / −7 | 移除「场景扮演」section + web search 设置键；「深度思考与联网」→「深度思考」 |
+| `pet/settings_default_marks.py` | +1 / −5 | 移除 web_search 默认值标记 |
+| `pet/agent_link/__init__.py` | +4 / −440 | 移除 `ClaudeCodeMonitor`/`CursorMonitor`/`OpenCodeMonitor`/`CustomAgentMonitor` 类定义（387 行）；`AGENT_NAMES` 缩减为 `{"dsh":"DSH"}`；`_warn_if_agent_absent` 简化为 no-op；`set_enabled` 移除 claude 分支 |
+| `tests/test_agent_link.py` | +0 / −527 | 移除 7 个测试类 + 2 个测试方法（引用已删除 Monitor 类） |
+| `tests/test_chat_thinking_web_search.py` | +0 / −511 | **删除**：引用已删除的 `web_search.py` 模块 |
+| `tests/test_agent_link_threads.py` | +1 / −35 | 移除 `CursorMonitor` import + `TestOpenCodeDbRotation` 类 |
+| `tests/test_proactive.py` | +1 / −5 | 移除 `ClaudeCodeMonitor` import + monkeypatch + claude toggle |
+| `tests/test_uninstall_cleanup.py` | +2 / −51 | 移除 `ClaudeCodeMonitor.uninstall_hooks` monkeypatch + claude_hooks 断言 + 2 个 claude 专属测试函数 |
+| `tools/mem_probe.py` | +1 / −1 | 移除 `OpenCodeMonitor` 引用 |
 
 ## 三、实现要点
 
@@ -92,11 +110,10 @@
 
 ## 七、已知限制与后续
 
-1. **未跑全量测试**：应补跑 `python -m ruff check pet tests scripts` + `python -m pytest -q`。
-2. **UI 死代码未清理**：多 provider 管理/联网搜索/人设编辑控件仍存在（桩化不会崩，但控件是死代码）。
-3. **`agent_link/__init__.py` 死代码**：非 DSH Monitor 类定义仍存在（6335 行文件，未实例化）。
-4. **未安装 persona 插件**：应安装 `dsh-persona-dafeiyu` 并导入最终人设文档（`D:\华为云盘\DSH\大肥鱼_蓝鲸女仆人设_最终版.md`）。
-5. **旧记忆数据迁移**：仍待做（见 task1 §三）。
+1. **未跑全量测试**：应补跑 `python -m pytest -q`。
+2. **roleplay config keys 未清理**：`roleplay_enabled`/`roleplay_scene` 仍保留在 config.py 和 chat widgets 中（`build_messages` 忽略这些参数；纯死数据）。
+3. **未安装 persona 插件**：应安装 `dsh-persona-dafeiyu` 并导入最终人设文档（`D:\华为云盘\DSH\大肥鱼_蓝鲸女仆人设_最终版.md`）。
+4. **旧记忆数据迁移**：仍待做（见 task1 §三）。
 
 ## 八、风险与回滚
 

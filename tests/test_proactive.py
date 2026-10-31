@@ -958,9 +958,6 @@ class TestPhase4UIAndMenuIntegration:
 
         # mock QMessageBox 避免弹窗阻塞
         monkeypatch.setattr(QMessageBox, "question", lambda *a, **kw: QMessageBox.StandardButton.Yes)
-        # 禁止测试写入真实 ~/.claude/settings.json（旧版曾污染真实配置，见终审记录）
-        from pet.agent_link import ClaudeCodeMonitor
-        monkeypatch.setattr(ClaudeCodeMonitor, "install_hooks", lambda f: True)
 
         # 触发菜单事件中的开关逻辑
         win._toggle_proactive_enabled(True)
@@ -970,8 +967,7 @@ class TestPhase4UIAndMenuIntegration:
         win._set_proactive_option("allow_when_mouse_through", False)
         assert cfg.data["proactive_screen"]["allow_when_mouse_through"] is False
 
-        win._toggle_agent_link("claude", True)
-        assert cfg.data["agent_link"]["claude"] is True
+
         # 窗口必须关闭：泄漏的真实窗口会在共享事件循环上继续推进动画链
         win.close()
         win.deleteLater()

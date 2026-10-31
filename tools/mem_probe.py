@@ -247,7 +247,7 @@ def _gc_census() -> dict:
                         'ProactiveScreenWatcher', 'DshStateConverger', 'DecodeFanoutHub',
                         'TodoReminderService', 'VoiceChimeService', 'FestivalReminderService',
                         'IslandChatBubble', 'PetSpeechBubble', 'QSystemTrayIcon',
-                        'DirGlobTailer', 'ByteOffsetTailer', 'DshMonitor', 'OpenCodeMonitor',
+                        'DirGlobTailer', 'ByteOffsetTailer', 'DshMonitor',
                         'QNetworkAccessManager', 'AppShell', 'PetInstance'):
                 class_hist[name] = class_hist.get(name, 0) + 1
             if name == 'QImage':
