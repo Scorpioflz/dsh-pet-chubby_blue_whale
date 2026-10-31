@@ -177,7 +177,7 @@ pet.log
 
 | 文件 | 改动 |
 |---|---|
-| `pet/chat/service.py` | 直接注入 `DshWebApiProvider`（无 `ProviderRouter`）；移除记忆提炼 hook |
+| `pet/chat/service.py` | 直接注入 `DshWebApiProvider`（无 `ProviderRouter`）；移除记忆提炼 hook；新增 `invalidate_session(char_id)` 方法（新建对话时使 DSH 侧会话失效） |
 | `pet/chat/prompt.py` | 移除人设/扮演/记忆引导；`build_messages` 只返回用户消息（DSH 管历史与人设）；移除 roleplay 参数 |
 | `pet/chat/providers.py` | 精简为 HTTP 工具（`_make_ssl_context`、`build_browser_headers`、`normalize_chat_endpoint`）；移除 `OpenAICompatibleProvider`、`SSEParser`、`test_connection`、联网搜索 |
 | `pet/chat/models.py` | `ProviderError`/`StreamEvent` 迁入；`WebSearchSettings`/`WEB_SEARCH_*` 移除；`ChatSettings.web_search` 字段移除；`default_system_prompt` 默认→空；`active_provider` 默认→`dsh-webapi` |
@@ -195,6 +195,7 @@ pet.log
 | `pet/uninstall_cleanup.py` | 移除 Claude hooks 清理；只保留 DSH bridge 清理 |
 | `pet/chat/ai_settings_page.py` | 新增 DSH 记忆插件设置区 |
 | `pet/chat/widgets.py` / `pet/legacy_widgets.py` | 移除记忆相关 UI 与逻辑 |
+| `pet/chat/widgets.py` | `new_session()` 调用 `service.invalidate_session()` 使 DSH 侧创建新会话（修复：新建对话后 AI 仍记得旧对话） |
 | `pet/config.py` | 默认 provider 改为 `dsh-webapi`；清理废置记忆键 |
 | `pet/vision.py` | 截图提问 DSH 分支 |
 | `pet/window.py` | 看看屏幕 DSH 分支 |

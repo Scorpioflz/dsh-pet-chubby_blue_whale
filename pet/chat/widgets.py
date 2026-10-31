@@ -2096,6 +2096,7 @@ class ChatWindow(QDialog):
         if self.service.busy:
             self._active_request_id = None
             self.service.stop()
+        self.service.invalidate_session(self.character_id)
         self.session = self._new_session()
         self._clear_message_rows()
         self._set_empty_state(True)

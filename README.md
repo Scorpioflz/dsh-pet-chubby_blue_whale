@@ -183,7 +183,7 @@ pet.log
 
 | File | Changes |
 |---|---|
-| `pet/chat/service.py` | Inject `DshWebApiProvider` directly (no `ProviderRouter`); remove memory extraction hook |
+| `pet/chat/service.py` | Inject `DshWebApiProvider` directly (no `ProviderRouter`); remove memory extraction hook; add `invalidate_session(char_id)` to invalidate DSH session on new conversation |
 | `pet/chat/prompt.py` | Remove persona/roleplay/memory guide; `build_messages` returns only user message (DSH handles history & persona); remove roleplay params from signature |
 | `pet/chat/providers.py` | Strip to HTTP utilities only (`_make_ssl_context`, `build_browser_headers`, `normalize_chat_endpoint`); remove `OpenAICompatibleProvider`, `SSEParser`, `test_connection`, web search code |
 | `pet/chat/models.py` | `ProviderError`/`StreamEvent` moved here; `WebSearchSettings`/`WEB_SEARCH_*` removed; `ChatSettings.web_search` field removed; `default_system_prompt` default→empty; `active_provider` default→`dsh-webapi` |
@@ -201,6 +201,7 @@ pet.log
 | `pet/uninstall_cleanup.py` | Remove Claude hooks cleanup; only DSH bridge cleanup |
 | `pet/chat/ai_settings_page.py` | Add DSH memory plugin settings + install button |
 | `pet/chat/widgets.py` / `pet/legacy_widgets.py` | Remove memory UI & logic |
+| `pet/chat/widgets.py` | `new_session()` calls `service.invalidate_session()` so DSH creates a fresh session (fix: new conversation cleared UI but AI still remembered old context) |
 | `pet/quick_chat.py` / `pet/modern_settings_dialog.py` | Remove memory references |
 | `pet/config.py` | Default provider → `dsh-webapi`; clean deprecated memory keys |
 | `pet/vision.py` | Screenshot Q&A: DSH branch (upload → ask → reply) |

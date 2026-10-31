@@ -132,6 +132,17 @@ class ChatService(QObject):
                 self._worker.cancel.set()
         elif self._cancel is not None:
             self._cancel.set()
+    def invalidate_session(self, char_id: str) -> None:
+        """通知 provider 使该角色的 DSH 会话失效，下次发消息时创建新会话。
+
+        非 DSH provider 无 _invalidate_session 方法时静默跳过。
+        """
+        invalidate = getattr(self.provider, '_invalidate_session', None)
+        if callable(invalidate):
+            try:
+                invalidate(char_id)
+            except Exception:
+                log.exception("使 DSH 会话失效失败 (char_id=%s)", char_id)
     def _current(self,rid): return (not self._detached) and rid==self._request_id
     def _delta(self,rid,text):
         if self._current(rid): self.delta.emit(rid,text)

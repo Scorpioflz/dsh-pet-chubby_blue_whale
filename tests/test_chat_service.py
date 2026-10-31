@@ -295,3 +295,27 @@ def test_provider_cancel_closes_blocking_response(monkeypatch):
     if service._worker is not None:
         service._worker.wait(2000)
     service.shutdown()
+
+def test_invalidate_session_calls_provider_invalidate():
+    """service.invalidate_session 转调 provider._invalidate_session。"""
+    app = _get_qapp()
+
+    class FakeDshProvider:
+        def __init__(self):
+            self.invalidated = []
+        def stream(self, messages, config, cancel):
+            yield "hi"
+        def _invalidate_session(self, char_id):
+            self.invalidated.append(char_id)
+
+    provider = FakeDshProvider()
+    service = ChatService(provider=provider)
+    service.invalidate_session("char-1")
+    assert provider.invalidated == ["char-1"]
+
+
+def test_invalidate_session_safe_for_providers_without_it():
+    """非 DSH provider 无 _invalidate_session 时不报错。"""
+    app = _get_qapp()
+    service = ChatService(provider=FastFakeProvider())
+    service.invalidate_session("char-1")

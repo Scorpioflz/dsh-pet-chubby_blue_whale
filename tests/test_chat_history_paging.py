@@ -411,3 +411,23 @@ def test_remove_bubble_clears_current_bubble_reference(tmp_path):
         assert win._bubble is None
     finally:
         win.close()
+
+def test_new_session_invalidates_dsh_session(tmp_path):
+    """新建对话必须通知 DSH provider 使旧会话失效，否则 AI 仍记得之前所有对话。"""
+    from pet.chat.widgets import ChatWindow
+    from pet.config import Config
+
+    _app()
+    win = ChatWindow(Config(tmp_path), "shenshen")
+    try:
+        invalidated = []
+        original = win.service.invalidate_session
+        def track_invalidate(char_id):
+            invalidated.append(char_id)
+            original(char_id)
+        win.service.invalidate_session = track_invalidate
+
+        win.new_session()
+        assert invalidated == ["shenshen"]
+    finally:
+        win.close()
