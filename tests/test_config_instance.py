@@ -42,7 +42,7 @@ def test_save_redacts_api_keys_from_disk(tmp_path):
     assert config.save() is True
 
     raw = json.loads(config.path.read_text(encoding="utf-8"))
-    disk_provider = raw["chat"]["providers"]["openai-main"]
+    disk_provider = raw["chat"]["providers"]["dsh-webapi"]
     assert "api_key" not in disk_provider
     assert "vision_api_key" not in disk_provider
     # 内存中保留，本次运行仍可用
@@ -107,7 +107,7 @@ def test_reload_preserves_memory_api_key_when_keyring_unavailable(tmp_path, monk
 
     # 磁盘文件确实不含明文 key（防回归）
     raw = json.loads(config.path.read_text(encoding="utf-8"))
-    disk_provider = raw["chat"]["providers"]["openai-main"]
+    disk_provider = raw["chat"]["providers"]["dsh-webapi"]
     assert "api_key" not in disk_provider
     assert "vision_api_key" not in disk_provider
 
@@ -119,7 +119,7 @@ def test_reload_preserves_memory_api_key_when_keyring_unavailable(tmp_path, monk
 
     # 磁盘依然没有明文（防回归：reload 不得把内存 key 写回磁盘）
     raw_after = json.loads(config.path.read_text(encoding="utf-8"))
-    disk_after = raw_after["chat"]["providers"]["openai-main"]
+    disk_after = raw_after["chat"]["providers"]["dsh-webapi"]
     assert "api_key" not in disk_after
     assert "vision_api_key" not in disk_after
 

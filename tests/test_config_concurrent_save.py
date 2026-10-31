@@ -88,7 +88,7 @@ def test_subprocess_disjoint_and_same_key_commit_order(writers):
 def test_subprocess_nested_chat_and_deletion(writers):
     cfg, start = writers
     first, second = start(), start()
-    provider = ['chat', 'providers', 'openai-main']
+    provider = ['chat', 'providers', 'dsh-webapi']
     assert _commit(first, set=[(provider + ['model'], 'first-model'),
                                (provider + ['new_object', 'first'], 1)],
                    delete=[['character_aliases', 'removed']])
@@ -96,9 +96,9 @@ def test_subprocess_nested_chat_and_deletion(writers):
                                (provider + ['new_object', 'second'], 2),
                                (['character_aliases', 'new'], 'new name')])
     raw = _disk(cfg)
-    assert raw['chat']['providers']['openai-main']['model'] == 'first-model'
-    assert raw['chat']['providers']['openai-main']['timeout'] == 33
-    assert raw['chat']['providers']['openai-main']['new_object'] == {'first': 1, 'second': 2}
+    assert raw['chat']['providers']['dsh-webapi']['model'] == 'first-model'
+    assert raw['chat']['providers']['dsh-webapi']['timeout'] == 33
+    assert raw['chat']['providers']['dsh-webapi']['new_object'] == {'first': 1, 'second': 2}
     assert raw['character_aliases'] == {'kept': 'keep', 'new': 'new name'}
 
 
@@ -159,7 +159,7 @@ def test_broken_disk_refused_and_preserved(tmp_path, broken):
 def test_lock_failure_and_secret_redaction(tmp_path, monkeypatch):
     cfg = Config(base=tmp_path)
     assert cfg.save()
-    provider = cfg.data['chat']['providers']['openai-main']
+    provider = cfg.data['chat']['providers']['dsh-webapi']
     provider['api_key'] = 'memory-only-api'
     provider['vision_api_key'] = 'memory-only-vision'
     cfg.set('on_top', False)
@@ -169,7 +169,7 @@ def test_lock_failure_and_secret_redaction(tmp_path, monkeypatch):
         patch.setattr(cwl, 'config_write_lock', timeout)
         assert cfg.save() is False
     assert cfg.save()
-    assert cfg.data['chat']['providers']['openai-main']['api_key'] == 'memory-only-api'
+    assert cfg.data['chat']['providers']['dsh-webapi']['api_key'] == 'memory-only-api'
     assert 'memory-only' not in cfg.path.read_text(encoding='utf-8')
 
 
@@ -229,7 +229,7 @@ def test_legacy_schema_migration_still_persists(tmp_path):
     assert 'scale' not in raw
     assert pet_profiles.read_slot_profile(cfg.dir, 0).value('scale') == cfg.get('scale')
     assert raw['chat']['enabled'] is False
-    assert raw['chat']['providers']['openai-main']['model'] == 'legacy-model'
+    assert raw['chat']['providers']['dsh-webapi']['model'] == 'legacy-model'
     assert 'chat_model' not in raw
 
 

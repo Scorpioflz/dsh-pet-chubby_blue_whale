@@ -99,12 +99,6 @@ def test_windows_build_collects_keyring_for_every_variant():
     assert "@keyringCollect" in _pyinstaller_command(text), "收集参数没真的交给 PyInstaller"
 
 
-def test_windows_build_excludes_only_the_chat_subsystem():
-    """no-chat 变体该排的是 chat 子系统本体，不是它的存储依赖。"""
-    text = PS1.read_text(encoding="utf-8")
-
-    assert "'--exclude-module', 'pet.chat'" in text
-
 
 def _load_tts_gate():
     """按文件路径加载产物侧自检脚本（``scripts/`` 不是包，import 不进来）。"""

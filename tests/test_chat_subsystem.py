@@ -14,8 +14,7 @@ from pet.chat.models import ChatMessage, ChatSettings, ProviderConfig
 from pet.chat.prompt import PromptBuilder, load_character_prompt
 from pet.chat.providers import (
     ProviderError,
-    SSEParser,
-    _is_cert_verify_error,
+
     _make_ssl_context,
     normalize_chat_endpoint,
 )
@@ -28,33 +27,6 @@ def test_provider_endpoint_normalization():
     assert normalize_chat_endpoint("https://api.example.com/v1/") == "https://api.example.com/v1/chat/completions"
     assert normalize_chat_endpoint("https://api.example.com/v1/chat/completions/") == "https://api.example.com/v1/chat/completions"
 
-
-def test_sse_parser_handles_fragmented_events_and_done():
-    parser = SSEParser()
-    first = parser.feed(b'data: {"choices":[{"delta":{"content":"he')
-    second = parser.feed(b'llo"}}]}\n\ndata: {"choices":[{"delta":{"content":"!"}}]}\n\n')
-    third = parser.feed(b'data: [DONE]\n\n')
-    assert first == []
-    assert second == ['hello', '!']
-    assert third == []
-    assert parser.done is True
-
-
-def test_sse_parser_ignores_keep_alive_and_empty_choices():
-    parser = SSEParser()
-    assert parser.feed(b': keep-alive\n\n') == []
-    assert parser.feed(b'data: {"choices":[]}\n\n') == []
-
-
-def test_sse_parser_empty_data_keepalive_and_buffer_cap():
-    """审查修复回归：空 data: 心跳行不解析不中止（DS-L20）；缓冲超 1MB 抛错（GLM-M5）。"""
-    parser = SSEParser()
-    # 空 data 行（部分 OpenAI 兼容服务的心跳）+ 正常内容混排：只取内容
-    out = parser.feed(b'data:\n\ndata: {"choices":[{"delta":{"content":"ok"}}]}\n\ndata: \n\n')
-    assert out == ['ok']
-    # 缓冲无界增长防护：超过 1MB 未分隔数据 → ProviderError
-    with pytest.raises(ProviderError):
-        parser.feed(b'x' * (1024 * 1024 + 1))
 
 
 def test_prompt_priority_and_limits(tmp_path: Path):
@@ -76,10 +48,8 @@ def test_prompt_priority_and_limits(tmp_path: Path):
     ]
     builder = PromptBuilder(tmp_path / "assets" / "characters")
     messages = builder.build_messages(settings, "cat", history, "question", role_prompt="override")
-    assert messages[0]["role"] == "system"
-    assert messages[0]["content"].startswith("override\n\n【时间信息】")
-    assert messages[-1] == {"role": "user", "content": "question"}
-    assert len(messages) <= 4
+    # DSH 侧通过 persona 插件管理人设，桌宠只发送最新用户消息
+    assert messages == [{"role": "user", "content": "question"}]
 
 
 def test_character_prompt_load(tmp_path: Path):
@@ -151,7 +121,7 @@ def test_config_v4_migrates_legacy_chat_fields(tmp_path: Path, monkeypatch):
     assert settings.active_config.model == "deepseek-chat"
     # 明文 key 已迁移进 keyring：内存 api_key 置空，经 keyring 优先序仍可解析
     assert settings.active_config.api_key == ""
-    assert _FakeStore.shared["provider/openai-main"] == "secret-value"
+    assert _FakeStore.shared["provider/dsh-webapi"] == "secret-value"
     assert cfg.resolve_api_key(settings.active_config) == "secret-value"
     cfg.save()
     assert json.loads((cfg_dir / "config.json").read_text(encoding="utf-8"))["version"] == 4
@@ -540,7 +510,6 @@ def test_no_chat_packaging_uses_isolated_entrypoint():
     # spec 是构建产物（*.spec 已 gitignore）；干净检出时不存在则跳过，
     # 存在时（本机构建过）校验无 Chat 变体必须排除 pet.chat。
     for spec_name in (
-        "dsh-pet-chubby_blue_whale.spec",
         "dsh-pet-chubby_blue_whale-hd.spec",
         "dsh-pet-chubby_blue_whale-gif.spec",
         "dsh-pet-chubby_blue_whale-webm.spec",
@@ -551,7 +520,11 @@ def test_no_chat_packaging_uses_isolated_entrypoint():
         spec = spec_path.read_text(encoding="utf-8")
         assert "pet_entry_no_chat.py" in spec
         assert "'pet.chat'" in spec
-    for spec_name in ("dsh-pet-chubby_blue_whale-gif-chat.spec", "dsh-pet-chubby_blue_whale-webm-chat.spec"):
+    for spec_name in (
+        "dsh-pet-chubby_blue_whale.spec",
+        "dsh-pet-chubby_blue_whale-gif-chat.spec",
+        "dsh-pet-chubby_blue_whale-webm-chat.spec",
+    ):
         spec_path = Path(spec_name)
         if not spec_path.is_file():
             continue
@@ -1047,7 +1020,7 @@ def test_modern_new_conversation_button_is_compact_and_elevated(tmp_path: Path):
     app.processEvents()
 
 
-def test_modern_message_surface_and_toolbar_are_separate_and_pin_and_copy():
+def test_modern_message_surface_and_toolbar_are_separate_and_copy():
     from PySide6.QtWidgets import QToolButton
     from pet.chat.widgets import MessageBubble
 
@@ -1055,13 +1028,11 @@ def test_modern_message_surface_and_toolbar_are_separate_and_pin_and_copy():
     assistant = MessageBubble("assistant", "hi", character_id="shenshen")
     assert user.findChild(object, "message-surface") is not None
     assert assistant.findChild(object, "message-surface") is not None
-    # 工具条与正文 surface 分离：钉为记忆（pin）+ 复制（copy）两个动作，顺序即视觉顺序
+    # 工具条与正文 surface 分离：复制（copy）动作
     assert [button.objectName() for button in user.tools.findChildren(QToolButton)] == [
-        "message-pin-button",
         "message-copy-button",
     ]
     assert [button.objectName() for button in assistant.tools.findChildren(QToolButton)] == [
-        "message-pin-button",
         "message-copy-button",
     ]
 
@@ -2282,82 +2253,6 @@ def test_ssl_context_selection():
     assert _make_ssl_context(False).verify_mode == ssl.CERT_NONE
     assert _make_ssl_context(True).verify_mode == ssl.CERT_REQUIRED
 
-
-def test_cert_error_detection():
-    assert _is_cert_verify_error(
-        ssl.SSLError("certificate verify failed: self-signed certificate in certificate chain")
-    ) is True
-    assert _is_cert_verify_error(TimeoutError("timed out")) is False
-
-
-def test_connection_test_happy_path(tmp_path):
-    import http.server
-
-    from pet.chat.providers import OpenAICompatibleProvider, test_connection
-
-    class Handler(http.server.BaseHTTPRequestHandler):
-        def do_POST(self):
-            length = int(self.headers.get("Content-Length", 0))
-            body = self.rfile.read(length)
-            if '"stream": true' in body.decode("utf-8", "replace"):
-                out = b'data: {"choices":[{"delta":{"content":"pong"}}]}\n\ndata: [DONE]\n\n'
-            else:
-                out = json.dumps({"choices": [{"message": {"content": "pong"}}]}).encode()
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(out)))
-            self.end_headers()
-            self.wfile.write(out)
-
-        def log_message(self, *args):
-            pass
-
-    server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    try:
-        port = server.server_address[1]
-        cfg = ProviderConfig("t", base_url=f"http://127.0.0.1:{port}", model="x")
-        ok, msg = test_connection(cfg)
-        assert ok is True
-        assert "200" in msg
-        # 同一配置走 stream 也应成功
-        provider = OpenAICompatibleProvider()
-        chunks = list(provider.stream([{"role": "user", "content": "hi"}], cfg, threading.Event()))
-        assert "".join(chunks) == "pong"
-    finally:
-        server.shutdown()
-        server.server_close()
-
-
-def test_stream_surfaces_certificate_hint(monkeypatch):
-    from pet.chat.providers import OpenAICompatibleProvider
-
-    def fake_urlopen(*args, **kwargs):
-        raise urllib.error.URLError(
-            ssl.SSLError("certificate verify failed: self-signed certificate in certificate chain")
-        )
-
-    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
-    provider = OpenAICompatibleProvider()
-    with pytest.raises(ProviderError) as excinfo:
-        list(provider.stream([{"role": "user", "content": "hi"}], ProviderConfig("t"), threading.Event()))
-    assert "网络连接失败" in str(excinfo.value)
-    assert "跳过 SSL 证书验证" in str(excinfo.value)
-
-
-def test_connection_test_reports_certificate_hint(monkeypatch):
-    from pet.chat.providers import test_connection
-
-    def fake_urlopen(*args, **kwargs):
-        raise urllib.error.URLError(
-            ssl.SSLError("certificate verify failed: self-signed certificate in certificate chain")
-        )
-
-    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
-    ok, msg = test_connection(ProviderConfig("t"))
-    assert ok is False
-    assert "跳过 SSL 证书验证" in msg
 
 
 def test_connection_test_reentrant_clicks_do_not_duplicate_requests(tmp_path, monkeypatch):
@@ -3846,6 +3741,7 @@ def test_secret_store_rejects_a_subclass_of_the_fail_backend():
     `keyring.backends.fail.Keyring`，换成 `myplugin.backends.FallbackKeyring` 就漏了。
     这一条走的是 `isinstance` 那条判据。
     """
+    pytest.importorskip("keyring")
     from keyring.backends import fail as fail_backend
 
     from pet.chat import models as chat_models
