@@ -4,6 +4,8 @@
 
 A **desktop pet frontend for DSH (DeepSeek Harness)**, connecting to DSH via the `dsh-web-service` plugin's session API.
 
+> **Project Goal**: Incrementally migrate the pet's core capabilities (memory, persona, conversation, etc.) into DSH via plugins — **subtract, don't add**. The pet itself gradually retreats into a thin frontend: animation, input, and display only. All intelligence (memory, persona, reasoning) lives in DSH plugins, shared across sessions and workspaces.
+
 [中文文档](README_ZH.md)
 
 ## Features
