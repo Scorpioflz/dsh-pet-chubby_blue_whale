@@ -6,6 +6,8 @@
 
 > **项目目标**：将桌宠的核心能力（记忆、人设、对话等）逐步迁移到 DSH 插件中——**做减法，不做加法**。桌宠自身逐渐回退为一个薄前端：只负责动画、输入和展示。所有智能（记忆、人设、推理）都住在 DSH 插件里，跨会话、跨工作区共享。
 
+> **个人自用项目**——不设 Issue、不接受 Pull Request。欢迎 fork 复用、欢迎交流讨论。
+
 [English](README.md) · [DSH-Dev 索引](https://github.com/Scorpioflz/dsh-selfuse-index)
 
 ## 功能
@@ -232,6 +234,8 @@ pet.log
 | `docs/plugin-phase-*/`（7 个目录） | 上游插件化路线图文档 |
 | `docs/plugin-roadmap/` | 上游插件路线图 |
 | `docs/` 下 35 个上游历史文档 | 设计决策、issue 档案、研究笔记 — 代码即文档，不再需要 |
+| `docs/PR-REPORT-TEMPLATE.md`、`docs/DEV-HANDOVER.md`、`docs/agents/` | PR/Issue 流程文档 — 个人自用项目，不设 PR/Issue |
+| `tests/test_pr_report_discipline.py` | PR 报告纪律测试 — 无 PR 流程 |
 
 ### 配置说明
 

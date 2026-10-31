@@ -6,9 +6,8 @@
 
 1. **任何新文档必须在本文登记一行**，否则视为未定义的孤儿文档。
 2. **新文档必须与相关文档互链**：正文中至少一处指向它所补充或取代的既有文档。
-3. **取代旧文档时**，先在本文登记旧文档与新文档的关系，再考虑是否删除。
-4. **有明确生效范围的文档，标题或首段必须写清基线**（分支 / 版本 / 日期 / 实测用例数）。
-5. **「何时必读」写触发条件，不写文档摘要**：写成"改 X 之前必读"，不要写成"介绍了 X"。
+3. **有明确生效范围的文档，标题或首段必须写清基线**（分支 / 版本 / 日期）。
+4. **「何时必读」写触发条件，不写文档摘要**：写成"改 X 之前必读"，不要写成"介绍了 X"。
 
 ---
 
@@ -18,7 +17,7 @@
 |---|---|---|
 | [`../README.md`](../README.md) | 主说明（英文）：下载/安装/使用/功能/DSH 插件依赖/changelog。 | 第一次接触项目；查用户可见行为、插件依赖、变更记录。 |
 | [`../README_ZH.md`](../README_ZH.md) | 主说明（中文）：同上。 | 同上。 |
-| [`../AGENTS.md`](../AGENTS.md) | 工程指南：项目结构、变更纪律、CI 成本纪律、Context pointers 触发表、agent skills 入口。 | 提交任何代码之前；尤其改动碰撞选举、打包、菜单、设置前，先查 Context pointers。 |
+| [`../AGENTS.md`](../AGENTS.md) | 工程指南：项目结构、变更纪律、Context pointers 触发表。 | 提交任何代码之前；尤其改动碰撞选举、打包、菜单、设置前，先查 Context pointers。 |
 | [`../CONTEXT.md`](../CONTEXT.md) | 领域术语表与禁用说法。 | 命名新概念、写设计文档、或需要确认"这个词在本项目里到底指什么"时。 |
 | [`../THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md) | 第三方素材、组件与随包分发二进制的授权声明。 | 新增/替换动画素材、图标、字体、第三方库时。 |
 
@@ -58,29 +57,9 @@
 
 ---
 
-## 交付证据
+## 改造记录
 
-| 文档 | 一句话内容 | 何时必读 |
-|---|---|---|
-| [`DEV-HANDOVER.md`](DEV-HANDOVER.md) | 交付证据纪律细则（§8.2/§8.3）：每个 PR 必须交付三份证据（修改文件说明 + 性能分析 + 实机运行记录）。 | 写 PR 报告或审查交付完整性时必读。 |
-| [`PR-REPORT-TEMPLATE.md`](PR-REPORT-TEMPLATE.md) | PR 报告模板：四个必备章节的结构模板。 | 写新 PR 报告时必读。 |
-
----
-
-## PR 报告存档
-
-- [非 DSH 后端移除（2026-10-31）](PR-REPORT-NON-DSH-BACKEND-REMOVAL-2026-10-31.md)：移除非 DSH provider（OpenAI 兼容）、桌宠侧人设拼接（system prompt 首发 + 角色扮演 + 记忆引导）、联网搜索、非 DSH agent 联动；后续清理 roleplay 死代码 + 已删除功能测试/docs（净 −1033 行）；新增 `dsh-web-service` 插件安装检测（硬依赖）。改 `pet/chat/`、`pet/agent_link/__init__.py`、`pet/config.py`、`pet/app.py` 时必读。
-
----
-
-## Agent 工作流文档
-
-| 文档 | 一句话内容 | 何时必读 |
-|---|---|---|
-| [`agents/issue-tracker.md`](agents/issue-tracker.md) | Issue 与 spec 的 Local Markdown 约定（`.scratch/<feature-slug>/`）。 | 创建或管理 issue/spec 时。 |
-| [`agents/triage-labels.md`](agents/triage-labels.md) | 五个规范 triage 状态标签。 | 给 issue 打标签时。 |
-| [`agents/domain.md`](agents/domain.md) | 单上下文文档布局：根 `CONTEXT.md` + `docs/adr/`。 | 写 ADR 或领域文档时。 |
-| [`agents/handoff.md`](agents/handoff.md) | 未完成多票据工作的 handoff 约定。 | 暂停或恢复多票据工作时。 |
+- [非 DSH 后端移除（2026-10-31）](REFACTOR-LOG-NON-DSH-BACKEND-REMOVAL-2026-10-31.md)：移除非 DSH provider（OpenAI 兼容）、桌宠侧人设拼接、联网搜索、非 DSH agent 联动；后续清理 roleplay 死代码 + 已删除功能测试/docs（净 −1033 行）；新增 `dsh-web-service` 插件安装检测（硬依赖）；文档全面整理（191→13 条目）。改 `pet/chat/`、`pet/agent_link/__init__.py`、`pet/config.py`、`pet/app.py` 时必读。
 
 ---
 

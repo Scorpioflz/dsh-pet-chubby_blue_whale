@@ -6,6 +6,8 @@ A **desktop pet frontend for DSH (DeepSeek Harness)**, connecting to DSH via the
 
 > **Project Goal**: Incrementally migrate the pet's core capabilities (memory, persona, conversation, etc.) into DSH via plugins — **subtract, don't add**. The pet itself gradually retreats into a thin frontend: animation, input, and display only. All intelligence (memory, persona, reasoning) lives in DSH plugins, shared across sessions and workspaces.
 
+> **Personal self-use project** — no Issue tracking, no Pull Requests. Feel free to fork, reuse, or reach out for discussion.
+
 [中文文档](README_ZH.md) · [DSH-Dev Index](https://github.com/Scorpioflz/dsh-selfuse-index)
 
 ## Features
@@ -243,6 +245,8 @@ pet.log
 | `docs/plugin-phase-*/` (7 dirs) | Upstream plugin phase roadmap docs |
 | `docs/plugin-roadmap/` | Upstream plugin roadmap |
 | `docs/{CHANGELOG,BUGFIX,BUILD_*,UPSTREAM-*,PRODUCT-*,PROJECT_*,HANDOVER_*,ANDROID,OPEN-SOURCE-*,OPTIMIZATION_*,PACK-PUBLISHING,ONLINE-UPDATE,ACCEPTANCE_*,ADDING-A-TTS,ASSET-PIPELINE,CHAT-BACKGROUND,CONTEXT-MENU-RESEARCH,DSH-HUMAN-REQUEST,DSH-REQUEST-EVENT-CATALOG,grill-*,ISLAND-SEGMENTS,issue-draft,PERSONA-TEMPLATE-FIELD,PET-STATE-MACHINE,PROACTIVE_SCREEN_*,QT-LIFECYCLE-FULL,SETTINGS-INFORMATION,SETTINGS-REPORT-PROB,WINDOW_PY_SPLIT,SETTINGS-REDESIGN-*,AGENT_LINK_LIVE_TEST,ISSUE-EDGE-TTS,ISSUE-111-*,PR-MERGE-LESSONS,PERSONA-PHRASES-PRESET-STORAGE}.md` | Upstream development history docs (35 files) — design decisions, issue archives, research notes |
+| `docs/PR-REPORT-TEMPLATE.md`, `docs/DEV-HANDOVER.md`, `docs/agents/` | PR/Issue workflow docs — personal self-use project, no PR/Issue tracking |
+| `tests/test_pr_report_discipline.py` | PR report discipline test — no PR workflow |
 
 ### Configuration
 
