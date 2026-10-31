@@ -239,5 +239,5 @@ pet.log
 - [MerZlin/dsh-pet-indesktop](https://github.com/MerZlin/dsh-pet-indesktop)（MIT, Copyright (c) 2026 Merzlin）— 上游项目
 - [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet) — 动画素材基础
 - [MeteorNOX/DeepSeek-Balance-Whale-Widget](https://github.com/MeteorNOX/DeepSeek-Balance-Whale-Widget) — 余额气泡参考
-- [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) — `@dsh-pet/memory` 记忆插件基础
+- [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) — `@dsh-pet/memory` 是本插件的衍生作品。按其 **Yuuyuko-uu 插件许可 1.2**（见 [`integrations/dsh-pet-memory/LICENSE`](integrations/dsh-pet-memory/LICENSE)）声明：`@dsh-pet/memory` 派生自上述上游仓库，原作者 Yuuyuko-uu，继续使用同一许可。相对上游的改动：记忆按工作区共享（上游按会话）；`<system-reminder>` 机器来源检索过滤；queryGate 小库保护（0.8→0.5，<10 条跳过）；设置页会话→工作区归类；打包目录编码修复；包名改为 `@dsh-pet/memory`（注册名仍为 `memory`，与上游 remember 工具兼容）。
 - [huaizhuanghub/dsh-persona-dafeiyu](https://github.com/huaizhuanghub/dsh-persona-dafeiyu) — 建议安装的人设插件

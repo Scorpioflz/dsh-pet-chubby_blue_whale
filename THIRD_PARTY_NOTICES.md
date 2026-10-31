@@ -5,6 +5,15 @@ This project includes third-party software and assets subject to their respectiv
 
 ---
 
+## 0. @dsh-pet/memory (derivative of dsh-fish-memory)
+
+- **Files**: `integrations/dsh-pet-memory/` (the bundled DSH memory plugin)
+- **Origin / Source Repository**: [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory)
+- **License**: Yuuyuko-uu 插件许可 1.2（正文见 [`integrations/dsh-pet-memory/LICENSE`](integrations/dsh-pet-memory/LICENSE)，逐字复制自上游）
+- **Derivative declaration** (per license 5b): `@dsh-pet/memory` derives from the upstream repository above, original author Yuuyuko-uu, and continues under the same license. Changes relative to upstream: per-workspace memory sharing (vs per-session); `<system-reminder>` machine-source query filtering; queryGate small-lib guard (0.8→0.5, skip when <10 memories); settings UI session→workspace mode; packed-dir encoding fix; package renamed to `@dsh-pet/memory` (register name stays `memory` for `remember` tool compatibility).
+
+---
+
 ## 1. DeepSeek Balance Whale Widget Sound Assets
 
 - **Files**:

@@ -181,13 +181,16 @@ pet.log
 | File | Changes |
 |---|---|
 | `pet/chat/service.py` | Inject `DshWebApiProvider` directly (no `ProviderRouter`); remove memory extraction hook |
-| `pet/chat/prompt.py` | Remove persona/roleplay/memory guide; `build_messages` returns only user message (DSH handles history & persona) |
+| `pet/chat/prompt.py` | Remove persona/roleplay/memory guide; `build_messages` returns only user message (DSH handles history & persona); remove roleplay params from signature |
 | `pet/chat/providers.py` | Strip to HTTP utilities only (`_make_ssl_context`, `build_browser_headers`, `normalize_chat_endpoint`); remove `OpenAICompatibleProvider`, `SSEParser`, `test_connection`, web search code |
 | `pet/chat/models.py` | `ProviderError`/`StreamEvent` moved here; `WebSearchSettings`/`WEB_SEARCH_*` removed; `ChatSettings.web_search` field removed; `default_system_prompt` default→empty; `active_provider` default→`dsh-webapi` |
 | `pet/chat/dsh_provider.py` | Remove `ProviderRouter`; remove `prompt_sync`/`system_sent` (DSH persona plugin handles system prompt) |
 | `pet/chat/ai_settings_page.py` | Remove multi-provider management UI, web search controls, roleplay UI + `RoleplaySceneDialog` (960→453 lines) |
 | `pet/chat/settings_dialog.py` | Remove multi-provider management UI (459→242 lines) |
-| `pet/config.py` | Only `dsh-webapi` provider; remove `openai-main`; remove `web_search` defaults + api_key stripping; `default_system_prompt`→empty |
+| `pet/chat/widgets.py` / `pet/chat/legacy_widgets.py` | Remove roleplay param passing to `build_messages` |
+| `pet/quick_chat.py` | Remove roleplay param passing to `build_messages` |
+| `pet/pet_profiles.py` | Remove roleplay keys from per-pet key set |
+| `pet/config.py` | Only `dsh-webapi` provider; remove `openai-main`; remove `web_search` defaults + api_key stripping; `default_system_prompt`→empty; remove roleplay keys (`roleplay_enabled`/`roleplay_scene`/`roleplay_cast`) + `_clean_roleplay_text` + `ROLEPLAY_*` constants; add `memory_plugin_remind` default |
 | `pet/file_interpret/__init__.py` | Remove `provider.web_search` assignment |
 | `pet/agent_link/__init__.py` | Only DSH monitor in `AgentLinkManager`; remove Claude/Cursor/OpenCode/CustomAgent monitor class definitions (−387 lines) + `AGENT_NAMES` reduced to `{"dsh":"DSH"}` |
 | `pet/modern_settings_dialog.py` | Remove roleplay + web_search settings sections; "深度思考与联网"→"深度思考" |
@@ -211,6 +214,13 @@ pet.log
 | `integrations/dsh-pet-memory/lib/client.js` | Settings UI: "session"→"workspace" wording |
 | `README.md` | English translation + plugin references |
 | `THIRD_PARTY_NOTICES.md` | Remove Android, add self-use components |
+| `tests/test_config_schema.py` | Remove roleplay + chat_memory keys from whitelist; add `dsh_self_talk_enabled` + `memory_plugin_remind` |
+| `tests/test_settings_default_marks.py` | Remove `web_search_key` from no-default rows |
+| `tests/test_architecture.py` | Update `modern_settings_dialog.py` line budget (2722→2714) |
+| `docs/AGENT_LINK_PROTOCOL.md` | Update Monitor references (deleted classes → `DshMonitor`) |
+| `docs/DSH-BRIDGE-PET-EVENT-CONTRACT-2026-09-02.md` | Remove Custom Agent adapter section (deleted `CustomAgentMonitor`) |
+| `docs/INDEX.md` | Update PR report description + web search report pointer |
+| `docs/PR-REPORT-NON-DSH-BACKEND-REMOVAL-2026-10-31.md` | Update stale "保留禁用桩" description + remove roleplay limitation |
 
 ### Deleted Files
 
@@ -226,6 +236,7 @@ pet.log
 | `pet/chat/web_search.py` | Web search module (225 lines) → removed; DSH handles web search |
 | `tests/test_chat_memory*.py` | Chat memory tests |
 | `tests/test_chat_thinking_web_search.py` | Web search + thinking tests (511 lines) — references deleted `web_search.py` |
+| `tests/test_chat_roleplay.py` | Roleplay tests (905 lines) — roleplay feature fully removed |
 
 ### Configuration
 
@@ -257,5 +268,5 @@ DSH Web API provider config (`config.json`):
 - [MerZlin/dsh-pet-indesktop](https://github.com/MerZlin/dsh-pet-indesktop) (MIT, Copyright (c) 2026 Merzlin) — upstream project
 - [PC2005-cloud/dsh-pet](https://github.com/PC2005-cloud/dsh-pet) — animation asset basis
 - [MeteorNOX/DeepSeek-Balance-Whale-Widget](https://github.com/MeteorNOX/DeepSeek-Balance-Whale-Widget) — balance bubble inspiration
-- [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) — memory plugin basis for `@dsh-pet/memory`
+- [Yuuyuko-uu/dsh-fish-memory](https://github.com/Yuuyuko-uu/dsh-fish-memory) — `@dsh-pet/memory` is a derivative work of this plugin. Per its **Yuuyuko-uu Plugin License 1.2** (see [`integrations/dsh-pet-memory/LICENSE`](integrations/dsh-pet-memory/LICENSE)): `@dsh-pet/memory` derives from the upstream repository above, original author Yuuyuko-uu, and continues under the same license. Changes relative to upstream: per-workspace memory sharing (vs per-session); `<system-reminder>` machine-source query filtering; queryGate small-lib guard (0.8→0.5, skip when <10 memories); settings UI session→workspace mode; packed-dir encoding fix; package renamed to `@dsh-pet/memory` (register name stays `memory` for `remember` tool compatibility).
 - [huaizhuanghub/dsh-persona-dafeiyu](https://github.com/huaizhuanghub/dsh-persona-dafeiyu) — recommended persona plugin

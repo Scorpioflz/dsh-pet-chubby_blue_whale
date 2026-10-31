@@ -2,8 +2,8 @@
   "name": "@dsh-pet/memory",
   "version": "0.1.0",
 
-  "description": "桌宠记忆插件：基于 fish-memory 改造，按工作区共享记忆",
-  "license": "MIT",
+  "description": "桌宠记忆插件：派生自 Yuuyuko-uu/dsh-fish-memory（Yuuyuko-uu 插件许可 1.2），按工作区共享记忆",
+  "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -14,6 +14,7 @@
   },
   "files": [
     "lib",
+    "LICENSE",
     "cordis.patch.yml"
   ],
   "dsh": {
