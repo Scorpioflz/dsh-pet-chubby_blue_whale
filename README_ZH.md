@@ -6,7 +6,7 @@
 
 > **项目目标**：将桌宠的核心能力（记忆、人设、对话等）逐步迁移到 DSH 插件中——**做减法，不做加法**。桌宠自身逐渐回退为一个薄前端：只负责动画、输入和展示。所有智能（记忆、人设、推理）都住在 DSH 插件里，跨会话、跨工作区共享。
 
-[English](README.md)
+[English](README.md) · [DSH-Dev 索引](https://github.com/Scorpioflz/dsh-selfuse-index)
 
 ## 功能
 
