@@ -450,6 +450,12 @@ def _merge_chat_data(raw):
                 base.update(provider)
                 if not str(provider.get("api_key_ref") or "").strip():
                     base["api_key_ref"] = f"provider/{provider_id}"
+                # 历史 bug 迁移：旧版本曾把主 provider 的钥匙串引用继承给自定义 provider，
+                # UI 从不暴露该字段，非主 provider 挂着主引用一定是继承错的。
+                # 同时覆盖旧主 provider (openai-main) 已退役的情况。
+                _ref = base.get("api_key_ref", "")
+                if provider_id != "dsh-webapi" and _ref in ("provider/dsh-webapi", "provider/openai-main"):
+                    base["api_key_ref"] = f"provider/{provider_id}"
                 providers[str(provider_id)] = base
     else:
         providers = dict(result["providers"])

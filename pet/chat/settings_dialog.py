@@ -3,7 +3,7 @@ import threading
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QDialog, QDoubleSpinBox, QFileDialog, QFormLayout, QHBoxLayout, QLabel,
-    QLineEdit, QPlainTextEdit, QPushButton, QSpinBox, QVBoxLayout, QWidget,
+    QLineEdit, QMessageBox, QPlainTextEdit, QPushButton, QSpinBox, QVBoxLayout, QWidget,
 )
 from .models import ChatSettings, ProviderConfig, SecretStore
 from .themes import CHAT_UI_STYLE_LABELS, CHAT_UI_VIEW_ASPECT, theme_names
@@ -226,6 +226,7 @@ class ChatSettingsDialog(QDialog):
         if key:
             if not SecretStore().set(p.api_key_ref, key):
                 p.api_key = key
+                QMessageBox.warning(self, '系统安全存储不可用', 'API Key 无法保存到系统安全存储（keyring），仅保留在内存中，重启后会丢失。')
         vkey = self.vkey.text()
         if vkey:
             if not SecretStore().set(p.vision_api_key_ref, vkey):
@@ -237,6 +238,6 @@ class ChatSettingsDialog(QDialog):
         self.config.set('system_notifications_enabled', self.system_notify_check.isChecked())
         self.config.set_chat_settings(self.settings)
         if not self.config.save():
-            from PySide6.QtWidgets import QMessageBox
+
             QMessageBox.warning(self, '保存失败', '配置未能写入磁盘，改动可能在重启后丢失。\n\n配置路径：' + str(self.config.path))
         self.accept()
