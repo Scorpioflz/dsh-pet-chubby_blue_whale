@@ -238,6 +238,11 @@ pet.log
 | `tests/test_chat_memory*.py` | Chat memory tests |
 | `tests/test_chat_thinking_web_search.py` | Web search + thinking tests (511 lines) — references deleted `web_search.py` |
 | `tests/test_chat_roleplay.py` | Roleplay tests (905 lines) — roleplay feature fully removed |
+| `docs/PR-REPORT-*.md` (119 files) | Upstream PR reports — not relevant to self-use fork |
+| `docs/RELEASE-v*.md` (8 files) | Upstream release notes |
+| `docs/plugin-phase-*/` (7 dirs) | Upstream plugin phase roadmap docs |
+| `docs/plugin-roadmap/` | Upstream plugin roadmap |
+| `docs/{CHANGELOG,BUGFIX,BUILD_*,UPSTREAM-*,PRODUCT-*,PROJECT_*,HANDOVER_*,ANDROID,OPEN-SOURCE-*,OPTIMIZATION_*,PACK-PUBLISHING,ONLINE-UPDATE,ACCEPTANCE_*,ADDING-A-TTS,ASSET-PIPELINE,CHAT-BACKGROUND,CONTEXT-MENU-RESEARCH,DSH-HUMAN-REQUEST,DSH-REQUEST-EVENT-CATALOG,grill-*,ISLAND-SEGMENTS,issue-draft,PERSONA-TEMPLATE-FIELD,PET-STATE-MACHINE,PROACTIVE_SCREEN_*,QT-LIFECYCLE-FULL,SETTINGS-INFORMATION,SETTINGS-REPORT-PROB,WINDOW_PY_SPLIT,SETTINGS-REDESIGN-*,AGENT_LINK_LIVE_TEST,ISSUE-EDGE-TTS,ISSUE-111-*,PR-MERGE-LESSONS,PERSONA-PHRASES-PRESET-STORAGE}.md` | Upstream development history docs (35 files) — design decisions, issue archives, research notes |
 
 ### Configuration
 

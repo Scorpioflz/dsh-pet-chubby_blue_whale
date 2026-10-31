@@ -227,6 +227,11 @@ pet.log
 | `pet/chat/web_search.py` | 联网搜索（225 行）→ 已移除；DSH 侧处理联网搜索 |
 | `tests/test_chat_thinking_web_search.py` | 联网搜索+思考测试（511 行）— 引用已删除的 `web_search.py` |
 | `tests/test_chat_roleplay.py` | 扮演测试（905 行）— roleplay 功能已完全移除 |
+| `docs/PR-REPORT-*.md`（119 个） | 上游 PR 报告 — 与自用改造无关 |
+| `docs/RELEASE-v*.md`（8 个） | 上游版本发布说明 |
+| `docs/plugin-phase-*/`（7 个目录） | 上游插件化路线图文档 |
+| `docs/plugin-roadmap/` | 上游插件路线图 |
+| `docs/` 下 35 个上游历史文档 | 设计决策、issue 档案、研究笔记 — 代码即文档，不再需要 |
 
 ### 配置说明
 

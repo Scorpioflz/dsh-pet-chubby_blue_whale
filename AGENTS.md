@@ -236,69 +236,24 @@ exact breakpoint there; see `docs/agents/handoff.md`.
 找文档先查 `docs/INDEX.md`（全文档入口索引：每条一句话 + 何时必读）；
 新文档入场必须按其中的规则登记并互链。高频专项指针：
 
-- Read `docs/ISSUE-111-WINDOWS-SESSION-END-FFMPEG-2026-09-12.md` when changing
-  ffmpeg spawning (`webm_clip` reader/first-frame/meta/exe probes), warm
-  scheduling, or anything that runs during Windows shutdown/logoff
-  (`session_watcher`, `match_shutdown`, `AppShell._on_session_end`).
 - Read `docs/ONEDIR_PACKAGING.md` when changing PyInstaller specs, bundled
   resources, or platform build scripts.
-- Read `docs/PR-REPORT-FRAMESEQ-ALPHA-FLOOR-2026-10-16.md` when changing the
-  frame-sequence encode grade or unblend chain
-  (`pet/frameseq_provision.py`: `ENCODER_DESC` / `UNBLEND_MARK` / `unblend_v3` /
-  `floor_faint_alpha`), the build-time material gate
-  (`scripts/check_frameseq_bundle.py`, whose grade constants must stay
-  byte-identical to the runtime ones), or when deciding whether frame-sequence
-  material must be re-generated. Current grade is `unblend-white-v6`
-  (**lossless**, 2026-10-20 起；v5/v3 are history — see
-  `docs/PR-REPORT-ASSET-ARCH-LOSSLESS-2026-10-19.md` for the lossless switch and
-  its bit-exact verification); v4 (hole restore) is suspended and is **not** a
-  grade. The runtime grade string, the build gate, and the material on disk must
-  all agree — a mismatch means the material is re-generated, never the constant.
-- Read `docs/ONEDIR_PACKAGING.md` §「随包分发的第三方二进制」and
-  `docs/PR-REPORT-GAME-FPS-2026-10-11.md` when touching the game-FPS chain
-  (`pet/island/game_fps.py`, `pet/island/fps_monitor.py`, `pet/island/fps.py`), the bundled
-  PresentMon backend under `resources/presentmon/` (Windows-only, x64-only,
-  digests gated by `scripts/verify_presentmon.py` at build time; never installed
-  as an MSI/service), or the `fps` member of `island_metrics` and the two
-  process-level `game_fps_*` keys. Real frame readings are **not** verified on
-  this machine: capture runs with **plain user permissions only** — the pet never
-  self-elevates and runs no resident elevated helper. The only elevation is the
-  user-clicked, one-time settings button (`pet/fps_permission.py`) that adds the
-  current account (token SID) to Performance Log Users via one UAC prompt; it
-  takes effect after re-logon. Until then, where the user is not in that
-  group the segment shows the raw `access denied` reason
-  from the capture backend and keeps no value (never a fake `0`). No ETW session
-  or real frame reading has ever been exercised here — do not cite any measured
-  FPS as verified.
 - Read `docs/STABLE_BUILDS.md` when changing release/build workflows.
-- Read `docs/CONTEXT-MENU-RESEARCH-AND-REFACTOR-2026-08-25.md` when changing
-  context-menu structure, styling, interaction, or platform behavior.
 - Read `docs/SETTINGS-CHANGE-GATES.md` before adding, moving, removing, or
   changing a persistent setting or its settings-page interaction.
-- Read `docs/PERSONA-PHRASES-PRESET-STORAGE-2026-09-08.md` before changing
-  dialogue preset files (`pet/persona_presets/*.json`), phrase loading
-  (`persona_phrases.py`), or expression-style semantics
-  (`dialogue_mode`/`dialogue_phrases`).
-- Read `docs/PR-MERGE-LESSONS-2026-09-12.md` before merging PRs: stacked-PR
-  conflicts after squashing the parent, budget/red-line changes that only break
-  when two PRs combine, and timing-test flake discipline (poll state with a wide
-  budget instead of fixed sleeps).
 - Read `docs/NETWORK-PROXY-AND-VPN-2026-09-22.md` when touching any networked
-  feature (music lyrics, edge-tts voice, updater, balance, vision, chat) or when
+  feature (music lyrics, edge-tts voice, balance, vision, chat) or when
   a report sounds like "X worked yesterday and now it doesn't": the Windows
-  system proxy / VPN is a first-class suspect — it made lyric fetching 20-41s
-  (all three sources timed out) on 2026-09-22, while jsdelivr update checks only
-  work *through* the proxy. Lyric requests try direct first and fall back to the
-  system proxy exactly once — only on a transport failure or HTTP 500/502/504,
-  sharing `fetch_lyrics`' single deadline budget (`pet/music/lyric.py`:
-  `_build_opener` / `_may_switch_to_proxy` / `_fallback_proxy` /
-  `_attempt_timeout`; 404/429/503 and other definitive answers never switch
-  routes, and neither does any response carrying `Retry-After`). The fallback
-  only counts when the URL's own scheme (http/https) has a proxy that the system
-  `proxy_bypass` list does not exempt — a `NO_PROXY`-only or other-scheme config
-  is not a second route. Never log proxy addresses, credentials, or raw
+  system proxy / VPN is a first-class suspect. Lyric requests try direct first
+  and fall back to the system proxy exactly once — only on a transport failure
+  or HTTP 500/502/504, sharing `fetch_lyrics`' single deadline budget
+  (`pet/music/lyric.py`). Never log proxy addresses, credentials, or raw
   exception/URL text: route names, exception type, HTTP status and `Retry-After`
-  only. Other features keep following the proxy.
+  only.
+- Read `docs/DSH-BRIDGE-PET-EVENT-CONTRACT-2026-09-02.md` when changing the
+  DSH bridge (`integrations/dsh-pet-bridge/`) or agent link event handling.
+- Read `docs/AGENT_LINK_PROTOCOL.md` when changing agent link event protocol,
+  the six-state vocabulary, or `DshMonitor`/`AgentLinkManager`.
 - Treat `assets/characters/<id>/videos/` plus its manifest as one character
   package; preserve relative paths and case because packaged platforms differ.
   The manifest may declare `body_box` (`[x1, y1, x2, y2]` in source pixels,

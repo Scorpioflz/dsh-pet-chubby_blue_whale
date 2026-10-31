@@ -120,3 +120,20 @@
 - **配置迁移**：`config.py` 的 `_merge_chat_data()` 自动将旧 `openai-main` provider 迁移为 `dsh-webapi`；`default_system_prompt` 旧值保留（不强制清空），但 `build_messages()` 不再使用它。
 - **回滚**：`git revert c2e4d3ac cc881933` 即可恢复全部移除的代码。无残留状态或落盘数据问题（配置迁移是单向的，回滚后旧配置仍可用）。
 - **主要风险**：若用户依赖非 DSH provider（如自建 OpenAI 兼容端点），本次改动后该功能不可用。但项目目标已明确只保留 DSH 作为唯一后端。
+## 九、后续变动（2026-10-31 续）
+
+### 9.1 roleplay 死代码 + 已删除功能测试/docs 清理（commit `6f74d57e`，净 −1033 行）
+
+**源码**：`pet/config.py` 移除 `ROLEPLAY_*` 常量 + `_clean_roleplay_text` + roleplay 键默认值/归一化；`pet/chat/prompt.py` 移除 `build_messages` 的 roleplay 参数；`pet/chat/widgets.py`/`legacy_widgets.py`/`quick_chat.py` 移除 roleplay 参数传递；`pet/pet_profiles.py` 移除 roleplay 键。
+
+**测试**：删除 `tests/test_chat_roleplay.py`（905 行）；`tests/test_config_schema.py`/`test_settings_default_marks.py`/`test_architecture.py` 更新。
+
+**docs**：`AGENT_LINK_PROTOCOL.md` 更新 Monitor 引用；`DSH-BRIDGE-PET-EVENT-CONTRACT-2026-09-02.md` 移除 Custom Agent 段落。
+
+### 9.2 `dsh-web-service` 插件安装检测（commit `27c21e2a`）
+
+`dsh-web-service` 是桌宠的硬依赖（暴露 HTTP API）。新增 `pet/webapi_plugin_link.py` 检测模块；`pet/app.py` 添加 `_show_webapi_plugin_dialog()` + 启动检查；`pet/config.py` 添加 `webapi_plugin_remind` 键。83 测试通过，`is_installed()` 返回 `True`。
+
+### 9.3 文档全面整理（本次 commit）
+
+移除上游历史文档（191→13 条目）：119 个上游 PR-REPORT、8 个 RELEASE notes、7 个 plugin-phase 目录、plugin-roadmap 目录、35 个上游开发历史文档。保留：INDEX.md（重写）、AGENTS.md（精简 Context pointers）、DEV-HANDOVER.md、ONEDIR_PACKAGING.md、SETTINGS-CHANGE-GATES.md、STABLE_BUILDS.md、NETWORK-PROXY-AND-VPN、DSH-BRIDGE-PET-EVENT-CONTRACT、AGENT_LINK_PROTOCOL、PR-REPORT-NON-DSH-BACKEND-REMOVAL、PR-REPORT-TEMPLATE、agents/、third_party_doc/、screenshots/。README 添加指向 `dsh-selfuse-index` 索引仓库的链接。
