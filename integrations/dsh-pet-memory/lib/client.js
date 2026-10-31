@@ -361,7 +361,7 @@ const 洗键进度 = { 已: 0, 总: 0, 在跑: false, 干跑: false }
         }
         const 会话 = 加哪个会话()
         if (!会话) {
-          set加结果({ ok: false, 文字: '没有会话可加' })
+          set加结果({ ok: false, 文字: '没有工作区可加' })
           return
         }
         const 重要 = Number(加重要)
@@ -375,7 +375,7 @@ const 洗键进度 = { 已: 0, 总: 0, 在跑: false, 干跑: false }
         })
           .then((r) => {
             if (r && r.ok) {
-              set加结果({ ok: true, 文字: '加上了 ✓（这个会话现在 ' + r.count + ' 条）' })
+              set加结果({ ok: true, 文字: '加上了 ✓（这个工作区现在 ' + r.count + ' 条）' })
               set加内容('')
               set加时间('')
               set加词('')
@@ -432,7 +432,7 @@ const 洗键进度 = { 已: 0, 总: 0, 在跑: false, 干跑: false }
       // ---- 第二级：某个会话的详情 ----
       if (open) {
         const s = (d.sessions || []).find((x) => x.id === open)
-        if (!s) return React.createElement('div', { style: S.wrap }, '找不到这个会话')
+        if (!s) return React.createElement('div', { style: S.wrap }, '找不到这个工作区')
         const tr = (s.traces || []).slice(-1)[0]
         const 删 = (id, action) => post('/delete', { session: open, id, action }).then(() => { setConfirm(null); load() })
         // ⭐⭐ 2026-09-23（反馈「过期条目没标作废」）：
@@ -474,7 +474,7 @@ const 洗键进度 = { 已: 0, 总: 0, 在跑: false, 干跑: false }
               else 尾巴.push('一条也没加')
               if (r && r.重复) 尾巴.push('重复跳过 ' + r.重复 + ' 条')
               if (r && r.保留) 尾巴.push('那边原有的 ' + r.保留 + ' 条都留着')
-              setExpNote(r && r.ok ? '✓ ' + 尾巴.join('，') + '；那个会话的开关也开了' : '✗ ' + ((r && r.message) || '？'))
+              setExpNote(r && r.ok ? '✓ ' + 尾巴.join('，') + '；那个工作区的开关也开了' : '✗ ' + ((r && r.message) || '？'))
               load()
             })
             .catch((e) => setExpNote('✗ ' + String((e && e.message) || e)))
@@ -1748,7 +1748,7 @@ const 洗键进度 = { 已: 0, 总: 0, 在跑: false, 干跑: false }
                   React.createElement(
                     'div',
                     { style: Object.assign({}, S.h, { cursor: 'pointer' }), onClick: () => set复制开(!复制开) },
-                    (复制开 ? '▾ ' : '▸ ') + '复制记忆到别的会话',
+                    (复制开 ? '▾ ' : '▸ ') + '复制记忆到别的工作区',
                   ),
                   复制开
                     ? React.createElement(
@@ -1761,7 +1761,7 @@ const 洗键进度 = { 已: 0, 总: 0, 在跑: false, 干跑: false }
                           React.createElement(
                             'select',
                             { style: Object.assign({}, S.inp, { flex: 1, width: 'auto', minWidth: 150 }), value: 复制到, onChange: (e) => set复制到(e.target.value) },
-                            React.createElement('option', { value: '' }, '（选一个会话）'),
+                             React.createElement('option', { value: '' }, '（选一个工作区）'),
                             别的.map((x) =>
                               React.createElement('option', { key: x.id, value: x.id }, (x.title || x.id.slice(0, 18)) + '（' + x.count + ' 条）'),
                             ),
@@ -1780,7 +1780,7 @@ const 洗键进度 = { 已: 0, 总: 0, 在跑: false, 干跑: false }
                           ? React.createElement(
                               'div',
                               { style: S.confirm },
-                              React.createElement('span', { style: { flex: 1 } }, '把这一份 ' + (s.memories || []).length + ' 条加进那个会话？那边**原来的都留着**，只补它还没有的（同一句会跳过）。'),
+                              React.createElement('span', { style: { flex: 1 } }, '把这一份 ' + (s.memories || []).length + ' 条加进那个工作区？那边**原来的都留着**，只补它还没有的（同一句会跳过）。'),
                               React.createElement('button', { style: S.btnDanger, onClick: 复制过去 }, '确认复制'),
                               React.createElement('button', { style: S.btn, onClick: () => setConfirm(null) }, '算了'),
                             )
@@ -1788,7 +1788,7 @@ const 洗键进度 = { 已: 0, 总: 0, 在跑: false, 干跑: false }
                         React.createElement(
                           'div',
                           { style: Object.assign({}, S.dim, { fontSize: 12 }) },
-                          '做法：新开一个空对话 → 回来这里把它选中 → 复制过去。那边一点历史都没有，她答得上来就一定是插件给的 ✓（复制过去会自动把那个会话的开关打开；只加不删，那边原本记的不会被换掉）',
+                          '做法：新开一个空对话 → 回来这里把它选中 → 复制过去。那边一点历史都没有，她答得上来就一定是插件给的 ✓（复制过去会自动把那个工作区的开关打开；只加不删，那边原本记的不会被换掉）',
                         ),
                       )
                     : null,
@@ -1917,7 +1917,7 @@ const 洗键进度 = { 已: 0, 总: 0, 在跑: false, 干跑: false }
               imp ? React.createElement('span', { style: S.dim }, '目录：' + imp.data.dir) : null,
               imp && imp.data.selfName
                 ? React.createElement('span', { style: S.dim }, '（人称：「' + imp.data.selfName + '」→「我」）')
-                : React.createElement('span', { style: S.warn, fontSize: 12 }, '（这个会话还没设「她自己叫什么」，导进去的人称不会自动换 —— 建议先在上面填好）'),
+                : React.createElement('span', { style: S.warn, fontSize: 12 }, '（这个工作区还没设「她自己叫什么」，导进去的人称不会自动换 —— 建议先在上面填好）'),
             ),
           )
           // 只导哪些文件 —— 同一个文件夹里常常还堆着别的文档，得能挑 ✓
@@ -2298,7 +2298,7 @@ const 洗键进度 = { 已: 0, 总: 0, 在跑: false, 干跑: false }
         return React.createElement(
           'div',
           { style: S.wrap },
-          React.createElement('div', { style: S.link, onClick: () => setOpen(null) }, '← 所有会话'),
+          React.createElement('div', { style: S.link, onClick: () => setOpen(null) }, '← 所有工作区'),
           React.createElement('div', { style: S.h }, s.title || s.id),
           React.createElement('div', { style: S.dim }, s.id + '　' + s.memories.length + ' 条记忆' + (已删.length ? '　（另外还收着 ' + 已删.length + ' 条）' : '')),
           React.createElement(
@@ -2441,7 +2441,7 @@ const 洗键进度 = { 已: 0, 总: 0, 在跑: false, 干跑: false }
                 React.createElement(
                   'div',
                   { style: Object.assign({}, S.askBox, { margin: '8px 0 0' }) },
-                  React.createElement('button', { style: S.btn, onClick: 提交一条 }, '加进这个会话'),
+                  React.createElement('button', { style: S.btn, onClick: 提交一条 }, '加进这个工作区'),
                   React.createElement(
                     'span',
                     { style: Object.assign({}, 加结果 && 加结果.ok ? S.ok : S.drop, { fontSize: 12 }) },
@@ -3857,7 +3857,7 @@ const 洗键进度 = { 已: 0, 总: 0, 在跑: false, 干跑: false }
         React.createElement(
           'div',
           { style: S.dim },
-          '装好就是开着的 —— 每个会话都能记、也能读。想给某个会话单独关掉，点它右边那个「关」。每个会话一份记忆，淡了只是不容易被想起来，不会删。',
+          '装好就是开着的 —— 每个工作区都能记、也能读。想给某个工作区单独关掉，点它右边那个「关」。每个工作区一份记忆，淡了只是不容易被想起来，不会删。',
         ),
         React.createElement(
           'div',
@@ -3945,8 +3945,8 @@ const 洗键进度 = { 已: 0, 总: 0, 在跑: false, 干跑: false }
             'div',
             { style: Object.assign({}, S.dim, { flex: 1, minWidth: 0 }) },
             d.全局开关 !== false
-              ? '所有会话都能记、也能读。单独不想要哪个，用下面那一行关掉。'
-              : '全关着 —— 哪个会话都不记也不读，工具列表里也不会出现它。',
+              ? '所有工作区都能记、也能读。单独不想要哪个，用下面那一行关掉。'
+              : '全关着 —— 哪个工作区都不记也不读，工具列表里也不会出现它。',
           ),
         ),
         (d.sessions || []).map((s) =>
@@ -3993,7 +3993,7 @@ const 洗键进度 = { 已: 0, 总: 0, 在跑: false, 干跑: false }
           ? React.createElement(
               'div',
               null,
-              React.createElement('div', { style: S.dim }, '这些是所有会话共用的。每项都有范围，超出会被收到范围内。'),
+              React.createElement('div', { style: S.dim }, '这些是所有工作区共用的。每项都有范围，超出会被收到范围内。'),
               blocks,
               React.createElement(
                 'div',

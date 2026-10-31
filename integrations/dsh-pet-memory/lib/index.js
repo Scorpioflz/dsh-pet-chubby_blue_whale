@@ -86,7 +86,7 @@ const DEFAULT_POLICY = {
   dailyQuota: 8,
   // ⭐ 2026-09-21 新加的两项（治「太敏感」，见 evaluate 上面的长注释）
   rarityK: 0.8, // ⭐ 1.4.0：1 → 0.8。稀有度饱和点：加起来到多少算「一半相关」（越小越容易给）
-  queryGate: 0.8, // 问句信息量门槛：这句话本身太没内容就不翻记忆。0 = 关掉这道门
+  queryGate: 0.5, // 问句信息量门槛：这句话本身太没内容就不翻记忆。0 = 关掉这道门
   // ⭐ 2026-09-21 中午加的（C＋D：两条队）
   factsMax: 2, // 长期事实每轮固定带几条（常驻层，不占 maxItems 的位置）。0 = 不带长期事实
   // ⭐ 2026-09-21 深夜（她的决定）：默认从 1 调到 **0.5** ✓
@@ -228,6 +228,7 @@ function diag(msg) {
 // storePath 按 workspaceId 而非 sessionId 命名，通过 sessionId → workspaceId
 // 缓存映射实现，缓存在 apply(ctx) 中初始化并定期刷新。
 const _sessionToWorkspace = new Map() // sessionId → workspaceId
+const _workspaceTitles = new Map() // workspaceId → title
 let _workspaceRegistry = null
 
 async function _refreshSessionWorkspaceMap() {
@@ -235,9 +236,11 @@ async function _refreshSessionWorkspaceMap() {
   try {
     const workspaces = await _workspaceRegistry.list()
     _sessionToWorkspace.clear()
+    _workspaceTitles.clear()
     for (const ws of workspaces || []) {
       const wsId = String(ws.id || ws.workspaceId || '')
       if (!wsId) continue
+      _workspaceTitles.set(wsId, String(ws.title || ws.name || ''))
       for (const sid of ws.sessionIds || []) {
         _sessionToWorkspace.set(String(sid), wsId)
       }
@@ -1851,10 +1854,15 @@ export function 清掉注入上下文(文) {
   //   ③ 记忆提醒里的固定句子（下面是你们过去真实发生过的事 / （如果此刻你想起什么 …））。
   let 跳到空行 = false
   let 跳元信息 = false
+  let 跳系统提醒 = false
   const 元信息行 = /^(Current runtime context|Current DSH|Current working directory|Current DeepSeek Harness|Browser time zone|Time sampled|Approval prompts)/i
   const 固定句 = /^(下面是你们过去真实发生过的事|（?如果此刻你想起什么|有时间的事会写在前面)/
   for (const 行 of 行们) {
     const 净 = 行.trim()
+    if (跳系统提醒) {
+      if (净.endsWith('</system-reminder>')) 跳系统提醒 = false
+      continue
+    }
     if (跳到空行) {
       if (!净) {
         跳到空行 = false
@@ -1865,6 +1873,11 @@ export function 清掉注入上下文(文) {
     if (!净) {
       留.push('')
       跳元信息 = false
+      continue
+    }
+    if (/^<system-reminder>/.test(净)) {
+      if (净.endsWith('</system-reminder>')) continue
+      跳系统提醒 = true
       continue
     }
     if (/^【[^】]{2,14}】/.test(净)) {
@@ -2928,9 +2941,9 @@ function recall(data, query, now, sid) {
   //   「在吗」「嗯」「哈哈」这种话本身没内容，就不该去翻几百条记忆 ——
   //   实测过：只换打分公式，它们照样六条，因为**总能比出六条来**。
   //   尺子是「她自己怎么说话」：天天说的词不算信息，偶尔说的才算 ✓
-  const 门槛 = typeof policy.queryGate === 'number' ? policy.queryGate : 0.8
+  const 门槛 = typeof policy.queryGate === 'number' ? policy.queryGate : 0.5
   let gate = null
-  if (门槛 > 0 && sid) {
+  if (门槛 > 0 && sid && memories.length >= 10) {
     const v = 问句信息量(sid, query, df)
     if (v < 门槛) {
       // 这道门挡下来的时候**不做 851 次打分**，省一趟；理由照样记进 trace 给她看 ✓
@@ -3600,12 +3613,21 @@ function buildMemoryList(ctx) {
         diag('清单：藏起 ' + 藏了 + ' 条幽灵（DSH 里已经没有这些会话了）')
       }
     } catch (error) {}
+    // 按工作区去重：同一工作区的多个 session 共享同一份记忆，只输出一个条目
+    const seenWs = new Set()
     for (const sid of ids) {
+      const wsId = _sessionToWorkspace.get(String(sid)) || null
+      if (wsId) {
+        if (seenWs.has(wsId)) continue
+        seenWs.add(wsId)
+      }
       const data = loadStore(sid)
       if (!out.policy) out.policy = data.policy
+      const wsTitle = wsId ? _workspaceTitles.get(wsId) : ''
       out.sessions.push({
         id: sid,
-        title: titleOfSession(ctx, sid),
+        workspaceId: wsId,
+        title: wsTitle || titleOfSession(ctx, sid),
         // ⭐ 1.2.9：这个会话里「怎么称呼对方」+「她自己叫什么」，设置页两个输入框要回显
         ownerName: ownerNameOf(sid),
         selfName: selfNameOf(sid),

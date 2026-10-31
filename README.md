@@ -190,6 +190,8 @@ pet.log
 | `scripts/build_onedir.ps1` | 去掉变体相关，统一为 `dsh-pet-chubby_blue_whale`；加 `-SkipAssets` 开关 |
 | `pyproject.toml` | Python 3.14 + uv 依赖管理（`[project]` dependencies + `[project.optional-dependencies]` build） |
 | `.gitignore` | CodeArts + uv 配置不追踪 |
+| `integrations/dsh-pet-memory/lib/index.js` | 修三项：① `清掉注入上下文` 加 `<system-reminder>` 块过滤（DSH 把系统提醒当 user 消息塞进来污染检索 query）② `queryGate` 默认 0.8→0.5 + 小库保护（memories<10 跳过门槛，新用户正常问句不被挡）③ 打包目录文件编码损坏修复（U+FFFD）。设置页按工作区去重：`buildMemoryList` 同一工作区多个 session 只输出一个条目，`_refreshSessionWorkspaceMap` 缓存工作区标题 |
+| `integrations/dsh-pet-memory/lib/client.js` | 设置页文案"会话"→"工作区"（列表标题、开关说明、手动加记忆、复制记忆等用户可见文案） |
 | `README.md` | 继承声明 + 自用定位 + 精简 |
 | `THIRD_PARTY_NOTICES.md` | 删除 Android 声明，新增自用版第三方组件 |
 | 2 个测试文件 | 删除引用已删目录的测试函数 |
