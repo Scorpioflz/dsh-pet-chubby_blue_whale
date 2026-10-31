@@ -166,6 +166,7 @@ pet.log
 | `pet/chat/dsh_provider.py` | `DshWebApiProvider` (DSH session API streaming) |
 | `pet/dsh_workspace.py` | Per-character workspace binding + memory toggle |
 | `pet/memory_plugin_link.py` | `@dsh-pet/memory` install check & one-click install |
+| `pet/webapi_plugin_link.py` | `dsh-web-service` install check (hard dependency — no API without it) |
 | `integrations/dsh-pet-memory/` | DSH memory plugin (forked from fish-memory, per-workspace, 14-day half-life) |
 | `pet/dsh_self_talk.py` | Daily auto self-talk generation via DSH API |
 | `pet/weather/ip_city.py` | IP city detection (Gaode API → free fallback) |
@@ -190,7 +191,7 @@ pet.log
 | `pet/chat/widgets.py` / `pet/chat/legacy_widgets.py` | Remove roleplay param passing to `build_messages` |
 | `pet/quick_chat.py` | Remove roleplay param passing to `build_messages` |
 | `pet/pet_profiles.py` | Remove roleplay keys from per-pet key set |
-| `pet/config.py` | Only `dsh-webapi` provider; remove `openai-main`; remove `web_search` defaults + api_key stripping; `default_system_prompt`→empty; remove roleplay keys (`roleplay_enabled`/`roleplay_scene`/`roleplay_cast`) + `_clean_roleplay_text` + `ROLEPLAY_*` constants; add `memory_plugin_remind` default |
+| `pet/config.py` | Only `dsh-webapi` provider; remove `openai-main`; remove `web_search` defaults + api_key stripping; `default_system_prompt`→empty; remove roleplay keys (`roleplay_enabled`/`roleplay_scene`/`roleplay_cast`) + `_clean_roleplay_text` + `ROLEPLAY_*` constants; add `memory_plugin_remind` + `webapi_plugin_remind` defaults |
 | `pet/file_interpret/__init__.py` | Remove `provider.web_search` assignment |
 | `pet/agent_link/__init__.py` | Only DSH monitor in `AgentLinkManager`; remove Claude/Cursor/OpenCode/CustomAgent monitor class definitions (−387 lines) + `AGENT_NAMES` reduced to `{"dsh":"DSH"}` |
 | `pet/modern_settings_dialog.py` | Remove roleplay + web_search settings sections; "深度思考与联网"→"深度思考" |
@@ -203,7 +204,7 @@ pet.log
 | `pet/vision.py` | Screenshot Q&A: DSH branch (upload → ask → reply) |
 | `pet/window.py` | Screen capture: DSH branch |
 | `pet/overlay_shell.py` | Screen capture overlay DSH branch; merge self-talk candidates |
-| `pet/app.py` | Startup checks: workspace binding, memory plugin, city detection, self-talk |
+| `pet/app.py` | Startup checks: workspace binding, webapi plugin (hard dep), memory plugin, city detection, self-talk |
 | `pet/settings_features.py` | Trigger city detection on weather activation |
 | `pet/window_alerts.py` | `merge_dsh_texts`: read self-talk from `dsh_self_talk_texts.json` |
 | `pet/pack_download.py` | Asset pack URL order (proxy first, GitHub last) |
@@ -214,7 +215,7 @@ pet.log
 | `integrations/dsh-pet-memory/lib/client.js` | Settings UI: "session"→"workspace" wording |
 | `README.md` | English translation + plugin references |
 | `THIRD_PARTY_NOTICES.md` | Remove Android, add self-use components |
-| `tests/test_config_schema.py` | Remove roleplay + chat_memory keys from whitelist; add `dsh_self_talk_enabled` + `memory_plugin_remind` |
+| `tests/test_config_schema.py` | Remove roleplay + chat_memory keys from whitelist; add `dsh_self_talk_enabled` + `memory_plugin_remind` + `webapi_plugin_remind` |
 | `tests/test_settings_default_marks.py` | Remove `web_search_key` from no-default rows |
 | `tests/test_architecture.py` | Update `modern_settings_dialog.py` line budget (2722→2714) |
 | `docs/AGENT_LINK_PROTOCOL.md` | Update Monitor references (deleted classes → `DshMonitor`) |

@@ -1211,6 +1211,27 @@ class PetInstance:
         elif clicked is btn_install:
             self.install_memory_plugin_dialog()
 
+    def _show_webapi_plugin_dialog(self) -> None:
+        from PySide6.QtWidgets import QMessageBox
+        win = getattr(self, "win", None)
+
+        msg = QMessageBox(win)
+        msg.setWindowTitle("DSH Web API 插件未安装")
+        msg.setIcon(QMessageBox.Icon.Warning)
+        msg.setText("桌宠依赖 dsh-web-service 插件与 DSH 通信，但该插件未安装。")
+        msg.setInformativeText(
+            "没有此插件，桌宠无法对话、截图问答或自言自语。\n\n"
+            "安装命令：dsh plugin --profile web add github:toddpan/dsh-webapi\n"
+            "安装说明：https://github.com/toddpan/dsh-webapi#readme"
+        )
+        btn_ok = msg.addButton("我知道了", QMessageBox.ButtonRole.AcceptRole)
+        btn_never = msg.addButton("不再提醒", QMessageBox.ButtonRole.DestructiveRole)
+        msg.exec()
+        if msg.clickedButton() is btn_never:
+            self.config.set('webapi_plugin_remind', 'never')
+            self.config.save()
+
+
     def install_memory_plugin_dialog(self) -> None:
         from .memory_plugin_link import check_status, install_memory_plugin
 
@@ -2735,6 +2756,14 @@ class AppShell:
                         ensure_character_workspace_title(character_id, char_name, parent=win)
             except Exception:
                 pass
+            try:
+                from .webapi_plugin_link import is_installed as webapi_installed
+                if not webapi_installed():
+                    remind = str(self.config.get('webapi_plugin_remind', ''))
+                    if remind != 'never':
+                        self.instance._show_webapi_plugin_dialog()
+            except Exception:
+                logging.exception("webapi plugin check failed")
             try:
                 settings = self.config.chat_settings()
                 provider = settings.active_config

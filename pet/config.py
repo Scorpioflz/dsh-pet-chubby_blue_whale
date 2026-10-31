@@ -1121,6 +1121,7 @@ class Config:
             # 偏好，与 mem_* 同口径：不进设置页，config.json 里改）。
             "anim_menu_stay_open": False,
             "memory_plugin_remind": "",  # 记忆插件提醒时间（空=不提醒；ISO 日期或 "never"）
+            "webapi_plugin_remind": "",  # webapi 插件提醒时间（同上）
             "quick_launch_apps": [dict(item) for item in DEFAULT_QUICK_LAUNCH_APPS],
             "auto_hide_fullscreen": True,  # 全屏应用自动隐藏（Windows）
             # 允许桌宠跨屏（全局键、重启级）：开启后每块有桌宠的屏各一张合成窗，
@@ -1504,6 +1505,7 @@ class Config:
             "self_talk_voice_precache_enabled",
             "dsh_self_talk_enabled",
             "memory_plugin_remind",
+            "webapi_plugin_remind",
 
 
             "balance_refresh_minutes",

@@ -107,6 +107,7 @@ RELOAD_WHITELIST_SNAPSHOT = frozenset(
         "mem_min_size_mb",
         "mem_skip_foreground",
         "memory_plugin_remind",
+        "webapi_plugin_remind",
         "menu_easter_egg",
         "modern_chat_background",
         "modern_chat_background_fill",

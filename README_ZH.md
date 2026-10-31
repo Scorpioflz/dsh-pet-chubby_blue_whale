@@ -161,6 +161,7 @@ pet.log
 | `pet/chat/dsh_provider.py` | `DshWebApiProvider`（DSH 会话 API 流式对话） |
 | `pet/dsh_workspace.py` | 按角色绑定工作区 + 记忆开关 |
 | `pet/memory_plugin_link.py` | 记忆插件安装检查与一键安装 |
+| `pet/webapi_plugin_link.py` | `dsh-web-service` 插件安装检查（硬依赖——无此插件无 API 可用） |
 | `integrations/dsh-pet-memory/` | DSH 记忆插件（基于 fish-memory 改造） |
 | `pet/dsh_self_talk.py` | 每天自动生成自言自语候选词 |
 | `pet/weather/ip_city.py` | IP 定位城市 |
@@ -184,7 +185,7 @@ pet.log
 | `pet/chat/widgets.py` / `pet/legacy_widgets.py` | 移除 roleplay 参数传递 |
 | `pet/quick_chat.py` | 移除 roleplay 参数传递 |
 | `pet/pet_profiles.py` | 移除 roleplay 键 |
-| `pet/config.py` | 只保留 `dsh-webapi` provider；移除 `openai-main`；移除 `web_search` 默认值 + api_key 剥离；`default_system_prompt`→空；移除 roleplay 键 + `_clean_roleplay_text` + `ROLEPLAY_*` 常量；新增 `memory_plugin_remind` 默认值 |
+| `pet/config.py` | 只保留 `dsh-webapi` provider；移除 `openai-main`；移除 `web_search` 默认值 + api_key 剥离；`default_system_prompt`→空；移除 roleplay 键 + `_clean_roleplay_text` + `ROLEPLAY_*` 常量；新增 `memory_plugin_remind` + `webapi_plugin_remind` 默认值 |
 | `pet/file_interpret/__init__.py` | 移除 `provider.web_search` 赋值 |
 | `pet/agent_link/__init__.py` | `AgentLinkManager` 只创建 DSH monitor；移除 Claude/Cursor/OpenCode/CustomAgent 类定义（−387 行）；`AGENT_NAMES` 缩减为 `{"dsh":"DSH"}` |
 | `pet/modern_settings_dialog.py` | 移除扮演 + 联网搜索设置区；「深度思考与联网」→「深度思考」 |
@@ -196,7 +197,7 @@ pet.log
 | `pet/vision.py` | 截图提问 DSH 分支 |
 | `pet/window.py` | 看看屏幕 DSH 分支 |
 | `pet/overlay_shell.py` | 看看屏幕 overlay DSH 分支；合并自言自语候选词 |
-| `pet/app.py` | 启动检查：工作区绑定、记忆插件、城市检测、自言自语 |
+| `pet/app.py` | 启动检查：工作区绑定、webapi 插件（硬依赖）、记忆插件、城市检测、自言自语 |
 | `pet/window_alerts.py` | `merge_dsh_texts`：从独立文件读取自言自语 |
 | `pet/pack_download.py` | 素材包 URL 顺序（代理优先） |
 | `scripts/build_onedir.ps1` | 统一名称；加 `-SkipAssets` |
@@ -206,7 +207,7 @@ pet.log
 | `integrations/dsh-pet-memory/lib/client.js` | 设置页"会话"→"工作区" |
 | `README.md` | 英文翻译 + 插件引用 |
 | `THIRD_PARTY_NOTICES.md` | 删除 Android，新增自用组件 |
-| `tests/test_config_schema.py` | 移除 roleplay + chat_memory 键；新增 `dsh_self_talk_enabled` + `memory_plugin_remind` |
+| `tests/test_config_schema.py` | 移除 roleplay + chat_memory 键；新增 `dsh_self_talk_enabled` + `memory_plugin_remind` + `webapi_plugin_remind` |
 | `tests/test_settings_default_marks.py` | 移除 `web_search_key` |
 | `tests/test_architecture.py` | 更新行数预算（2722→2714） |
 | `docs/AGENT_LINK_PROTOCOL.md` | 更新 Monitor 引用（已删除类→`DshMonitor`） |
