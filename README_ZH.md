@@ -224,6 +224,10 @@ pet.log
 | `tests/test_config_concurrent_save.py` | 5 处 provider key `openai-main` → `dsh-webapi` |
 | `tests/test_config_instance.py` | 3 处 provider key `openai-main` → `dsh-webapi` |
 | `tests/test_packaging_keyring_notices.py` | 删除过时 `test_windows_build_excludes_only_the_chat_subsystem` |
+| `pet/dsh_self_talk.py` | 碎碎念生成改为定时计划模式：用 `HH:MM` + 星期筛选替代 24h 滑动窗口；`_should_run_now` 检查 `(last_run, now]` 间是否有计划点；`next_check_delay_ms` 供 QTimer 调度；空 schedule 向后兼容旧行为 |
+| `pet/config.py` | 新增 `dsh_self_talk_schedule`（默认 `"08:00"`）+ `dsh_self_talk_weekdays`（默认 `[]`）键，含 `_clean_hhmm_schedule` / `_clean_weekday_list` 清洗函数 |
+| `pet/app.py` | 提取 `_check_self_talk` 嵌套函数，QTimer 自调度实现周期性碎碎念生成检查 |
+| `tests/test_dsh_self_talk_schedule.py` | 新增：30 个定时逻辑测试（`_parse_hhmm` / `_clean_weekdays` / `_next_schedule_after` / `_should_run_now` / `next_check_delay_ms`） |
 
 ### 删除文件
 

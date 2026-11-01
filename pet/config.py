@@ -585,6 +585,23 @@ def _clean_self_talk_texts(value):
     return texts or list(DEFAULT_SELF_TALK_TEXTS)
 
 
+def _clean_hhmm_schedule(value) -> str:
+    """清洗 HH:MM 定时计划字符串；无效回退 '08:00'。"""
+    sched = str(value or "").strip()
+    if len(sched) == 5 and sched[2] == ":" and sched[:2].isdigit() and sched[3:].isdigit():
+        h, m = int(sched[:2]), int(sched[3:])
+        if 0 <= h <= 23 and 0 <= m <= 59:
+            return sched
+    return "08:00"
+
+
+def _clean_weekday_list(value) -> list[int]:
+    """清洗星期筛选列表：空 = 每天；否则 [1..7]（1=周一…7=周日）。"""
+    if not isinstance(value, (list, tuple)):
+        return []
+    return [int(w) for w in value if isinstance(w, (int, float)) and 1 <= int(w) <= 7]
+
+
 def _default_dynamic_island_data() -> dict:
     """灵动岛默认配置：默认开启常驻，位置留空由首次显示时自动定位。"""
     return {
@@ -1104,6 +1121,8 @@ class Config:
             "bubble_text_scale": 100,  # 气泡文字显示尺寸百分比（50~300，100 = 默认；气泡与字号一起放大）
             "self_talk_texts": list(DEFAULT_SELF_TALK_TEXTS),
             "dsh_self_talk_enabled": False,  # 自用版：每天通过 DSH API 自动生成自言自语候选词
+            "dsh_self_talk_schedule": "08:00",  # 定时计划 HH:MM（空=旧行为 24h 滑动窗口）
+            "dsh_self_talk_weekdays": [],  # 星期筛选：空=每天；[1..7]（1=周一…7=周日）
 
             "self_talk_image_dir": "assets/big_blue_fat_fish",
             "self_talk_bubble_style": DEFAULT_SELF_TALK_BUBBLE_STYLE,
@@ -1510,6 +1529,8 @@ class Config:
             "self_talk_speak_enabled",
             "self_talk_voice_precache_enabled",
             "dsh_self_talk_enabled",
+            "dsh_self_talk_schedule",
+            "dsh_self_talk_weekdays",
             "memory_plugin_remind",
             "webapi_plugin_remind",
 
@@ -1931,6 +1952,8 @@ class Config:
         _normalize_pet_profile_values(self.data)
         self.data["animation_gap_seconds"] = _float_or_default(self.data.get("animation_gap_seconds"), DEFAULT_ANIMATION_GAP_SECONDS, 0.0, 3600.0)
         self.data["self_talk_voice_precache_enabled"] = _bool_or_default(self.data.get("self_talk_voice_precache_enabled"), False)
+        self.data["dsh_self_talk_schedule"] = _clean_hhmm_schedule(self.data.get("dsh_self_talk_schedule"))
+        self.data["dsh_self_talk_weekdays"] = _clean_weekday_list(self.data.get("dsh_self_talk_weekdays"))
         self.data["cursor_hidden_passthrough"] = _bool_or_default(self.data.get("cursor_hidden_passthrough"), True)
         self.data["allow_cross_screen"] = _bool_or_default(self.data.get("allow_cross_screen"), False)
         self.data["spawn_inherit_size"] = _bool_or_default(self.data.get("spawn_inherit_size"), True)
@@ -2205,6 +2228,8 @@ class Config:
             "bubble_text_scale",
             "self_talk_bubble_style",
             "self_talk_voice_precache_enabled",
+            "dsh_self_talk_schedule",
+            "dsh_self_talk_weekdays",
             "context_menu_appearance",
             "context_menu_layout",
             "quick_launch_apps",

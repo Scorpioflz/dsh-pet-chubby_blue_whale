@@ -2696,6 +2696,24 @@ class AppShell:
     def start(self) -> None:
         # 自用版：启动时延迟检查工作区 + 天气城市 + 自言自语生成（等 feature activation freeze）
         from PySide6.QtCore import QTimer
+        def _check_self_talk():
+            try:
+                import threading
+                from .dsh_self_talk import generate_self_talk
+                threading.Thread(
+                    target=generate_self_talk,
+                    args=(self.config,),
+                    daemon=True,
+                    name="pet-self-talk-gen",
+                ).start()
+            except Exception:
+                pass
+            try:
+                from .dsh_self_talk import next_check_delay_ms
+                QTimer.singleShot(next_check_delay_ms(self.config), _check_self_talk)
+            except Exception:
+                pass
+
         def _dsh_startup_checks():
             try:
                 settings = self.config.chat_settings()
@@ -2761,17 +2779,7 @@ class AppShell:
                     ensure_weather_city(config=self.config)
             except Exception:
                 pass
-            try:
-                import threading
-                from .dsh_self_talk import generate_self_talk
-                threading.Thread(
-                    target=generate_self_talk,
-                    args=(self.config,),
-                    daemon=True,
-                    name="pet-self-talk-gen",
-                ).start()
-            except Exception:
-                pass
+            _check_self_talk()
         QTimer.singleShot(1000, _dsh_startup_checks)
         # aboutToQuit 只在控制器层绑定一次：角色热切换会重建窗口，逐个
         # connect win.save_position 会在旧窗口延迟销毁后残留失效引用。

@@ -232,6 +232,10 @@ pet.log
 | `tests/test_config_concurrent_save.py` | Update 5 provider key references `openai-main` → `dsh-webapi` |
 | `tests/test_config_instance.py` | Update 3 provider key references `openai-main` → `dsh-webapi` |
 | `tests/test_packaging_keyring_notices.py` | Delete obsolete `test_windows_build_excludes_only_the_chat_subsystem` |
+| `pet/dsh_self_talk.py` | Schedule-based self-talk generation: replace 24h sliding window with `HH:MM` + weekday filter; `_should_run_now` checks if any scheduled point falls in `(last_run, now]`; `next_check_delay_ms` for QTimer scheduling; backward compatible (empty schedule → legacy 24h interval) |
+| `pet/config.py` | Add `dsh_self_talk_schedule` (default `"08:00"`) + `dsh_self_talk_weekdays` (default `[]`) keys with `_clean_hhmm_schedule` / `_clean_weekday_list` normalizers |
+| `pet/app.py` | Extract `_check_self_talk` nested function with QTimer self-scheduling for periodic self-talk generation |
+| `tests/test_dsh_self_talk_schedule.py` | New: 30 tests for schedule logic (`_parse_hhmm`, `_clean_weekdays`, `_next_schedule_after`, `_should_run_now`, `next_check_delay_ms`) |
 
 ### Deleted Files
 
