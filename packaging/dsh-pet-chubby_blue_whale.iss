@@ -1,4 +1,4 @@
-; -*- mode: ini -*-
+﻿; -*- mode: ini -*-
 ; dsh-pet-chubby_blue_whale onedir installer (Inno Setup 7)
 ; 自用版安装包脚本，基于上游 packaging/dsh-pet.iss 修改
 ;
@@ -11,7 +11,7 @@
 #define MyAppExeName "dsh-pet-chubby_blue_whale.exe"
 #define MyAppDir "..\dist-onedir\dsh-pet-chubby_blue_whale"
 #define MyAppId "{{a1b2c3d4-e5f6-7890-abcd-ef1234567890}"
-#define MyAppDisplay "dsh-pet-chubby_blue_whale"
+#define MyAppDisplay "家养大肥鱼"
 #define MyAppVersion "4.4.0"
 
 [Setup]
@@ -46,8 +46,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "{#MyAppDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\{#MyAppShortName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\{#MyAppShortName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autoprograms}\{#MyAppDisplay}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{autodesktop}\{#MyAppDisplay}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppShortName}}"; Flags: nowait postinstall
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppDisplay}}"; Flags: nowait postinstall
