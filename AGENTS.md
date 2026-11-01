@@ -226,5 +226,6 @@ Run focused tests before `python -m pytest -q`. Set
 - **逐条执行**：不要 chained `&&`，逐条 add → commit → push
 - **暂存**：只 `git add` 相关文件，**不要 `git add -A`**
 - **push 前 rebase**：`git pull --rebase origin main` 后再 push
+- **push 用 `fgit push` 不带 `origin main`**：带 `-C` 参数或显式 refspec 时 fgit 可能走透明代理 407；纯 `fgit push` 用 fgit 自己的网络栈绕过代理
 
 > 根工作区完整约定见 `D:\DSH-Dev\AGENTS.md`。本段是其子项目适用部分的摘录，有冲突以根文件为准。
