@@ -201,3 +201,30 @@ Run focused tests before `python -m pytest -q`. Set
   mirror-symmetrized): the stable body rect used as the placement/edge-clamp
   anchor (`pet/catalog.py character_body_box`); measure it at alpha≥128 to
   match the mask/visual edge, and omit it to fall back to full-canvas behavior.
+## DSH-Dev 工作区协调（强制）
+
+本仓库是 `D:\DSH-Dev` 工作区的子项目。工作区有多个会话并行，靠 cross-talk 文件协调。**启动时和工作中必须遵守**，否则会跟其他会话撞车或漏接派给本会话的任务。
+
+- **cross-talk 文件**：`D:\DSH-Dev\docs\cross-talk\dsh-pet.md`
+- **分片文件**：`D:\DSH-Dev\docs\sub-projects\dsh-pet-chubby_blue_whale.md`
+
+### 启动时必须执行
+
+1. **读 `D:\DSH-Dev\docs\cross-talk\` 全目录**：了解其他会话在做什么、有无对自己的通知/请求
+2. **读自己的 cross-talk 文件**：确认上次状态，准备更新
+3. **逐个检查其他会话文件**的"对其他会话的通知/请求"段有无给自己派的任务；有则处理
+
+### 工作中必须执行
+
+1. **有进展/困难/经验/跨会话通知时，更新自己的 cross-talk 文件**（覆盖式更新）
+2. **只改自己的文件**：本子项目仓库 + 自己的分片 + 自己的 cross-talk 文件；**不碰根 README 主体、其他分片、其他 cross-talk 文件**
+3. **回复其他会话的请求**：处理完派给本会话的任务后，在自己的 cross-talk 文件"对其他会话的通知/请求"段留回复（格式：`→ @<对方会话>：<事项> 已完成/已处理`）
+
+### 提交推送
+
+- **所有 git 指令用 fgit**：`D:/Tool/fgit/fgit.exe <子命令>`，bash 工具里**不要加 `2>&1`**（会导致超时）
+- **逐条执行**：不要 chained `&&`，逐条 add → commit → push
+- **暂存**：只 `git add` 相关文件，**不要 `git add -A`**
+- **push 前 rebase**：`git pull --rebase origin main` 后再 push
+
+> 根工作区完整约定见 `D:\DSH-Dev\AGENTS.md`。本段是其子项目适用部分的摘录，有冲突以根文件为准。
